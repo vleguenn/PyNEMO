@@ -30,18 +30,17 @@
 !-----------------------------------------------------------------------
 !  grid information 
 !-----------------------------------------------------------------------
-   sn_src_hgr = '/login2/jdha/socnet/noc/altix2/scratch/omfman/ORCA0083-N001/domain/mesh_hgr.nc'
-   sn_src_zgr = '/login2/jdha/socnet/noc/altix2/scratch/omfman/ORCA0083-N001/domain/mesh_zgr.nc'
-   sn_dst_hgr = '/projectsb/Eurobasin/grid/NNA_R12/mesh_hgr_zps.nc'
-   sn_dst_zgr = '/projectsb/Eurobasin/grid/NNA_R12/mesh_zgr_s_1.nc'
-   sn_src_msk = '/login2/jdha/socnet/noc/altix2/scratch/omfman/ORCA0083-N001/domain/mask.nc'
+   sn_src_hgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_low_res_C/mesh_hgr.nc'   !  /grid/
+   sn_src_zgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_low_res_C/mesh_zgr.nc'
+   sn_dst_hgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_C/mesh_hgr_zps.nc'
+   sn_dst_zgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_C/mesh_zgr_zps.nc'
+   sn_src_msk = 'F:/NEMO_bdy_tools/bdy_matlab/grid_low_res_C/mask.nc'
 
 !-----------------------------------------------------------------------
 !  I/O 
 !-----------------------------------------------------------------------
-   sn_src_dir = '/projectsb/Eurobasin/forcing/ocn/src/v3.3.1/'
-   sn_src_dir = '/projectsb/Eurobasin/forcing/ocn/src/ORCA0083-N001/1982/'
-   sn_dst_dir = '/projectsb/Eurobasin/forcing/ocn/bdy/NNA_R12/zps_L10/'
+   sn_src_dir = 'F:/NEMO_bdy_tools/bdy_matlab/srcdata_low_res_C/'       ! src_files/'
+   sn_dst_dir = 'F:/NEMO_bdy_tools/scratch/jofa/'
    sn_fn      = 'NNA_R12'                 ! prefix for output files
    nn_fv      = -1e20                     !  set fill value for output files
 
@@ -55,7 +54,7 @@
     ln_dyn2d       = .true.               !  boundary conditions for barotropic fields
     ln_dyn3d       = .true.               !  boundary conditions for baroclinic velocities
     ln_tra         = .true.               !  boundary conditions for T and S
-    ln_ice         = .true.               !  ice boundary condition   
+    ln_ice         = .false.               !  ice boundary condition   
     nn_rimwidth    = 9                    !  width of the relaxation zone
 
 !-----------------------------------------------------------------------
@@ -75,7 +74,7 @@
     rn_r0   = 0.0417              !  decorrelation distance use in gauss
                                   !  smoothing onto dst points. Need to 
                                   !  make this a funct. of dlon
-    sn_history  = 'EB bdy files produced by jdha from ORCA0083-N001 gloabl run provided by acc'
+    sn_history  = 'EB bdy files produced by jofa from ORCA0083-N001 for testing'
                                   !  history for netcdf file
     ln_nemo3p4  = .true.          !  else presume v3.2 or v3.3
     nn_alpha    = 0               !  Euler rotation angle

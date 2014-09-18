@@ -15,7 +15,7 @@ class Setup:
     # setfile = settings file location
     def __init__(self, setfile):
         if not setfile: # debug
-            namelist = open('F:/NEMO_bdy_tools/first/jofa_namelist', 'r')
+            namelist = open('../data/namelist.bdy', 'r')
         else:
             namelist = open(setfile, 'r')
         data = namelist.readlines()
