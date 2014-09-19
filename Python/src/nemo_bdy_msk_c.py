@@ -43,9 +43,9 @@ class Mask:
         # Normalise all elements > 0 to 1, otherwise to 0
         bdy_msk = np.around((bdy_msk + .5).clip(0,1))
         bdy_msk[bdy_msk ==1] = -1 
-        tmp = bdy_msk[4:396,4:346]
+        tmp = bdy_msk[3:398,3:348]
         tmp[tmp == -1] = 1
-        bdy_msk[4:396,4:346] = tmp
+        bdy_msk[3:398,3:348] = tmp
         # Debug line
         print ('bdy_msk FINAL: Total: ', np.sum(bdy_msk[:,:]), '| 1s: ', 
                np.sum(bdy_msk[:]==1), '| -1s: ', np.sum(bdy_msk[:]==-1),
