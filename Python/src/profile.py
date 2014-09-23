@@ -27,54 +27,62 @@ from netCDF4 import Dataset
 import numpy as np
 #import pickle
 
+import logging
+logging.basicConfig(level=logging.INFO)
+    
 def go(): 
-    print 'START'   
+    #Logger
+    logger = logging.getLogger(__name__)
+    logger.info('START')   
     start = clock()
     SourceCoord = source_coord.SourceCoord()
     DstCoord = dst_coord.DstCoord()
     
-    print clock() - start
+    logger.info( clock() - start)
     start = clock()
     Setup = setup.Setup(0) # default settings file
     settings = Setup.settings
 
-    print clock() - start
+    
+    logger.info( clock() - start)
     ice = settings['ice']
-    print 'ice = ', ice
+    logger.info('ice = %s', ice)
 
-    print 'Done Setup'
+    logger.info( 'Done Setup')
     # default file, region settingas
     
+    #This is to create mask. a future improvement will be to use GUI.
     start = clock()
     Mask = msk.Mask(0, med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
 
-    print clock() - start
-    print 'Done Mask'
+    logger.info( clock() - start)
+    logger.info( 'Done Mask')
+        
     bdy_msk = Mask.bdy_msk
     DstCoord.bdy_msk = bdy_msk == 1
     
     start = clock()
-    print 'start bdy_t'
+    logger.info( 'start bdy_t')
     Grid_T = gen_grid.Boundary(bdy_msk, settings, 't')
     
-    print clock() - start
+    logger.info( clock() - start)
     start = clock()
-    print 'start bdy_u'
+    logger.info( 'start bdy_u')
     Grid_U = gen_grid.Boundary(bdy_msk, settings, 'u')
-    print 'start bdy_v'
+    logger.info( 'start bdy_v')
     
-    print clock() - start
+    logger.info( clock() - start)
     start = clock()
     Grid_V = gen_grid.Boundary(bdy_msk, settings, 'v')
-    print 'start bdy_f'
+    logger.info('start bdy_f')
     
-    print clock() - start
+    logger.info( clock() - start)
     start = clock()
     
     Grid_F = gen_grid.Boundary(bdy_msk, settings, 'f')
-    print 'done  bdy t,u,v,f'
+    logger.info( 'done  bdy t,u,v,f')
 
-    print clock() - start
+    logger.info( clock() - start)
     start = clock()
     if ice:
         Grid_ice = nemo_bdy_ice.BoundaryIce()
@@ -96,18 +104,18 @@ def go():
 
     
     for k in bdy_ind.keys():
-        print 'bdy_ind ', k, bdy_ind[k].bdy_i.shape, bdy_ind[k].bdy_r.shape
+        logger.info( 'bdy_ind %s %s %s', k, bdy_ind[k].bdy_i.shape, bdy_ind[k].bdy_r.shape)
     
     start = clock()
     co_set = coord.Coord(None, bdy_ind)
-    print 'done coord gen'
-    print clock() - start
+    logger.info( 'done coord gen')
+    logger.info( clock() - start)
     start = clock()
-    print settings['dst_hgr']
+    logger.info( settings['dst_hgr'])
     co_set.populate(settings['dst_hgr'])
-    print 'done coord pop'
+    logger.info( 'done coord pop')
     
-    print clock() - start
+    logger.info( clock() - start)
     
     
     Grid_U.bdy_i = Grid_U.bdy_i[Grid_U.bdy_r == 1, :]
@@ -125,22 +133,22 @@ def go():
     ######
     # Gather grid info
     ######
-    print 'gather grid info'
+    logger.info( 'gather grid info')
     start = clock()
     # how grid broken up, long/lats
     nc = Dataset(settings['src_zgr'], 'r')
     SourceCoord.zt = nc.variables['gdept_0'][:]
     nc.close()
 
-    print clock() - start
-    print 'generating depth info'
+    logger.info( clock() - start)
+    logger.info( 'generating depth info')
     start = clock()
     z = zgrv.Depth(Grid_T.bdy_i,Grid_U.bdy_i,Grid_V.bdy_i, settings)
 
-    print clock() - start
+    logger.info( clock() - start)
     zp =  z.zpoints
     zk = zp.keys()
-    print zk
+    logger.info( zk)
     for zk in zp:
         print zk, ' is ', zp[zk].shape, ' and a ', np.sum(zp[zk][:]), ' max: ', np.amax(zp[zk][:10,:2], axis=0)
         
@@ -156,7 +164,7 @@ def go():
         DstCoord.depths[g]['bdy_z'] = zp[g]
 
     # Might want to stake up some heretics now
-    print 'horizontal grid info'
+    logger.info( 'horizontal grid info')
     start = clock()
     # Horizontal grid info
     nc = Dataset(settings['src_hgr'], 'r')
@@ -164,7 +172,7 @@ def go():
     SourceCoord.lat = nc.variables['gphit'][:,:]
     nc.close()
 
-    print clock() - start
+    logger.info( clock() - start)
     DstCoord.lonlat = {'t': {}, 'u': {}, 'v': {}}
 
     start = clock()
@@ -177,7 +185,7 @@ def go():
     DstCoord.lonlat['v']['lon'] = nc.variables['glamv'][0,:,:]
     DstCoord.lonlat['v']['lat'] = nc.variables['gphiv'][0,:,:]
     """
-    print 'read and assign netcdf data, lon lat'
+    logger.info( 'read and assign netcdf data, lon lat')
     # Read and assign netcdf data
     for g in 't', 'u', 'v':
         DstCoord.lonlat[g]['lon'] = nc.variables['glam' + g][0,:,:]
@@ -185,7 +193,7 @@ def go():
     nc.close()
 
     
-    print clock() - start
+    logger.info( clock() - start)
     # Set of 
     DstCoord.bdy_lonlat = {'t': {}, 'u': {}, 'v': {}, 'z': {}}
     for g in 't', 'u', 'v', 'z':
@@ -194,7 +202,7 @@ def go():
 
 
     for g in 't', 'u', 'v':
-        print 'range is ', num_bdy[g]
+        logger.info( 'range is %s', num_bdy[g])
         for i in range(num_bdy[g]):
             x = bdy_ind[g].bdy_i[i,1]
             y = bdy_ind[g].bdy_i[i,0]
@@ -206,7 +214,7 @@ def go():
     DstCoord.bdy_lonlat['z']['lon'] = DstCoord.bdy_lonlat['t']['lon'][bdy_r == 1]
     DstCoord.bdy_lonlat['z']['lat'] = DstCoord.bdy_lonlat['t']['lat'][bdy_r == 1]
 
-    print DstCoord.bdy_lonlat['t']['lon'].shape
+    logger.info( DstCoord.bdy_lonlat['t']['lon'].shape)
 
 
     # TEMP
@@ -219,8 +227,9 @@ def go():
     start = clock()
     # Create a Time handler object
     SourceTime = source_time.SourceTime(settings['src_dir'])
-    acc = -3168000 - 86400 # Straight out Matlab code. Question this. 
-    acc = 0
+    acc = settings['src_time_adj']
+#    acc = -3168000 - 86400 # Straight out Matlab code. Question this. 
+#    acc = 0
     # Extract source data on dst grid
     # Assign time info to Boundary T, U, V objects
     # FIX MY STRUCTURING
@@ -279,4 +288,4 @@ def go():
     ret1 = {'t': Grid_T, 'u':Grid_U, 'v':Grid_V, 'f':Grid_F}
     return settings, ret1, SourceCoord, DstCoord
 
-#go()
+go()

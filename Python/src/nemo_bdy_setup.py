@@ -10,14 +10,24 @@ Invoke with a text file location, class init reads and deciphers variables.
 attribute 'settings' is a dict holding all the vars.
 '''
 
+import os.path
+import logging
+import sys
 class Setup:
 
     # setfile = settings file location
     def __init__(self, setfile):
+        #Logging for class
+        logger = logging.getLogger(__name__)
+        
         if not setfile: # debug
             namelist = open('../data/namelist.bdy', 'r')
         else:
-            namelist = open(setfile, 'r')
+            try:
+                namelist = open(setfile, 'r')
+            except:
+                logger.error("Cannot open the file:"+setfile)
+                raise
         data = namelist.readlines()
         
         # Dictionary of all the vars in the file
@@ -42,8 +52,8 @@ class Setup:
     # x = string, checks type, returns name and val. Raises error for ambiguous
     def _get_val(self, x):
         t = x[0][0:2].lower()
-        n = x[0][3:].lower() # 3 -> 0 to keep type info
-        v = x[2]
+        n = x[0][3:].lower().strip() # 3 -> 0 to keep type info
+        v = x[1].strip()
 
         if t == 'ln':
             if v.find('true') is not -1:
@@ -74,8 +84,8 @@ class Setup:
     # Returns tidy dictionary of var names and values
     def _assign(self, data):
         vars = {}
-        for l in data:
-            x = l.split(None, 2)
+        for line in data:
+            x = line.split('=', 2)
             n,v = self._get_val(x)
             vars[n] = v
 

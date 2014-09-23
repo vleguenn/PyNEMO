@@ -43,6 +43,7 @@
    sn_dst_dir = 'F:/NEMO_bdy_tools/scratch/jofa/'
    sn_fn      = 'NNA_R12'                 ! prefix for output files
    nn_fv      = -1e20                     !  set fill value for output files
+   nn_src_time_adj = 0					  ! src time adjustment
 
 !-----------------------------------------------------------------------
 !  unstructured open boundaries                         

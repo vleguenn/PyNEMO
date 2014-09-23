@@ -139,7 +139,10 @@ class Coord:
                 #print 'Just about to add 1 to ', attData
                 # add 1 to all indices as they're going to be used in
                 # a Fortran environment
-                data = data + 1
+                # This is commented because data generated doesn't match
+                # with output generated from matlab
+                #data = data + 1
+                
 
                 vardic[ind][dim][:] = data 
  
