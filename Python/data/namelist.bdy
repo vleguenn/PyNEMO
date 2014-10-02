@@ -59,6 +59,15 @@
     nn_rimwidth    = 9                    !  width of the relaxation zone
 
 !-----------------------------------------------------------------------
+!  unstructured open boundaries tidal parameters                        
+!-----------------------------------------------------------------------
+    ln_tide        = .true.               !  =T : produce bdy tidal conditions
+    nb_harmo       = 3                    !  number of constituents to use
+    clname(1)      = 'M2'                 ! constituent name
+    clname(2)      = 'S2'         
+    clname(3)      = 'K2'        
+
+!-----------------------------------------------------------------------
 !  Time information
 !-----------------------------------------------------------------------
     nn_year_000     = 1982        !  year start
