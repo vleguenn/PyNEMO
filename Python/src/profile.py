@@ -11,6 +11,7 @@
 
 
 from time import time, clock
+from calendar import monthrange
 
 import nemo_bdy_setup as setup
 import nemo_bdy_msk_c as msk
@@ -22,12 +23,15 @@ import nemo_bdy_src_time as source_time
 import nemo_bdy_source_coord as source_coord
 import nemo_bdy_dst_coord as dst_coord
 import nemo_bdy_ice
+import nemo_bdy_extr_tm3
 
 from netCDF4 import Dataset
 import numpy as np
+from scipy.interpolate import interp1d
 #import pickle
 
 import logging
+from netcdftime import date2num, datetime
 logging.basicConfig(level=logging.INFO)
     
 def go(): 
@@ -276,16 +280,73 @@ def go():
 
     # Enter Years Loop
     # Loop not yet implemented
-    year = 1979
-    month = 11
+    years = [1979]
+    months = [11]
 
 
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-    print '\n- Old Callington Ratsmith should never be trusted -\n'
-    print 'DstCoord: \n', dir(DstCoord), '\nSourceCoord: \n', dir(SourceCoord)
+    #print '\n- Old Callington Ratsmith should never be trusted -\n'
+    #print 'DstCoord: \n', dir(DstCoord), '\nSourceCoord: \n', dir(SourceCoord)
 
-    ret1 = {'t': Grid_T, 'u':Grid_U, 'v':Grid_V, 'f':Grid_F}
-    return settings, ret1, SourceCoord, DstCoord
+    #ret1 = {'t': Grid_T, 'u':Grid_U, 'v':Grid_V, 'f':Grid_F}
+    # return settings, ret1, SourceCoord, DstCoord
+    
+    for year in years:
+        for month in months:
+
+            if Setup.settings['tra'] :
+                extract = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_T,['votemper','vosaline'],
+                                        years=year,months=month) 
+                extract.extract_month(year, month)
+                #Get Date as a Number used in interpolation
+                time_counter=np.zeros([len(extract.sc_time)])
+                for i in range(0,len(extract.sc_time)):
+                    time_counter[i] = extract.convert_date_to_destination_num(extract.sc_time[i]['date'])
+                
+                date_start = datetime(year, month, 1, 0, 0, 0)
+                date_end = datetime(year, month, monthrange(year,month)[1],24, 60,60)
+                time_num_start = extract.convert_date_to_destination_num(date_start)
+                time_num_end = extract.convert_date_to_destination_num(date_end)
+                    
+                if monthrange(year,month)[1] == 29:
+                    interp1fn = interp1d(np.arange(0,len(extract.sc_time),1),time_counter) 
+                    time_counter = interp1fn(np.append(np.arange(0,len(extract.sc_time)-2+0.2,0.2),
+                                                       np.arange(len(extract.sc_time)-2+1/6.0,len(extract.sc_time)-1+1/6.0,1/6.0)))      #added 0.2 to include boundary              
+                else:
+                    interp1fn = interp1d(np.arange(0,len(extract.sc_time),1),time_counter) 
+                    time_counter = interp1fn(np.arange(0,len(extract.sc_time)-1+0.2,0.2))      #added 0.2 to include boundary   
+                 
+                ft = np.where(((time_counter >= time_num_start) - (time_counter <= time_num_end)).all())    
+                time_counter = time_counter[ft]
+                    
+                for variable_name in extract.d_bdy:
+                    if monthrange(year,month)[1] == 29:
+                        x = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][year]['data'][1,1,:]),1)).transpose()))                        
+                        y = extract.d_bdy[variable_name][year]['data'].transpose(2, 0, 1)
+                        interp1fn = interp1d(x,y,axis=0)
+                        extra_axis = np.append(np.arange(0,len(extract.d_bdy[variable_name][year]['data'][1,1,:])-2+0.2,0.2),
+                                                       np.arange(len(extract.d_bdy[variable_name][year]['data'][1,1,:])-2+1/6.0,
+                                                                 len(extract.d_bdy[variable_name][year]['data'][1,1,:])-1+1/6.0,1/6.0))
+                        extract.d_bdy[variable_name][year]['data'] = interp1fn(extra_axis)
+                    else:
+                        x = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][year]['data'][1,1,:]),1)).transpose()))
+                        y = extract.d_bdy[variable_name][year]['data'].transpose(2, 0, 1)
+                        interp1fn = interp1d(x,y,axis=0)
+                        extract.d_bdy[variable_name][year]['data'] = interp1fn(np.mat(np.arange(0,len(extract.d_bdy[variable_name][year]['data'][1,1,:])-1+0.2,0.2)).transpose())      #added 0.2 to include boundary
+                    #extract.d_bdy[variable_name][year]['data'] = extract.d_bdy[variable_name][year]['data'][ft,:,:].transpose([1,2,0]) #not working
+                        
+                
+            if Setup.settings['dyn2d'] or Setup.settings['dyn3d'] :
+                extract_u = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_U,['vozocrtx'], 
+                                        years=year,months=month)
+                extract_u.extract_month(year,month)
+                extract_v = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_V,['vomecrty'],
+                                        years=year,months=month)
+                extract_v.extract_month(year,month)
+                
+                
+            
+                  
 
 go()

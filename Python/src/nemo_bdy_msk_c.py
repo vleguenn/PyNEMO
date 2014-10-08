@@ -21,39 +21,43 @@
 
 from netCDF4 import Dataset
 import numpy as np
-#import matplotlib # Plotting unfinished
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+import matplotlib.pyplot as plt
+import logging
 
 class Mask:
 
     def __init__(self, ncfname, med=True, blk=True, hud=True, bal=True,
                  v2=True, custom_areas=None):
+        #Logging
+        self.logger = logging.getLogger(__name__)
         # Debug
-        print 'Mask init, ' 'med', med, 'blk', blk, 'hud', hud, 'bal ',bal, 'v2 ',v2
-        print '''Mask initialising with remove med: %s, blk: %s, hud: %s,
-                 bal: %s, v2: %s''' %(med, blk, hud, bal, v2)
+        #self.logger.info('Mask init, ' 'med', med, 'blk', blk, 'hud', hud, 'bal ',bal, 'v2 ',v2)
+        self.logger.info( '''Mask initialising with remove med: %s, blk: %s, hud: %s,
+                 bal: %s, v2: %s''', med, blk, hud, bal, v2)
 
         # Read from default location
         if ncfname == 0:
-            ncfname = 'F:/NEMO_bdy_tools/bdy_matlab/grid_C/NNA_R12_bathy_meter_bench.nc'
+            ncfname = '../data/grid_C/NNA_R12_bathy_meter_bench.nc'
 
         # Open and read bathymetry netcdf file
         nc = Dataset(ncfname, 'r')
         bdy_msk = np.asarray(nc.variables['Bathymetry'][:,:])
 
         # Normalise all elements > 0 to 1, otherwise to 0
-        bdy_msk = np.around((bdy_msk + .5).clip(0,1))
-        bdy_msk[bdy_msk ==1] = -1 
+        bdy_msk = np.around((bdy_msk + .5).clip(0,1))      
+        bdy_msk[bdy_msk ==1] = -1          
         tmp = bdy_msk[3:398,3:348]
         tmp[tmp == -1] = 1
         bdy_msk[3:398,3:348] = tmp
         # Debug line
-        print ('bdy_msk FINAL: Total: ', np.sum(bdy_msk[:,:]), '| 1s: ', 
-               np.sum(bdy_msk[:]==1), '| -1s: ', np.sum(bdy_msk[:]==-1),
-                '| 0s: ', np.sum(bdy_msk[:] == 0))
+        self.logger.debug ('bdy_msk FINAL: Total: %s , | 1s: %s | -1s: %s | 0s: %s',  
+                          np.sum(bdy_msk[:,:]),np.sum(bdy_msk[:]==1),np.sum(bdy_msk[:]==-1),np.sum(bdy_msk[:] == 0))
 
         # Set our attribute
         self.bdy_msk = bdy_msk
-
         # Close NetCDF file
         nc.close()
             
@@ -114,6 +118,24 @@ class Mask:
         return bathy
 
 
+    def _plot_map(self,area):
+        self.logger.info('Processing Surface Plot of the data ...')
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        Y = np.arange(1, area.shape[0]+1, 1)
+        X = np.arange(1, area.shape[1]+1, 1)
+        X, Y = np.meshgrid(X, Y)
+        Z = area
+        self.logger.debug ('Data shape: %s x %s',area.shape[0],area.shape[1])
+        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm,linewidth=0, antialiased=False)
+
+        ax.zaxis.set_major_locator(LinearLocator(10))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+        fig.colorbar(surf, shrink=0.5, aspect=5)
+
+        plt.show()
+        return
 # Below code for plotting projections not currently in use
 """
     # Map plotting unfinised

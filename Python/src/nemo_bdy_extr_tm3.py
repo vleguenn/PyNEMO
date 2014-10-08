@@ -11,12 +11,14 @@ via splitting up in src_time module
 
 Initial arguments:
 setup: dictionary
-SourceCoord, DstCoord: objects
+SourceCoord : source coordinates object
+DstCoord: destination coordinates object
 Grid: t, u, v or f. Decides how to run
 var_nam: netcdf file variable names
 Grid_2: Rotation grid, defaults to None if unneeded
 fnames_2: source_time dictionary of secondary grid for rotation
-
+years: year of data to be extracted
+months: month of data to be extracted
 '''
 
 
@@ -27,6 +29,7 @@ import numpy as np
 import scipy.spatial as sp
 from netCDF4 import Dataset
 from netcdftime import utime
+#from netCDF4 import date2num, num2date
 
 import nemo_bdy_grid_angle
 from nemo_bdy_lib import sub2ind
@@ -38,7 +41,7 @@ class Extract:
 
                 # SourceCoord, DstCoord, grid, Setup dict, 
     def __init__(self, setup, SourceCoord, DstCoord, Grid, var_nam, 
-                 Grid_2=None, fnames_2=None):
+                 Grid_2=None, fnames_2=None, years=[1979], months=[11]):
 
         self.g_type = Grid.grid_type
         self.settings = setup
@@ -75,8 +78,8 @@ class Extract:
         # ??? Should this be read from settings?
         wei_121 = np.array([0.5, 0.25, 0.25])
 
-        years = [1979]
-        months = [11] #12
+        #years = [1979]
+        #months = [11] #12
         
         SC.lon = SC.lon.squeeze()
         SC.lat = SC.lat.squeeze()
@@ -308,8 +311,10 @@ class Extract:
         self.d_bdy = {}
         for v in range(self.nvar):
             self.d_bdy[self.var_nam[v]] = {}
-            for year in years:
-                self.d_bdy[self.var_nam[v]][year] = {'data': None, 'date': {}}
+            
+            
+        #    for year in years:
+        #        self.d_bdy[self.var_nam[v]][year] = {'data': None, 'date': {}}
 
         
         # This loop should be removed. Once the module is initialised 
@@ -318,9 +323,9 @@ class Extract:
         #
         # Extract source data level by level and interpolate onto bc points
         # Determine stretch factors for calendar out based on calendar in
-        for year in years:
-            for month in months:
-                self.extract_month(year, month)
+        #for year in years:
+        #    for month in months:
+        #        self.extract_month(year, month)
         
 # # # # # # # # # # # # # # # # # # # # #
 
@@ -354,7 +359,9 @@ class Extract:
         dst_end = DstCal.date2num(datetime(year, month, ed, 23, 59, 59))
 
         self.S_cal = utime(sc_time[0]['units'], sc_time[0]['calendar'])
-        self.D_cal = utime('seconds since %d-1-1' %year, 
+#        self.D_cal = utime('seconds since %d-1-1' %year, 
+#                           self.settings['dst_calendar'])
+        self.D_cal = utime('seconds since %d-1-1' %self.settings['base_year'], 
                            self.settings['dst_calendar'])
 
         for date in sc_time:
@@ -661,6 +668,9 @@ class Extract:
     def convert_date(self, date):
         val = self.S_cal.num2date(date)
         return self.D_cal.date2num(val)
+    
+    def convert_date_to_destination_num(self, date):
+        return self.D_cal.date2num(date)
 
     # Translate Calendars
     def cal_trans(self, source, dest, year, month):

@@ -24,6 +24,7 @@ Additional assigned externally
 """
 
 import numpy as np
+import logging
 
 from nemo_bdy_lib import sub2ind
 
@@ -36,6 +37,7 @@ class Boundary:
     _WEST = [1,-1,1,-1,1,-1,None,-2]
     
     def __init__(self, boundary_mask, settings, grid):
+        self.logger = logging.getLogger(__name__)
         bdy_msk = boundary_mask
         self.settings = settings
         rw = self.settings['rimwidth']
@@ -43,6 +45,7 @@ class Boundary:
         self.grid_type = grid.lower()
         # Throw an error for grid type confusion
         if grid not in ['t', 'u', 'v', 'f']:
+            self.logger.error('Grid Type not correctly specified:'+grid)
             raise ValueError("""%s is invalid grid type;  
                                 must be 't', 'u', 'v' or 'f'""" %grid)
 
@@ -101,7 +104,7 @@ class Boundary:
         for i in range(rm):
             bdy_i[:,:,i+1] = bdy_i[:,:,i] + np.transpose(temp, (1,0))
             bdy_r[:,i+1] = i+1
-        
+                   
         bdy_i = np.transpose(bdy_i, (1,2,0))
         bdy_i = np.reshape(bdy_i, 
                  (bdy_i.shape[0],bdy_i.shape[1]*bdy_i.shape[2]))
@@ -112,6 +115,7 @@ class Boundary:
         # Note: Needs to use a stable sort method to preserve order
         # Get index of ascending order. 
         s_ind = np.argsort(bdy_r,kind='mergesort')
+
         # Rearrange according to the order
         bdy_r = bdy_r[s_ind]
         bdy_i = bdy_i[:,s_ind]
@@ -145,13 +149,13 @@ class Boundary:
         r_msk_orig = r_msk.copy()
         r_msk_ref = r_msk[1:-1,1:-1]
 
-        print 'Start r_msk bearings loop'
+        self.logger.debug('Start r_msk bearings loop')
         # # # This is by far the slowest part # # #
         for i in range(rw-1):
             # Check each bearing
             for b in [self._SOUTH, self._NORTH, self._WEST, self._EAST]:
                 r_msk,r_msk_ref = self._fill(r_msk,r_msk_ref, b)
-        print 'done loop'
+        self.logger.debug('done loop')
     
         # update bdy_i and bdy_r
         new_ind = np.abs(r_msk - r_msk_orig) >  0
@@ -173,7 +177,7 @@ class Boundary:
         self.bdy_i = bdy_i
         self.bdy_r = bdy_r
 
-        print 'Final bdy_i: ', self.bdy_i.shape, '\n'
+        self.logger.debug( 'Final bdy_i: %s', self.bdy_i.shape)
 
 
 # # # # # # # # # # # # #
