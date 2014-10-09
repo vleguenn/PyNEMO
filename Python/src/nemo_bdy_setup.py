@@ -50,34 +50,40 @@ class Setup:
         return data
 
     # x = string, checks type, returns name and val. Raises error for ambiguous
-    def _get_val(self, x):
+    def _get_val(self, vars, x):
         t = x[0][0:2].lower()
         n = x[0][3:].lower().strip() # 3 -> 0 to keep type info
         v = x[1].strip()
 
         if t == 'ln':
             if v.find('true') is not -1:
-                return n, True
+                vars[n] = True
             elif v.find('false') is not -1:
-                return n, False
+                vars[n] = False
             else:
                 raise ValueError('Cannot assign %s to %s, must be boolean' 
                                                                     %(v,n))
         elif t == 'rn' or t == 'nn':
             if v.find('.') > -1 or v.find('e') > -1:
                 try:
-                    return n, float(v)
+                    vars[n] = float(v)
                 except ValueError:
                     print 'Cannot assign %s to %s, must be float'
                     raise
             else:
                 try:
-                    return n, int(v)
+                    vars[n] = int(v)
                 except ValueError:
                     print 'Cannot assign %s to %s, must be integer'
                     raise
         elif t == 'cn' or t == 'sn':
-            return n,v.strip("'")
+                vars[n] = v.strip("'")
+        elif t == 'cl':
+                name = x[0].split('(')
+                index = name[1].split(')')
+                if name[0].strip() not in vars.keys():
+                    vars[name[0].strip()] = {}
+                vars[name[0].strip()][index[0].strip()]=v.strip()
         else:
             raise ValueError('%s data type is ambiguous' %x)
 
@@ -86,8 +92,9 @@ class Setup:
         vars = {}
         for line in data:
             x = line.split('=', 2)
-            n,v = self._get_val(x)
-            vars[n] = v
+            self._get_val(vars, x)
+#            n,v = self._get_val(x)
+#            vars[n] = v
 
         return vars
 

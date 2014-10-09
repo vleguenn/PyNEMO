@@ -44,6 +44,7 @@
    sn_fn      = 'NNA_R12'                 ! prefix for output files
    nn_fv      = -1e20                     !  set fill value for output files
    nn_src_time_adj = 0					  ! src time adjustment
+   sn_dst_metainfo = 'EB bdy files produced by jdha from ORCA0083-N001 global run provided by acc'
 
 !-----------------------------------------------------------------------
 !  unstructured open boundaries                         
@@ -62,7 +63,6 @@
 !  unstructured open boundaries tidal parameters                        
 !-----------------------------------------------------------------------
     ln_tide        = .true.               !  =T : produce bdy tidal conditions
-    nb_harmo       = 3                    !  number of constituents to use
     clname(1)      = 'M2'                 ! constituent name
     clname(2)      = 'S2'         
     clname(3)      = 'K2'        

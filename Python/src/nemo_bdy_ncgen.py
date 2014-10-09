@@ -23,7 +23,7 @@ def CreateBDYNetcdfFile(filename, N,I,J,K,rw,h,orig,fv,grd):
     
     #define dimensions
     if grd in dimensionNames:
-        dimztID = ncid.createDimension('z', xb_len)
+        dimztID = ncid.createDimension('z', depth_len)
     dimxbID = ncid.createDimension('xb',xb_len)
     dimybID = ncid.createDimension('yb',yb_len)
     dimxID  = ncid.createDimension('x', x_len)
@@ -32,42 +32,42 @@ def CreateBDYNetcdfFile(filename, N,I,J,K,rw,h,orig,fv,grd):
 
     #define variable  
     vartcID = ncid.createVariable('time_counter','f4',('time_counter',))
-    varlonID = ncid.createVariable('nav_lon','f4',('x','y',))
-    varlatID = ncid.createVariable('nav_lat','f4',('x','y',))
+    varlonID = ncid.createVariable('nav_lon','f4',('y','x',))
+    varlatID = ncid.createVariable('nav_lat','f4',('y','x',))
     
 
     if grd in ['E'] :
-        varztID = ncid.createVariable('deptht','f4',('xb','yb','z',))
-        varmskID = ncid.createVariable('bdy_msk','f4',('x','y',),fill_value=fv)
-        varN1pID = ncid.createVariable('N1p','f4',('xb','yb','z','time_counter',),fill_value=fv)
-        varN3nID = ncid.createVariable('N3n','f4',('xb','yb','z','time_counter',),fill_value=fv)
-        varN5sID = ncid.createVariable('N5s','f4',('xb','yb','z','time_counter',),fill_value=fv)
+        varztID = ncid.createVariable('deptht','f4',('z','yb','xb',))
+        varmskID = ncid.createVariable('bdy_msk','f4',('y','x',),fill_value=fv)
+        varN1pID = ncid.createVariable('N1p','f4',('time_counter','z','yb','xb',),fill_value=fv)
+        varN3nID = ncid.createVariable('N3n','f4',('time_counter','z','yb','xb',),fill_value=fv)
+        varN5sID = ncid.createVariable('N5s','f4',('time_counter','z','yb','xb',),fill_value=fv)
     elif grd in ['T','I'] :
-        varztID = ncid.createVariable('deptht','f4',('xb','yb','z',))
-        varmskID = ncid.createVariable('bdy_msk','f4',('x','y',),fill_value=fv)
-        vartmpID = ncid.createVariable('votemper','f4',('xb','yb','z','time_counter',),fill_value=fv)
-        varsalID = ncid.createVariable('vosaline','f4',('xb','yb','z','time_counter',),fill_value=fv)
+        varztID = ncid.createVariable('deptht','f4',('z','yb','xb',))
+        varmskID = ncid.createVariable('bdy_msk','f4',('y','x',),fill_value=fv)
+        vartmpID = ncid.createVariable('votemper','f4',('time_counter','z','yb','xb',),fill_value=fv)
+        varsalID = ncid.createVariable('vosaline','f4',('time_counter','z','yb','xb',),fill_value=fv)
         if grd == 'I' :
-            varildID = ncid.createVariable('ileadfra','f4',('xb','yb','time_counter',),fill_value=fv)
-            variicID = ncid.createVariable('iicethic','f4',('xb','yb','time_counter',),fill_value=fv)
-            varisnID = ncid.createVariable('isnowthi','f4',('xb','yb','time_counter',),fill_value=fv)
+            varildID = ncid.createVariable('ileadfra','f4',('time_counter','yb','xb',),fill_value=fv)
+            variicID = ncid.createVariable('iicethic','f4',('time_counter','yb','xb',),fill_value=fv)
+            varisnID = ncid.createVariable('isnowthi','f4',('time_counter','yb','xb',),fill_value=fv)
     elif grd == 'U':
-        varztID = ncid.createVariable('depthu','f4',('xb','yb','z',),fill_value=fv)
-        varbtuID = ncid.createVariable('vobtcrtx','f4',('xb','yb','time_counter',),fill_value=fv)
-        vartouID = ncid.createVariable('vozocrtx','f4',('xb','yb','z','time_counter',),fill_value=fv)
+        varztID = ncid.createVariable('depthu','f4',('z','yb','xb',),fill_value=fv)
+        varbtuID = ncid.createVariable('vobtcrtx','f4',('time_counter','yb','xb',),fill_value=fv)
+        vartouID = ncid.createVariable('vozocrtx','f4',('time_counter','z','yb','xb',),fill_value=fv)
     elif grd == 'V':
-        varztID = ncid.createVariable('depthv','f4',('xb','yb','z',))
-        varbtvID = ncid.createVariable('vobtcrty','f4',('xb','yb','time_counter',),fill_value=fv)
-        vartovID = ncid.createVariable('vomecrty','f4',('xb','yb','z','time_counter',),fill_value=fv)
+        varztID = ncid.createVariable('depthv','f4',('z','yb','xb',))
+        varbtvID = ncid.createVariable('vobtcrty','f4',('time_counter','yb','xb',),fill_value=fv)
+        vartovID = ncid.createVariable('vomecrty','f4',('time_counter','z','yb','xb',),fill_value=fv)
     elif grd == 'Z':
-        varsshID = ncid.createVariable('sossheig','f4',('xb','yb','time_counter',),fill_value=fv)
+        varsshID = ncid.createVariable('sossheig','f4',('time_counter','yb','xb',),fill_value=fv)
     else :
         logging.error("Unknow Grid input")
         
     
-    varnbiID = ncid.createVariable('nbidta','i4',('xb','yb',))
-    varnbjID = ncid.createVariable('nbjdta','i4',('xb','yb',))
-    varnbrID = ncid.createVariable('nbrdta','i4',('xb','yb',))
+    varnbiID = ncid.createVariable('nbidta','i4',('yb','xb',))
+    varnbjID = ncid.createVariable('nbjdta','i4',('yb','xb',))
+    varnbrID = ncid.createVariable('nbrdta','i4',('yb','xb',))
     #Global Attributes
     ncid.file_name = filename
     ncid.creation_date = str(datetime.datetime.now())

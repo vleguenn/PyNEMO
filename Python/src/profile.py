@@ -28,12 +28,17 @@ import nemo_bdy_extr_tm3
 from netCDF4 import Dataset
 import numpy as np
 from scipy.interpolate import interp1d
+
+import nemo_bdy_ncgen
+import nemo_bdy_ncpop
 #import pickle
 
 import logging
 from netcdftime import date2num, datetime
 logging.basicConfig(level=logging.INFO)
     
+    
+            
 def go(): 
     #Logger
     logger = logging.getLogger(__name__)
@@ -296,57 +301,87 @@ def go():
         for month in months:
 
             if Setup.settings['tra'] :
-                extract = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_T,['votemper','vosaline'],
+                extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_T,['votemper','vosaline'],
                                         years=year,months=month) 
-                extract.extract_month(year, month)
+                extract_t.extract_month(year, month)
                 #Get Date as a Number used in interpolation
-                time_counter=np.zeros([len(extract.sc_time)])
-                for i in range(0,len(extract.sc_time)):
-                    time_counter[i] = extract.convert_date_to_destination_num(extract.sc_time[i]['date'])
+                time_counter=np.zeros([len(extract_t.sc_time)])
+                for i in range(0,len(extract_t.sc_time)):
+                    time_counter[i] = extract_t.convert_date_to_destination_num(extract_t.sc_time[i]['date'])
                 
                 date_start = datetime(year, month, 1, 0, 0, 0)
                 date_end = datetime(year, month, monthrange(year,month)[1],24, 60,60)
-                time_num_start = extract.convert_date_to_destination_num(date_start)
-                time_num_end = extract.convert_date_to_destination_num(date_end)
+                time_num_start = extract_t.convert_date_to_destination_num(date_start)
+                time_num_end = extract_t.convert_date_to_destination_num(date_end)
                     
                 if monthrange(year,month)[1] == 29:
-                    interp1fn = interp1d(np.arange(0,len(extract.sc_time),1),time_counter) 
-                    time_counter = interp1fn(np.append(np.arange(0,len(extract.sc_time)-2+0.2,0.2),
-                                                       np.arange(len(extract.sc_time)-2+1/6.0,len(extract.sc_time)-1+1/6.0,1/6.0)))      #added 0.2 to include boundary              
+                    interp1fn = interp1d(np.arange(0,len(extract_t.sc_time),1),time_counter) 
+                    time_counter = interp1fn(np.append(np.arange(0,len(extract_t.sc_time)-2+0.2,0.2),
+                                                       np.arange(len(extract_t.sc_time)-2+1/6.0,len(extract_t.sc_time)-1+1/6.0,1/6.0)))      #added 0.2 to include boundary              
                 else:
-                    interp1fn = interp1d(np.arange(0,len(extract.sc_time),1),time_counter) 
-                    time_counter = interp1fn(np.arange(0,len(extract.sc_time)-1+0.2,0.2))      #added 0.2 to include boundary   
+                    interp1fn = interp1d(np.arange(0,len(extract_t.sc_time),1),time_counter) 
+                    time_counter = interp1fn(np.arange(0,len(extract_t.sc_time)-1+0.2,0.2))      #added 0.2 to include boundary   
                  
-                ft = np.where(((time_counter >= time_num_start) - (time_counter <= time_num_end)).all())    
+                ft = np.where(((time_counter >= time_num_start) & (time_counter <= time_num_end)))    
                 time_counter = time_counter[ft]
-                    
-                for variable_name in extract.d_bdy:
-                    if monthrange(year,month)[1] == 29:
-                        x = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][year]['data'][1,1,:]),1)).transpose()))                        
-                        y = extract.d_bdy[variable_name][year]['data'].transpose(2, 0, 1)
-                        interp1fn = interp1d(x,y,axis=0)
-                        extra_axis = np.append(np.arange(0,len(extract.d_bdy[variable_name][year]['data'][1,1,:])-2+0.2,0.2),
-                                                       np.arange(len(extract.d_bdy[variable_name][year]['data'][1,1,:])-2+1/6.0,
-                                                                 len(extract.d_bdy[variable_name][year]['data'][1,1,:])-1+1/6.0,1/6.0))
-                        extract.d_bdy[variable_name][year]['data'] = interp1fn(extra_axis)
-                    else:
-                        x = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][year]['data'][1,1,:]),1)).transpose()))
-                        y = extract.d_bdy[variable_name][year]['data'].transpose(2, 0, 1)
-                        interp1fn = interp1d(x,y,axis=0)
-                        extract.d_bdy[variable_name][year]['data'] = interp1fn(np.mat(np.arange(0,len(extract.d_bdy[variable_name][year]['data'][1,1,:])-1+0.2,0.2)).transpose())      #added 0.2 to include boundary
-                    #extract.d_bdy[variable_name][year]['data'] = extract.d_bdy[variable_name][year]['data'][ft,:,:].transpose([1,2,0]) #not working
-                        
                 
-            if Setup.settings['dyn2d'] or Setup.settings['dyn3d'] :
-                extract_u = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_U,['vozocrtx'], 
-                                        years=year,months=month)
-                extract_u.extract_month(year,month)
-                extract_v = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_V,['vomecrty'],
-                                        years=year,months=month)
-                extract_v.extract_month(year,month)
+                interpolate_data(extract_t,year,month,ft) # interpolate the data to daily period in a month
+                
+                if Setup.settings['ice']:
+                    extract_ice = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_ice,['iicethic','ileadfra','isnowthi'],
+                                                          years=year,months=month)
+                    extract_ice.extract_month(year,month)
+                    interpolate_data(extract_ice, year, month,ft) #interpolate the data to daily period in a month
+                                                                   
+                        
+                output_filename_t = Setup.settings['dst_dir']+Setup.settings['fn']+'_bdyT_y'+str(year)+'m'+str(month)+'.nc'
+                logger.info('Outputing T file:%s', output_filename_t)
+                print DstCoord.lonlat['t']['lon'].shape[0]
+                nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_t, num_bdy['t'], DstCoord.lonlat['t']['lon'].shape[1], DstCoord.lonlat['t']['lon'].shape[0], 
+                                                   DstCoord.depths['t']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], 'T')
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'votemper', extract_t.d_bdy['votemper'][year]['data'])
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'vosaline', extract_t.d_bdy['vosaline'][year]['data'])
+                if Setup.settings['ice']:
+                    nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'iicethic', extract_ice.d_bdy['iicethic'][year]['data'])
+                    nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'ileadfra', extract_ice.d_bdy['ileadfra'][year]['data'])
+                    nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'isnowthi', extract_ice.d_bdy['isnowthi'][year]['data'])
+                    
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'bdy_msk',DstCoord.bdy_msk) 
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'deptht',DstCoord.depths['t']['bdy_z']) 
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nav_lon',DstCoord.lonlat['t']['lon']) 
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nav_lat',DstCoord.lonlat['t']['lat']) 
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbidta',Grid_T.bdy_i[:,0])                                 
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbjdta',Grid_T.bdy_i[:,1])
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbrdta',Grid_T.bdy_r[:])
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'time_counter',time_counter)
+                
+#            if Setup.settings['dyn2d'] or Setup.settings['dyn3d'] :
+#                extract_u = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_U,['vozocrtx'], 
+#                                         years=year,months=month)
+#                extract_u.extract_month(year,month)
+#                extract_v = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_V,['vomecrty'],
+#                                         years=year,months=month)
+#                extract_v.extract_month(year,month)
                 
                 
             
+def interpolate_data(extract, Year, Month, Time_indexes):
+    
+    for variable_name in extract.d_bdy:
+        if monthrange(Year,Month)[1] == 29: #leap year
+            x = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,1,1]),1)).transpose()))                        
+            y = extract.d_bdy[variable_name][Year]['data'].transpose(0, 2, 1)
+            interp1fn = interp1d(x,y,axis=0)
+            extra_axis = np.append(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,1,1])-2+0.2,0.2),
+                                           np.arange(len(extract.d_bdy[variable_name][Year]['data'][:,1,1])-2+1/6.0,
+                                                     len(extract.d_bdy[variable_name][Year]['data'][:,1,1])-1+1/6.0,1/6.0))
+            extract.d_bdy[variable_name][Year]['data'] = interp1fn(extra_axis)
+        else:
+            x = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,1,1]),1)).transpose()))
+            y = extract.d_bdy[variable_name][Year]['data'].transpose(0, 2, 1)
+            interp1fn = interp1d(x,y,axis=0)
+            extract.d_bdy[variable_name][Year]['data'] = interp1fn(np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,1,1])-1+0.2,0.2)).transpose())))      #added 0.2 to include boundary
+        extract.d_bdy[variable_name][Year]['data'] =  np.squeeze(extract.d_bdy[variable_name][Year]['data'][Time_indexes,:,:]).transpose(0,2,1)
                   
 
 go()
