@@ -44,7 +44,7 @@
    sn_fn      = 'NNA_R12'                 ! prefix for output files
    nn_fv      = -1e20                     !  set fill value for output files
    nn_src_time_adj = 0					  ! src time adjustment
-   sn_dst_metainfo = 'EB bdy files produced by jdha from ORCA0083-N001 global run provided by acc'
+   sn_dst_metainfo = 'EB bdy files produced by jdha from ORCA0083-N001 gloabl run provided by acc'
 
 !-----------------------------------------------------------------------
 !  unstructured open boundaries                         

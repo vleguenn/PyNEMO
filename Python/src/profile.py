@@ -128,15 +128,15 @@ def go():
     logger.info( clock() - start)
     
     
-    Grid_U.bdy_i = Grid_U.bdy_i[Grid_U.bdy_r == 1, :]
-    Grid_V.bdy_i = Grid_V.bdy_i[Grid_V.bdy_r == 1, :]
+    Grid_U.bdy_i = Grid_U.bdy_i[Grid_U.bdy_r == 0, :]
+    Grid_V.bdy_i = Grid_V.bdy_i[Grid_V.bdy_r == 0, :]
     # Ought to look at this
     bdy_r = Grid_T.bdy_r
 
     # number of points
     num_bdy = {}
     num_bdy['t'] = len(Grid_T.bdy_i[:,0])
-    num_bdy['z'] = len(Grid_T.bdy_i[bdy_r == 1, 0])
+    num_bdy['z'] = len(Grid_T.bdy_i[bdy_r == 0, 0])
     num_bdy['u'] = len(Grid_U.bdy_i[:,0])
     num_bdy['v'] = len(Grid_V.bdy_i[:,0])
 
@@ -339,7 +339,7 @@ def go():
                 logger.info('Outputing T file:%s', output_filename_t)
                 
                 nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_t, num_bdy['t'], DstCoord.lonlat['t']['lon'].shape[1], DstCoord.lonlat['t']['lon'].shape[0], 
-                                                   DstCoord.depths['t']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], 'T')
+                                                   DstCoord.depths['t']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], Setup.settings['dst_calendar'],'T')
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'votemper', extract_t.d_bdy['votemper'][year]['data'])
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'vosaline', extract_t.d_bdy['vosaline'][year]['data'])
                 if Setup.settings['ice']:
@@ -367,7 +367,7 @@ def go():
                 output_filename_bt = Setup.settings['dst_dir']+Setup.settings['fn']+'_bt_bdyT_y'+str(year)+'m'+str(month)+'.nc'
                 logger.info('Outputting bt_T file: %s', output_filename_bt)
                 nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_bt, num_bdy['z'], DstCoord.lonlat['t']['lon'].shape[1],DstCoord.lonlat['t']['lon'].shape[0], 
-                                                   1, Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], 'Z')             
+                                                   1, Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], Setup.settings['dst_calendar'],'Z')             
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_bt, 'sossheig', extract_t.d_bdy['sossheig'][year]['data'])
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nav_lon',DstCoord.lonlat['t']['lon']) 
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nav_lat',DstCoord.lonlat['t']['lat']) 
@@ -397,7 +397,7 @@ def extract_write_u_data(Setup,SourceCoord,DstCoord,Grid_U,year,month,ft,num_bdy
     output_filename_u = Setup.settings['dst_dir'] + Setup.settings['fn'] + '_bdyU_y' + str(year) + 'm' + str(month) + '.nc'
     logger.info('Outputting U file: %s', output_filename_u)
     nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_u, num_bdy['u'], DstCoord.lonlat['u']['lon'].shape[1], DstCoord.lonlat['u']['lon'].shape[0],
-                                       DstCoord.depths['u']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], 'U')
+                                       DstCoord.depths['u']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], Setup.settings['dst_calendar'],'U')
     nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'vozocrtx', tmp_vozocrtx)
     nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'depthu', DstCoord.depths['u']['bdy_z'])
     # TODO: write vobtcrtx
@@ -427,7 +427,7 @@ def extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,year,month,ft,num_bdy
     output_filename_v = Setup.settings['dst_dir']+Setup.settings['fn']+'_bdyV_y'+str(year)+'m'+str(month)+'.nc'
     logger.info('Outputting V file: %s', output_filename_v)
     nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_v, num_bdy['v'], DstCoord.lonlat['v']['lon'].shape[1], DstCoord.lonlat['v']['lon'].shape[0], 
-                                       DstCoord.depths['v']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], 'V')
+                                       DstCoord.depths['v']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'],Setup.settings['dst_calendar'], 'V')
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v, 'vomecrty', extract_v.d_bdy['vomecrty'][year]['data'])
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'depthv',DstCoord.depths['v']['bdy_z']) 
     tmp_vozocrty[nanindex] = float('NaN')

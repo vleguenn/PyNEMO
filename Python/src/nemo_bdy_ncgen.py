@@ -8,7 +8,7 @@ from netCDF4 import Dataset
 import datetime
 import logging
 
-def CreateBDYNetcdfFile(filename, N,I,J,K,rw,h,orig,fv,grd):
+def CreateBDYNetcdfFile(filename, N,I,J,K,rw,h,orig,fv,calendar,grd):
     dimensionNames = ['T', 'I','U','V','E']
     
     # Dimension Lengths
@@ -73,7 +73,7 @@ def CreateBDYNetcdfFile(filename, N,I,J,K,rw,h,orig,fv,grd):
     ncid.creation_date = str(datetime.datetime.now())
     ncid.rim_width = rw
     ncid.history = h
-    ncid.institution = 'National Geography Centre, Liverpool, UK'
+    ncid.institution = 'National Oceanography Centre, Livepool, U.K.'
     
     #Time axis attributes
     vartcID.axis = 'T'
@@ -82,6 +82,7 @@ def CreateBDYNetcdfFile(filename, N,I,J,K,rw,h,orig,fv,grd):
     vartcID.title = 'Time'
     vartcID.long_name = 'Time axis'
     vartcID.time_origin = orig
+    vartcID.calendar = calendar
     
     #Longitude axis attributes
     varlonID.axis = 'Longitude'
