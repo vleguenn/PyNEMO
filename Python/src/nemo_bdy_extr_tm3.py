@@ -72,7 +72,10 @@ class Extract:
 
         dst_lon = DC.bdy_lonlat[self.g_type]['lon']
         dst_lat = DC.bdy_lonlat[self.g_type]['lat']
-        dst_dep = DC.depths[self.g_type]['bdy_z']
+        try:
+            dst_dep = DC.depths[self.g_type]['bdy_z']
+        except KeyError:
+            dst_dep = np.zeros([1])
         self.isslab = len(dst_dep) == 1
 
         # ??? Should this be read from settings?
@@ -154,8 +157,11 @@ class Extract:
             self.dst_gsin = tmp_gsin
 
 
-        # Determine size of source data subset    
-        dst_len_z = len(dst_dep[:,0])
+        # Determine size of source data subset  
+        if not self.isslab:  
+            dst_len_z = len(dst_dep[:,0])
+        else:
+            dst_len_z = 0
         source_dims = SC.lon.shape
 
         # Find nearest neighbour on the source grid to each dst bdy point
@@ -292,6 +298,9 @@ class Extract:
             z_ind[:,:] += (np.arange(0, (num_bdy) * sc_z_len, sc_z_len)
                            [np.arange(num_bdy).repeat(2*dst_len_z)].reshape(
                                                                 z_ind.shape))
+        else:
+            z_ind = np.zeros([1,1])
+            z_dist = np.zeros([1,1])
         # End self.isslab
         
         # Set instance attributes
@@ -302,7 +311,10 @@ class Extract:
         self.dst_dep = dst_dep
         self.num_bdy = num_bdy
         self.id_121 = id_121
-        self.bdy_z = DC.depths[self.g_type]['bdy_hbat']
+        if not self.isslab:
+            self.bdy_z = DC.depths[self.g_type]['bdy_hbat']
+        else:
+            self.bdy_z = np.zeros([1])
         self.sc_z_len = sc_z_len
         self.sc_time = sc_time
         self.tmp_filt = tmp_filt
@@ -451,7 +463,7 @@ class Extract:
                 # Extract 2D scalar vars
                 else:
                     print ' 2D source array '
-                    sc_array[0] = varid[:1, j_run, i_run]
+                    sc_array[0] = varid[:1, j_run, i_run].reshape([1,1,j_run.size,i_run.size])
 
                 # Average vector vars onto T-grid
                 if self.key_vec:

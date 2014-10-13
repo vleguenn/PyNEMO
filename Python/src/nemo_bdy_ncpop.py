@@ -20,11 +20,19 @@ def WriteDataToFile(filename, variableName, data):
     elif variableName in twoDimensionVariables:
         if len(count) == 2:
             count += (1L,)
+        elif len(count) == 1:
+            count += (1L,1L,)
         ncid.variables[variableName][:,:,:] = np.reshape(data, count)[:,:,:]
     elif variableName == 'time_counter':
         ncid.variables[variableName][:] = data[:]
     else:
-        ncid.variables[variableName][:] = data[:]
+        if len(count) == 1:
+            ncid.variables[variableName][:] = data[:]
+        elif len(count) == 2:
+            ncid.variables[variableName][:,:] = data[:,:]
+        elif len(count) == 3:
+            ncid.variables[variableName][:,:,:] = data[:,:,:]
+                                         
         
     ncid.close()
         
