@@ -47,10 +47,10 @@ class Extract:
         self.settings = setup
         SC = copy.deepcopy(SourceCoord)
         DC = copy.deepcopy(DstCoord)
-        if self.g_type == 't':
+        if self.g_type == 't':  # this should be removed as bdy_r needs to be defined for all grids
             bdy_r = copy.deepcopy(Grid.bdy_r)
         else:
-            bdy_r = np.zeros(Grid.bdy_i.shape[0])
+            bdy_r = Grid.bdy_r[Grid.bdy_r == 0]
 
         self.fnames_2 = fnames_2 # second source times dict
         sc_time = Grid.source_time
@@ -224,15 +224,14 @@ class Extract:
 
         # Determine 1-2-1 filter indices
         id_121 = np.zeros((num_bdy, 3), dtype=np.int64)
-        for r in range(int(np.amax(bdy_r))):
+        for r in range(int(np.amax(bdy_r))+1):
+            print r            
             r_id = bdy_r != r
             rr_id = bdy_r == r
-        
             tmp_lon = dst_lon.copy()
             tmp_lon[r_id] = -9999
             tmp_lat = dst_lat.copy()
             tmp_lat[r_id] = -9999
-
             source_tree = sp.cKDTree(zip(tmp_lon.ravel(order='F'),
                                      tmp_lat.ravel(order='F')))
             dst_pts = zip(dst_lon[rr_id].ravel(order='F'),
