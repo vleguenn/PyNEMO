@@ -221,8 +221,8 @@ def go():
 
         DstCoord.lonlat[g]['lon'][DstCoord.lonlat[g]['lon'] > 180] -= 360
 
-    DstCoord.bdy_lonlat['z']['lon'] = DstCoord.bdy_lonlat['t']['lon'][bdy_r == 1]
-    DstCoord.bdy_lonlat['z']['lat'] = DstCoord.bdy_lonlat['t']['lat'][bdy_r == 1]
+    DstCoord.bdy_lonlat['z']['lon'] = DstCoord.bdy_lonlat['t']['lon'][bdy_r == 0]
+    DstCoord.bdy_lonlat['z']['lat'] = DstCoord.bdy_lonlat['t']['lat'][bdy_r == 0]
 
     logger.info( DstCoord.bdy_lonlat['t']['lon'].shape)
 
@@ -325,7 +325,8 @@ def go():
                  
                 ft = np.where(((time_counter >= time_num_start) & (time_counter <= time_num_end)))    
                 time_counter = time_counter[ft]
-                
+#                tmp_pre_data = copy.deepcopy(extract_t.d_bdy['vosaline'][year]['data'])
+#                np.savetxt("testt.txt", extract_t.d_bdy['vosaline'][year]['data'][:,0]) 
                 interpolate_data(extract_t,year,month,ft) # interpolate the data to daily period in a month
                 
                 if Setup.settings['ice']:
@@ -351,9 +352,9 @@ def go():
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'deptht',DstCoord.depths['t']['bdy_z']) 
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nav_lon',DstCoord.lonlat['t']['lon']) 
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nav_lat',DstCoord.lonlat['t']['lat']) 
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbidta',Grid_T.bdy_i[:,0])                                 
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbjdta',Grid_T.bdy_i[:,1])
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbrdta',Grid_T.bdy_r[:])
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbidta',Grid_T.bdy_i[:,0]+1)          #Added to match the index of matlab                       
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbjdta',Grid_T.bdy_i[:,1]+1)          #Added to match the index of matlab
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbrdta',Grid_T.bdy_r[:]+1)            #Added to match the index of matlab
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'time_counter',time_counter)
                 
                 SourceCoordLatLon = copy.deepcopy(SourceCoord)
@@ -371,9 +372,9 @@ def go():
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_bt, 'sossheig', extract_t.d_bdy['sossheig'][year]['data'])
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nav_lon',DstCoord.lonlat['t']['lon']) 
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nav_lat',DstCoord.lonlat['t']['lat']) 
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbidta',Grid_T.bdy_i[np.where(Grid_T.bdy_r==1),0])                                 
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbjdta',Grid_T.bdy_i[np.where(Grid_T.bdy_r==1),1])
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbrdta',Grid_T.bdy_r[np.where(Grid_T.bdy_r==1)])
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbidta',Grid_T.bdy_i[np.where(Grid_T.bdy_r==0),0])                                 
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbjdta',Grid_T.bdy_i[np.where(Grid_T.bdy_r==0),1])
+                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbrdta',Grid_T.bdy_r[np.where(Grid_T.bdy_r==0)])
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'time_counter',time_counter)                   
             #Eco
             
