@@ -50,7 +50,7 @@ class Extract:
         if self.g_type == 't':  # this should be removed as bdy_r needs to be defined for all grids
             bdy_r = copy.deepcopy(Grid.bdy_r)
         else:
-            bdy_r = Grid.bdy_r[Grid.bdy_r == 0]
+            bdy_r = copy.deepcopy(Grid.bdy_r[Grid.bdy_r == 0])
 
         self.fnames_2 = fnames_2 # second source times dict
         sc_time = Grid.source_time
