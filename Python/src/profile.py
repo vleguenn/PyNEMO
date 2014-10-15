@@ -341,6 +341,12 @@ def go():
                 
                 nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_t, num_bdy['t'], DstCoord.lonlat['t']['lon'].shape[1], DstCoord.lonlat['t']['lon'].shape[0], 
                                                    DstCoord.depths['t']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], Setup.settings['dst_calendar'],'T')
+                #Replace nan values with fillvalues
+                nanindex = np.isnan(extract_t.d_bdy['votemper'][year]['data'])
+                extract_t.d_bdy['votemper'][year]['data'][nanindex] = Setup.settings['fv']    
+                nanindex = np.isnan(extract_t.d_bdy['vosaline'][year]['data'])      
+                extract_t.d_bdy['vosaline'][year]['data'][nanindex] = Setup.settings['fv']
+                
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'votemper', extract_t.d_bdy['votemper'][year]['data'])
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'vosaline', extract_t.d_bdy['vosaline'][year]['data'])
                 if Setup.settings['ice']:
@@ -463,8 +469,9 @@ def interpolate_data(extract, Year, Month, Time_indexes):
             extract.d_bdy[variable_name][Year]['data'] = interp1fn(np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,0,0])-1+0.2,0.2)).transpose())))      #added 0.2 to include boundary
         tmp = np.squeeze(extract.d_bdy[variable_name][Year]['data'][Time_indexes,:,:]) 
         if len(tmp.shape) == 2:            
-            tmp = tmp.reshape(tmp.shape+(1L,))           
+            tmp = tmp.reshape(tmp.shape+(1L,))        
         extract.d_bdy[variable_name][Year]['data'] =  tmp.transpose(0,2,1)
+        
                   
 
 go()

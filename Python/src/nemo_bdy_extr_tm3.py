@@ -115,9 +115,14 @@ class Extract:
         twolegs = np.logical_and(two, legs)
 
         dejavu = np.logical_and(ivegot, twolegs)
-        dejavu = np.argwhere(dejavu.flatten(0) != 0)#.flatten(1)
+        dejavu = np.where(dejavu!=0)
+        dejavu_sorted_index = np.argsort(dejavu[1])
 
-        sub_j, sub_i = np.unravel_index(dejavu, SC.lon.shape)
+        sub_j  = dejavu[0][dejavu_sorted_index]
+        sub_i  = dejavu[1][dejavu_sorted_index]
+#        dejavu = np.argwhere(dejavu.flatten(0) != 0)#.flatten(1)
+
+#        sub_j, sub_i = np.unravel_index(dejavu.sort(axis=0), SC.lon.shape)
 
         # Find I/J range
         imin = np.maximum(np.amin(sub_i) - 2, 0)
@@ -221,7 +226,7 @@ class Extract:
         sc_ind['jmin'], sc_ind['jmax'] = jmin, jmax
 
         # Fig not implemented
-
+        #Sri TODO::: key_vec compare to assign gcos and gsin
         # Determine 1-2-1 filter indices
         id_121 = np.zeros((num_bdy, 3), dtype=np.int64)
         for r in range(int(np.amax(bdy_r))+1):
@@ -272,7 +277,7 @@ class Extract:
             
             # WORKAROUND: the tree query returns out of range val when
             # dst_dep point is NaN, causing ref problems later.
-            nn_id[nn_id == sc_z_len] = 0
+            nn_id[nn_id == sc_z_len] = sc_z_len-1
             sc_z[nn_id]
             # Find next adjacent point in the vertical
             z_ind[:,0] = nn_id
@@ -482,6 +487,10 @@ class Extract:
                 print 'SC ARRAY MIN MAX : ', np.nanmin(sc_array[0]), np.nanmax(sc_array[0])
                 sc_array[0][t_mask == 0] = np.NaN
                 print 'SC ARRAY MIN MAX : ', np.nanmin(sc_array[0]), np.nanmax(sc_array[0])
+                if not np.isnan(np.sum(meta_data[vn]['sf'])):
+                    sc_array[0] *= meta_data[vn]['sf']
+                if not np.isnan(np.sum(meta_data[vn]['os'])):
+                    sc_array += meta_data[vn]['os']
                 
                 if self.key_vec:
                     sc_array[1][t_mask == 0] = np.NaN
@@ -550,8 +559,7 @@ class Extract:
 
                 # Calculate guassian weighting with correlation dist
                 r0 = self.settings['r0']
-                dist_wei = (1 / np.power(r0 * (2 * np.pi), 0.5) * 
-                            np.exp(-0.5 * np.power(self.dist_tot / r0, 2)))
+                dist_wei = (1/(r0 * np.power(2 * np.pi, 0.5)))*(np.exp( -0.5 *np.power(self.dist_tot / r0, 2)))
                 # Calculate sum of weightings
                 dist_fac = np.sum(dist_wei * data_ind, 2)
                 # identify loc where all sc pts are land
