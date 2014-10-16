@@ -88,7 +88,7 @@ class Extract:
         SC.lat = SC.lat.squeeze()
         
         # Make function of grid resolution
-        fr = 0.2
+        fr = 0.1
 
         # infer key_vec
         if Grid_2 is not None:
@@ -244,11 +244,14 @@ class Extract:
             junk, an_id = source_tree.query(dst_pts, k=3, 
                                             distance_upper_bound=fr)    
             id_121[rr_id,:] = an_id
-            id_121[id_121 == len(dst_lon)] = 0
+#            id_121[id_121 == len(dst_lon)] = 0
 
-        
         reptile = np.tile(id_121[:,0], 3).reshape(id_121.shape, order='F')
-        id_121 = id_121 + reptile * (id_121 == 0)
+        tmp_reptile = reptile * (id_121 == len(dst_lon))
+        id_121[id_121 == len(dst_lon)] = 0
+        tmp_reptile[tmp_reptile == len(dst_lon)] = 0
+        id_121 = id_121+tmp_reptile
+#        id_121 = id_121 + reptile * (id_121 == len(dst_lon))
 
         rep_dims = (id_121.shape[0], id_121.shape[1], sc_z_len)
         # These tran/tiles work like matlab. Tested with same Data.
@@ -259,6 +262,7 @@ class Extract:
                                             order='F').transpose(2,0,1)
   
         id_121 = sub2ind((sc_z_len, num_bdy), id_121, reptile)
+
         tmp_filt = wei_121.repeat(num_bdy).reshape(num_bdy, len(wei_121), 
                                                    order='F')
         tmp_filt = tmp_filt.repeat(sc_z_len).reshape(num_bdy, len(wei_121),
