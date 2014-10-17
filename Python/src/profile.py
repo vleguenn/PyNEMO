@@ -363,38 +363,55 @@ def go():
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbrdta',Grid_T.bdy_r[:]+1)            #Added to match the index of matlab
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'time_counter',time_counter)
                 
-                SourceCoordLatLon = copy.deepcopy(SourceCoord)
-                SourceCoordLatLon.zt = np.zeros([1,1])
-                DstCoordLatLon = copy.deepcopy(DstCoord)
-                DstCoordLatLon.depths['t']['bdy_z'] = np.zeros([1,1])
-                Grid_T.grid_type = 'z'
-                extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoordLatLon,DstCoord, Grid_T,['sossheig'], years=year, months=month)
-                extract_t.extract_month(year,month)
-                interpolate_data(extract_t,year,month,ft) #interpolate the data to daily period in a month
-                output_filename_bt = Setup.settings['dst_dir']+Setup.settings['fn']+'_bt_bdyT_y'+str(year)+'m'+str(month)+'.nc'
-                logger.info('Outputting bt_T file: %s', output_filename_bt)
-                nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_bt, num_bdy['z'], DstCoord.lonlat['t']['lon'].shape[1],DstCoord.lonlat['t']['lon'].shape[0], 
-                                                   1, Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], Setup.settings['dst_calendar'],'Z')             
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt, 'sossheig', extract_t.d_bdy['sossheig'][year]['data'])
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nav_lon',DstCoord.lonlat['t']['lon']) 
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nav_lat',DstCoord.lonlat['t']['lat']) 
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbidta',Grid_T.bdy_i[np.where(Grid_T.bdy_r==0),0])                                 
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbjdta',Grid_T.bdy_i[np.where(Grid_T.bdy_r==0),1])
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbrdta',Grid_T.bdy_r[np.where(Grid_T.bdy_r==0)])
-                nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'time_counter',time_counter)                   
+                #bt
+                extract_write_bt_data(Setup,SourceCoord,DstCoord,Grid_T,year,month,ft,num_bdy,time_counter,unit_origin,logger)  
             #Eco
             
             #U, V
             if Setup.settings['dyn2d'] or Setup.settings['dyn3d'] :
+                class Grid_2(object):pass
+                Grid_U2 = Grid_2()
+                Grid_U2.grid_type = 'u'    
+                Grid_U2.bdy_i = Grid_U.bdy_i
+                Grid_U2.maxI = DstCoord.lonlat['t']['lon'].shape[1]
+                Grid_U2.maxJ = DstCoord.lonlat['t']['lon'].shape[0]    
+                Grid_U2.fname_2 = Grid_V.source_time
                 #---------------------------------------------U----------------------------------------------------------
-                extract_write_u_data(Setup,SourceCoord,DstCoord,Grid_U,year,month,ft,num_bdy,time_counter,unit_origin,logger)                
+                extract_write_u_data(Setup,SourceCoord,DstCoord,Grid_U,Grid_U2,year,month,ft,num_bdy,time_counter,unit_origin,logger)                
                 #----------------------------------------------V--------------------------------               
-                extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,year,month,ft,num_bdy,time_counter,unit_origin,logger)                 
+                Grid_V2 = Grid_2()
+                Grid_V2.grid_type = 'v'    
+                Grid_V2.bdy_i = Grid_V.bdy_i
+                Grid_V2.maxI = DstCoord.lonlat['t']['lon'].shape[1]
+                Grid_V2.maxJ = DstCoord.lonlat['t']['lon'].shape[0]    
+                Grid_V2.fname_2 = Grid_U.source_time
+                extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,Grid_V2,year,month,ft,num_bdy,time_counter,unit_origin,logger)                 
                 
-            
-def extract_write_u_data(Setup,SourceCoord,DstCoord,Grid_U,year,month,ft,num_bdy,time_counter,unit_origin,logger):
+       
+def extract_write_bt_data(Setup,SourceCoord,DstCoord,Grid_T,year, month, ft, num_bdy,time_counter,unit_origin,logger):
+    SourceCoordLatLon = copy.deepcopy(SourceCoord)
+    SourceCoordLatLon.zt = np.zeros([1,1])
+    DstCoordLatLon = copy.deepcopy(DstCoord)
+    DstCoordLatLon.depths['t']['bdy_z'] = np.zeros([1,1])
+    Grid_T.grid_type = 'z'
+    extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoordLatLon,DstCoord, Grid_T,['sossheig'], years=year, months=month)
+    extract_t.extract_month(year,month)
+    interpolate_data(extract_t,year,month,ft) #interpolate the data to daily period in a month
+    output_filename_bt = Setup.settings['dst_dir']+Setup.settings['fn']+'_bt_bdyT_y'+str(year)+'m'+str(month)+'.nc'
+    logger.info('Outputting bt_T file: %s', output_filename_bt)
+    nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_bt, num_bdy['z'], DstCoord.lonlat['t']['lon'].shape[1],DstCoord.lonlat['t']['lon'].shape[0], 
+                                       1, Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], Setup.settings['dst_calendar'],'Z')             
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_bt, 'sossheig', extract_t.d_bdy['sossheig'][year]['data'])
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nav_lon',DstCoord.lonlat['t']['lon']) 
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nav_lat',DstCoord.lonlat['t']['lat']) 
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbidta',Grid_T.bdy_i[np.where(Grid_T.bdy_r==0),0]+1)                                 
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbjdta',Grid_T.bdy_i[np.where(Grid_T.bdy_r==0),1]+1)
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'nbrdta',Grid_T.bdy_r[np.where(Grid_T.bdy_r==0)]+1)
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_bt,'time_counter',time_counter) 
+                
+def extract_write_u_data(Setup,SourceCoord,DstCoord,Grid_U,Grid_U2,year,month,ft,num_bdy,time_counter,unit_origin,logger):
     #---------------------------------------------U----------------------------------
-    extract_u = nemo_bdy_extr_tm3.Extract(Setup.settings, SourceCoord, DstCoord, Grid_U, ['vozocrtx'],
+    extract_u = nemo_bdy_extr_tm3.Extract(Setup.settings, SourceCoord, DstCoord, Grid_U, ['vozocrtx','vomecrty'],Grid_2=Grid_U2,
                              years=year, months=month)
     extract_u.extract_month(year, month)
     interpolate_data(extract_u, year, month, ft)
@@ -416,14 +433,14 @@ def extract_write_u_data(Setup,SourceCoord,DstCoord,Grid_U,year,month,ft,num_bdy
     nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'vobtcrtx', tmp_vobtcrtx)               
     nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'nav_lon', DstCoord.lonlat['u']['lon'])
     nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'nav_lat', DstCoord.lonlat['u']['lat'])
-    nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'nbidta', Grid_U.bdy_i[:, 0])                
-    nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'nbjdta', Grid_U.bdy_i[:, 1])                
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'nbidta', Grid_U.bdy_i[:, 0]+1)                
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'nbjdta', Grid_U.bdy_i[:, 1]+1)                
     nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'nbrdta', np.ones([1, num_bdy['u']]))
     nemo_bdy_ncpop.WriteDataToFile(output_filename_u, 'time_counter', time_counter)                
     #-------------------------------------------End U-------------------------------    
     
-def extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,year,month,ft,num_bdy,time_counter,unit_origin,logger):
-    extract_v = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_V,['vomecrty'],
+def extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,Grid_V2,year,month,ft,num_bdy,time_counter,unit_origin,logger):
+    extract_v = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_V,['vomecrty','vozocrtx'],Grid_2=Grid_V2,
                              years=year,months=month)
     extract_v.extract_month(year,month)
     interpolate_data(extract_v, year,month,ft)
@@ -446,8 +463,8 @@ def extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,year,month,ft,num_bdy
                                                   
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nav_lon',DstCoord.lonlat['v']['lon'])
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nav_lat',DstCoord.lonlat['v']['lat'])
-    nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbidta',Grid_V.bdy_i[:,0])                
-    nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbjdta',Grid_V.bdy_i[:,1])                
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbidta',Grid_V.bdy_i[:,0]+1)                
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbjdta',Grid_V.bdy_i[:,1]+1)                
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbrdta',np.ones([1,num_bdy['v']]))
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'time_counter',time_counter)   
                     

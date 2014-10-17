@@ -113,6 +113,10 @@ class GridAngle:
         d = self.DIM_STR
         i, ii = self.IMIN + i, self.IMAX + i
         j, jj = self.JMIN + j, self.JMAX + j
+        if j < 0:
+            jj -= j
+            j = 0
+             
         if map:
             case = self.M_T
         else:

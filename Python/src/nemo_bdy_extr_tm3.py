@@ -35,6 +35,7 @@ import nemo_bdy_grid_angle
 from nemo_bdy_lib import sub2ind
 
 import copy # DEBUG ONLY- allows multiple runs without corruption
+import logging
 
 class Extract:
 
@@ -43,6 +44,7 @@ class Extract:
     def __init__(self, setup, SourceCoord, DstCoord, Grid, var_nam, 
                  Grid_2=None, fnames_2=None, years=[1979], months=[11]):
 
+        self.logger = logging.getLogger(__name__)
         self.g_type = Grid.grid_type
         self.settings = setup
         SC = copy.deepcopy(SourceCoord)
@@ -61,6 +63,9 @@ class Extract:
         # We can infer rot_str and rot_dir
         if Grid_2:
             bdy_vel = Grid_2.bdy_i
+            maxJ = Grid_2.maxJ
+            maxI = Grid_2.maxI
+            self.fnames_2 = Grid_2.fname_2
             self.rot_str = Grid_2.grid_type
             if self.rot_str == 'u':
                 self.rot_dir = 'i'
@@ -100,6 +105,8 @@ class Extract:
         self.nvar = len(self.var_nam)
         if self.key_vec:
             self.nvar = self.nvar / 2 
+            if self.nvar != 1:
+                self.logger.error('Code not written yet to handle more than one pair of rotated vectors')
  
         print 'nvar: ', self.nvar
         print 'key vec: ', self.key_vec
@@ -137,15 +144,17 @@ class Extract:
 
         # Init of gsin* and gcos* at first call for rotation of vectors
         if self.key_vec:
+            dst_gcos = np.ones([maxJ, maxI])
+            dst_gsin = np.zeros([maxJ,maxI])
             T_GridAngles = nemo_bdy_grid_angle.GridAngle(
                        self.settings['src_hgr'], imin, imax, jmin, jmax, 't')
             RotStr_GridAngles = nemo_bdy_grid_angle.GridAngle(
-                         self.settings['dst_hgr'], 0, imax, 0, jmax, self.rot_str)
+                         self.settings['dst_hgr'], 1, maxI, 1, maxJ, self.rot_str)
             
             self.gcos = T_GridAngles.cosval
             self.gsin = T_GridAngles.sinval
-            dst_gcos = RotStr_GridAngles.cosval
-            dst_gsin = RotStr_GridAngles.sinval
+            dst_gcos[1:,1:] = RotStr_GridAngles.cosval
+            dst_gsin[1:,1:] = RotStr_GridAngles.sinval
             
             # BEWARE THE ETERNAL FORTRAN C CONFLICT
             dst_gcos = np.tile(np.array([dst_gcos]), (sc_z_len, 1, 1))
@@ -719,10 +728,13 @@ class Extract:
 
     def _get_meta_data(self, fname, var, source_dic):
         nc = Dataset(fname, 'r')
-        source_att = nc.variables[var].ncattrs()
+        try:
+            source_att = nc.variables[var].ncattrs()
+        except KeyError:
+            return
 
+        varid = nc.variables[var]
         for i in range(len(source_att)):
-            varid = nc.variables[var]
             if source_att[i] == 'missing_value':
                 source_dic['mv'] = varid.missing_value[:]
             elif source_att[i] == 'scale_factor':
