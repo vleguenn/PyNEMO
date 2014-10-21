@@ -363,7 +363,7 @@ class Extract:
    # # # # # # # # #    
 
     def extract_month(self, year, month):
-        print '\n extract_month function called \n'
+        self.logger.info('extract_month function called')
         # Check year entry exists in d_bdy, if not create it.
         for v in range(self.nvar):
             try:
@@ -503,7 +503,7 @@ class Extract:
                 if not np.isnan(np.sum(meta_data[vn]['sf'])):
                     sc_array[0] *= meta_data[vn]['sf']
                 if not np.isnan(np.sum(meta_data[vn]['os'])):
-                    sc_array += meta_data[vn]['os']
+                    sc_array[0] += meta_data[vn]['os']
                 
                 if self.key_vec:
                     sc_array[1][t_mask == 0] = np.NaN
@@ -690,7 +690,7 @@ class Extract:
             x,y = pxin, pyin
         elif cd_todo.lower() in ['en to j', 'ij to n']:
             print 'en to j or ij to n'
-            x,y = pyin, pxin
+            x,y = pyin, pxin*-1
         else:
             raise SyntaxError('rot_rep cd_todo %s is invalid' %cd_todo)
         # cd_type = superfluous?
@@ -734,6 +734,8 @@ class Extract:
             return
 
         varid = nc.variables[var]
+        source_dic['sf'] = 1
+        source_dic['os'] = 0
         for i in range(len(source_att)):
             if source_att[i] == 'missing_value':
                 source_dic['mv'] = varid.missing_value[:]

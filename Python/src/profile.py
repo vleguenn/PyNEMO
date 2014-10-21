@@ -384,8 +384,13 @@ def go():
                 Grid_V2.bdy_i = Grid_V.bdy_i
                 Grid_V2.maxI = DstCoord.lonlat['t']['lon'].shape[1]
                 Grid_V2.maxJ = DstCoord.lonlat['t']['lon'].shape[0]    
-                Grid_V2.fname_2 = Grid_U.source_time
-                extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,Grid_V2,year,month,ft,num_bdy,time_counter,unit_origin,logger)                 
+                Grid_V2.fname_2 = Grid_V.source_time   
+                Grid_UV = Grid_2()
+                Grid_UV.bdy_i = Grid_V.bdy_i
+                Grid_UV.grid_type = 'v'
+                Grid_UV.bdy_r = Grid_V.bdy_r
+                Grid_UV.source_time = Grid_U.source_time        
+                extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_UV,Grid_V2,year,month,ft,num_bdy,time_counter,unit_origin,logger)                 
                 
        
 def extract_write_bt_data(Setup,SourceCoord,DstCoord,Grid_T,year, month, ft, num_bdy,time_counter,unit_origin,logger):
@@ -440,19 +445,19 @@ def extract_write_u_data(Setup,SourceCoord,DstCoord,Grid_U,Grid_U2,year,month,ft
     #-------------------------------------------End U-------------------------------    
     
 def extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,Grid_V2,year,month,ft,num_bdy,time_counter,unit_origin,logger):
-    extract_v = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_V,['vomecrty','vozocrtx'],Grid_2=Grid_V2,
+    extract_v = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_V,['vozocrtx','vomecrty'],Grid_2=Grid_V2,
                              years=year,months=month)
     extract_v.extract_month(year,month)
     interpolate_data(extract_v, year,month,ft)
-    nanindex = np.isnan(extract_v.d_bdy['vomecrty'][year]['data'])
-    tmp_vozocrty = extract_v.d_bdy['vomecrty'][year]['data']
+    nanindex = np.isnan(extract_v.d_bdy['vozocrtx'][year]['data'])
+    tmp_vozocrty = extract_v.d_bdy['vozocrtx'][year]['data']
     tmp_vozocrty[nanindex] = Setup.settings['fv']
                     
     output_filename_v = Setup.settings['dst_dir']+Setup.settings['fn']+'_bdyV_y'+str(year)+'m'+str(month)+'.nc'
     logger.info('Outputting V file: %s', output_filename_v)
     nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_v, num_bdy['v'], DstCoord.lonlat['v']['lon'].shape[1], DstCoord.lonlat['v']['lon'].shape[0], 
                                        DstCoord.depths['v']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'],Setup.settings['dst_calendar'], 'V')
-    nemo_bdy_ncpop.WriteDataToFile(output_filename_v, 'vomecrty', extract_v.d_bdy['vomecrty'][year]['data'])
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_v, 'vomecrty', extract_v.d_bdy['vozocrtx'][year]['data'])
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'depthv',DstCoord.depths['v']['bdy_z']) 
     tmp_vozocrty[nanindex] = float('NaN')
     #ft size has some problem
@@ -461,8 +466,8 @@ def extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,Grid_V2,year,month,ft
     tmp_vobtcrty[np.isnan(tmp_vobtcrty)] = Setup.settings['fv']
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'vobtcrty',tmp_vobtcrty) 
                                                   
-    nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nav_lon',DstCoord.lonlat['v']['lon'])
-    nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nav_lat',DstCoord.lonlat['v']['lat'])
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nav_lon',DstCoord.lonlat['u']['lon'])
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nav_lat',DstCoord.lonlat['u']['lat'])
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbidta',Grid_V.bdy_i[:,0]+1)                
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbjdta',Grid_V.bdy_i[:,1]+1)                
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbrdta',np.ones([1,num_bdy['v']]))

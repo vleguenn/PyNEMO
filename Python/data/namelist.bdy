@@ -81,7 +81,7 @@
 !  Additional parameters
 !-----------------------------------------------------------------------
     nn_wei  = 1                   !  smoothing filter weights 
-    rn_r0   = 0.0417              !  decorrelation distance use in gauss
+    rn_r0   = 0.041666666         !  decorrelation distance use in gauss
                                   !  smoothing onto dst points. Need to 
                                   !  make this a funct. of dlon
     sn_history  = 'EB bdy files produced by jofa from ORCA0083-N001 for testing'
