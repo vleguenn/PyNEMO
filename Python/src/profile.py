@@ -96,6 +96,8 @@ def go():
     start = clock()
     if ice:
         Grid_ice = nemo_bdy_ice.BoundaryIce()
+        Grid_ice.grid_type= 't'
+        Grid_ice.bdy_r = Grid_T.bdy_r
 
     
 
@@ -325,22 +327,16 @@ def go():
                  
                 ft = np.where(((time_counter >= time_num_start) & (time_counter <= time_num_end)))    
                 time_counter = time_counter[ft]
-#                tmp_pre_data = copy.deepcopy(extract_t.d_bdy['vosaline'][year]['data'])
-#                np.savetxt("testt.txt", extract_t.d_bdy['vosaline'][year]['data'][:,0]) 
-                interpolate_data(extract_t,year,month,ft) # interpolate the data to daily period in a month
-                
-                if Setup.settings['ice']:
-                    extract_ice = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_ice,['iicethic','ileadfra','isnowthi'],
-                                                          years=year,months=month)
-                    extract_ice.extract_month(year,month)
-                    interpolate_data(extract_ice, year, month,ft) #interpolate the data to daily period in a month
-                                                                   
+
+                interpolate_data(extract_t,year,month,ft) # interpolate the data to daily period in a month                                                              
                         
                 output_filename_t = Setup.settings['dst_dir']+Setup.settings['fn']+'_bdyT_y'+str(year)+'m'+str(month)+'.nc'
                 logger.info('Outputing T file:%s', output_filename_t)
-                
+                grid_id = 'T'
+                if Setup.settings['ice']:
+                    grid_id = 'I'
                 nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_t, num_bdy['t'], DstCoord.lonlat['t']['lon'].shape[1], DstCoord.lonlat['t']['lon'].shape[0], 
-                                                   DstCoord.depths['t']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], Setup.settings['dst_calendar'],'T')
+                                                   DstCoord.depths['t']['bdy_z'].shape[0], Setup.settings['rimwidth'], Setup.settings['dst_metainfo'], unit_origin, Setup.settings['fv'], Setup.settings['dst_calendar'],grid_id)
                 #Replace nan values with fillvalues
                 nanindex = np.isnan(extract_t.d_bdy['votemper'][year]['data'])
                 extract_t.d_bdy['votemper'][year]['data'][nanindex] = Setup.settings['fv']    
@@ -349,10 +345,6 @@ def go():
                 
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'votemper', extract_t.d_bdy['votemper'][year]['data'])
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'vosaline', extract_t.d_bdy['vosaline'][year]['data'])
-                if Setup.settings['ice']:
-                    nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'iicethic', extract_ice.d_bdy['iicethic'][year]['data'])
-                    nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'ileadfra', extract_ice.d_bdy['ileadfra'][year]['data'])
-                    nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'isnowthi', extract_ice.d_bdy['isnowthi'][year]['data'])
                     
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'bdy_msk',DstCoord.bdy_msk) 
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'deptht',DstCoord.depths['t']['bdy_z']) 
@@ -362,7 +354,9 @@ def go():
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbjdta',Grid_T.bdy_i[:,1]+1)          #Added to match the index of matlab
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'nbrdta',Grid_T.bdy_r[:]+1)            #Added to match the index of matlab
                 nemo_bdy_ncpop.WriteDataToFile(output_filename_t,'time_counter',time_counter)
-                
+ 
+                if Setup.settings['ice']:
+                    extract_write_ice_data(Setup, SourceCoord, DstCoord, Grid_ice, year, month, ft, num_bdy, time_counter, unit_origin, logger)               
                 #bt
                 extract_write_bt_data(Setup,SourceCoord,DstCoord,Grid_T,year,month,ft,num_bdy,time_counter,unit_origin,logger)  
             #Eco
@@ -392,7 +386,24 @@ def go():
                 Grid_UV.source_time = Grid_U.source_time        
                 extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_UV,Grid_V2,year,month,ft,num_bdy,time_counter,unit_origin,logger)                 
                 
-       
+def extract_write_ice_data(Setup,SourceCoord,DstCoord,Grid_ice,year, month, ft, num_bdy,time_counter,unit_origin,logger):
+    
+    SourceCoordLatLon = copy.deepcopy(SourceCoord)
+    SourceCoordLatLon.zt = np.zeros([1,1])
+    DstCoordLatLon = copy.deepcopy(DstCoord)
+    DstCoordLatLon.depths['t']['bdy_z'] = np.zeros([1,1])   
+    extract_ice = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoordLatLon,DstCoordLatLon,Grid_ice,['iicethic','ileadfra','isnowthi'],
+                                             years=year,months=month)
+    extract_ice.extract_month(year,month)
+    interpolate_data(extract_ice, year, month,ft) #interpolate the data to daily period in a month
+                        
+    output_filename_t = Setup.settings['dst_dir']+Setup.settings['fn']+'_bdyT_y'+str(year)+'m'+str(month)+'.nc'
+    logger.info('Outputing ICE values to T file:%s', output_filename_t)                        
+
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'iicethic', extract_ice.d_bdy['iicethic'][year]['data'])
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'ileadfra', extract_ice.d_bdy['ileadfra'][year]['data'])
+    nemo_bdy_ncpop.WriteDataToFile(output_filename_t, 'isnowthi', extract_ice.d_bdy['isnowthi'][year]['data'])
+                               
 def extract_write_bt_data(Setup,SourceCoord,DstCoord,Grid_T,year, month, ft, num_bdy,time_counter,unit_origin,logger):
     SourceCoordLatLon = copy.deepcopy(SourceCoord)
     SourceCoordLatLon.zt = np.zeros([1,1])
@@ -447,8 +458,8 @@ def extract_write_u_data(Setup,SourceCoord,DstCoord,Grid_U,Grid_U2,year,month,ft
 def extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,Grid_V2,year,month,ft,num_bdy,time_counter,unit_origin,logger):
     extract_v = nemo_bdy_extr_tm3.Extract(Setup.settings,SourceCoord,DstCoord,Grid_V,['vozocrtx','vomecrty'],Grid_2=Grid_V2,
                              years=year,months=month)
-    extract_v.extract_month(year,month)
-    interpolate_data(extract_v, year,month,ft)
+    extract_v.extract_month(year,month) #return values in vozocrtx instead of vomecrty
+    interpolate_data(extract_v, year,month,ft)  
     nanindex = np.isnan(extract_v.d_bdy['vozocrtx'][year]['data'])
     tmp_vozocrty = extract_v.d_bdy['vozocrtx'][year]['data']
     tmp_vozocrty[nanindex] = Setup.settings['fv']

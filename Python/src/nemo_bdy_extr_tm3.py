@@ -82,6 +82,8 @@ class Extract:
         except KeyError:
             dst_dep = np.zeros([1])
         self.isslab = len(dst_dep) == 1
+        if dst_dep.size == len(dst_dep):
+            dst_dep = np.ones([1,len(dst_lon)])
 
         # ??? Should this be read from settings?
         wei_121 = np.array([0.5, 0.25, 0.25])
@@ -172,10 +174,8 @@ class Extract:
 
 
         # Determine size of source data subset  
-        if not self.isslab:  
-            dst_len_z = len(dst_dep[:,0])
-        else:
-            dst_len_z = 0
+        dst_len_z = len(dst_dep[:,0])
+
         source_dims = SC.lon.shape
 
         # Find nearest neighbour on the source grid to each dst bdy point
