@@ -12,7 +12,7 @@ setup(
       
       version='0.1',
       
-      description = 'A Python NEMO Project',
+      description = 'NEMO Regional Configuration Toolbox',
       long_description = long_description,
       
       #The projectt's main homepage
