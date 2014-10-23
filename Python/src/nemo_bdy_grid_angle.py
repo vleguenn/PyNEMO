@@ -14,6 +14,7 @@
 
 import numpy as np
 from netCDF4 import Dataset
+import logging
 
 class GridAngle:
     
@@ -25,11 +26,12 @@ class GridAngle:
     def __init__(self, coord_fname, imin, imax, jmin, jmax, cd_type):
         # set case and check validity
         self.CD_T = cd_type.lower()
+        self.logger = logging.getLogger(__name__)
         if self.CD_T not in ['t', 'u', 'v', 'f']:
             raise ValueError('Unknown grid type %s' %cd_type)
         self.M_T = self.MAP[self.CD_T]
         
-        print 'Grid Angle: ', self.CD_T
+        self.logger.debug( 'Grid Angle: ', self.CD_T)
 
         # open coord file 
         self.nc = Dataset(coord_fname, 'r')

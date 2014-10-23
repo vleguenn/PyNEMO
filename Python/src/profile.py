@@ -162,7 +162,7 @@ def go():
     zk = zp.keys()
     logger.info( zk)
     for zk in zp:
-        print zk, ' is ', zp[zk].shape, ' and a ', np.sum(zp[zk][:]), ' max: ', np.amax(zp[zk][:10,:2], axis=0)
+        logger.info( '%s  is %s and a %s  max: %s', zk, zp[zk].shape, np.sum(zp[zk][:]),np.amax(zp[zk][:10,:2], axis=0))
         
     # FIX? Consider renaming to bdy_depths
     
@@ -235,7 +235,7 @@ def go():
      #################
     ## Set Constants ##
      #################
-    print 'src time'
+    logger.debug('src time')
     start = clock()
     # Create a Time handler object
     SourceTime = source_time.SourceTime(settings['src_dir'])
@@ -251,7 +251,7 @@ def go():
     if ice:
         Grid_ice.source_time = SourceTime.get_source_time('i', acc)
 
-    print clock() - start
+    logger.debug( clock() - start )
     """
     # List source filenames
     
@@ -357,12 +357,13 @@ def go():
  
                 if Setup.settings['ice']:
                     extract_write_ice_data(Setup, SourceCoord, DstCoord, Grid_ice, year, month, ft, num_bdy, time_counter, unit_origin, logger)               
-                #bt
+                #-------------------------bt---------------------------------------------------------------------------
                 extract_write_bt_data(Setup,SourceCoord,DstCoord,Grid_T,year,month,ft,num_bdy,time_counter,unit_origin,logger)  
             #Eco
             
             #U, V
             if Setup.settings['dyn2d'] or Setup.settings['dyn3d'] :
+                #---------------------------------------------U----------------------------------------------------------                
                 class Grid_2(object):pass
                 Grid_U2 = Grid_2()
                 Grid_U2.grid_type = 'u'    
@@ -370,7 +371,6 @@ def go():
                 Grid_U2.maxI = DstCoord.lonlat['t']['lon'].shape[1]
                 Grid_U2.maxJ = DstCoord.lonlat['t']['lon'].shape[0]    
                 Grid_U2.fname_2 = Grid_V.source_time
-                #---------------------------------------------U----------------------------------------------------------
                 extract_write_u_data(Setup,SourceCoord,DstCoord,Grid_U,Grid_U2,year,month,ft,num_bdy,time_counter,unit_origin,logger)                
                 #----------------------------------------------V--------------------------------               
                 Grid_V2 = Grid_2()

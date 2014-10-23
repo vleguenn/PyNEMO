@@ -10,12 +10,13 @@
 from os import listdir
 
 from netCDF4 import Dataset, netcdftime
+import logging
 
 class SourceTime:
 
     def __init__(self, src_dir):
         self.src_dir = src_dir
-
+        self.logger = logging.getLogger(__name__)
     # returns a list of all the relevant netcdf files
     def _get_dir_list(self, grid):
         fend = 'd05%s.nc' %grid.upper()
@@ -39,7 +40,7 @@ class SourceTime:
         dir_list = self._get_dir_list(grid)
         src_time = []
         for f in range(len(dir_list)):
-            print 'get_source_time: ', dir_list[f]
+            self.logger.debug('get_source_time: %s', dir_list[f])
             nc = Dataset(dir_list[f], 'r')
             varid = nc.variables['time_counter']
             f_time = {}

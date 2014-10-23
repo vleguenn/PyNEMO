@@ -16,14 +16,16 @@ and settings dictionary
 
 from netCDF4 import Dataset
 import numpy as np
+import logging
 
 from nemo_bdy_lib import sub2ind
 
 # Query name
 class Depth:
 
-    def __init__(self, bdy_t, bdy_u, bdy_v, settings): 
-        print 'init Depth'
+    def __init__(self, bdy_t, bdy_u, bdy_v, settings):
+        self.logger = logging.getLogger(__name__) 
+        self.logger.debug( 'init Depth' )
         hc = settings['hc'] 
         nc = Dataset(settings['dst_zgr'], 'r')
         mbathy = nc.variables['mbathy'][:,:,:].squeeze()
@@ -66,7 +68,7 @@ class Depth:
         v_ind2 = sub2ind(mbathy.shape, bdy_v[:,0], bdy_v[:,1] + 1) 
    
         # This is very slow
-        print 'starting nc reads loop'
+        self.logger.debug( 'starting nc reads loop' )
         for k in range(nz):
             if settings['sco']:
                 # sigma coeffs at t-point (1->0 indexed)
@@ -107,7 +109,7 @@ class Depth:
             for p in self.zpoints.keys():
                 self.zpoints[p] = self.zpoints[p].reshape(zshapes[p])
             
-        print 'Done loop, zpoints: ', self.zpoints['t'].shape
+        self.logger.debug( 'Done loop, zpoints: %s ', self.zpoints['t'].shape)
                                 
 
         nc.close()

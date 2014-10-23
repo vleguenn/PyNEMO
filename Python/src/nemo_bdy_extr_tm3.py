@@ -110,8 +110,8 @@ class Extract:
             if self.nvar != 1:
                 self.logger.error('Code not written yet to handle more than one pair of rotated vectors')
  
-        print 'nvar: ', self.nvar
-        print 'key vec: ', self.key_vec
+        self.logger.info( 'nvar: %s', self.nvar)
+        self.logger.info( 'key vec: %s', self.key_vec)
 
         # Find subset of source data set required to produce bdy points
 
@@ -139,7 +139,7 @@ class Extract:
         jmin = np.maximum(np.amin(sub_j) - 2, 0)
         jmax = np.minimum(np.amax(sub_j) + 2, len(SC.lon[:,0]) - 1) + 1
 
-        print ' \n imin: %d\n imax: %d\n jmin: %d\n jmax: %d\n' %(imin,imax,jmin,jmax)
+        self.logger.info(' \n imin: %d\n imax: %d\n jmin: %d\n jmax: %d\n',imin,imax,jmin,jmax)
         # SC.lon: big matrix from an nc, dst_lon - bdy_lon_t
         SC.lon = SC.lon[jmin:jmax, imin:imax]
         SC.lat = SC.lat[jmin:jmax, imin:imax]
@@ -238,8 +238,7 @@ class Extract:
         #Sri TODO::: key_vec compare to assign gcos and gsin
         # Determine 1-2-1 filter indices
         id_121 = np.zeros((num_bdy, 3), dtype=np.int64)
-        for r in range(int(np.amax(bdy_r))+1):
-            print r            
+        for r in range(int(np.amax(bdy_r))+1):         
             r_id = bdy_r != r
             rr_id = bdy_r == r
             tmp_lon = dst_lon.copy()
@@ -410,7 +409,7 @@ class Extract:
                 last_date = date
                 break
 
-        print 'first/last dates: ', first_date, last_date
+        self.logger.info('first/last dates: %s %s', first_date, last_date)
 
         if self.first:
             nc_3 = Dataset(self.settings['src_msk'], 'r')
@@ -447,7 +446,7 @@ class Extract:
         for f in range(first_date, last_date + 1):
             sc_array = [None, None]
             sc_alt_arr = [None, None]
-            print 'opening nc file: %s' %sc_time[f]['fname']
+            self.logger.info('opening nc file: %s', sc_time[f]['fname'])
             nc = Dataset(sc_time[f]['fname'], 'r')
             # If extracting vector quantities open second file
             if self.key_vec:
@@ -461,7 +460,7 @@ class Extract:
             # Loop over time entries from file f
             for vn in range(self.nvar):
                 # Extract sub-region of data
-                print 'var_nam = %s' %self.var_nam[vn]
+                self.logger.info('var_nam = %s',self.var_nam[vn])
                 varid = nc.variables[self.var_nam[vn]]
                 # If extracting vector quantities open second var
                 if self.key_vec:
@@ -469,7 +468,7 @@ class Extract:
 
                 # Extract 3D scalar variables
                 if not self.isslab and not self.key_vec:
-                    print ' 3D source array '
+                    self.logger.info(' 3D source array ')
                     sc_array[0] = varid[:1 , :sc_z_len, j_run, i_run]
                 # Extract 3D vector variables
                 elif self.key_vec:
@@ -479,7 +478,7 @@ class Extract:
                     sc_alt_arr[1] = varid_2[:1, :sc_z_len, extended_j, i_run]
                 # Extract 2D scalar vars
                 else:
-                    print ' 2D source array '
+                    self.logger.info(' 2D source array ')
                     sc_array[0] = varid[:1, j_run, i_run].reshape([1,1,j_run.size,i_run.size])
 
                 # Average vector vars onto T-grid
@@ -497,9 +496,9 @@ class Extract:
                 # Factor offset
                 # Note using isnan/sum is relatively fast, but less than 
                 # bottleneck external lib
-                print 'SC ARRAY MIN MAX : ', np.nanmin(sc_array[0]), np.nanmax(sc_array[0])
+                self.logger.info('SC ARRAY MIN MAX : %s %s', np.nanmin(sc_array[0]), np.nanmax(sc_array[0]))
                 sc_array[0][t_mask == 0] = np.NaN
-                print 'SC ARRAY MIN MAX : ', np.nanmin(sc_array[0]), np.nanmax(sc_array[0])
+                self.logger.info( 'SC ARRAY MIN MAX : %s %s', np.nanmin(sc_array[0]), np.nanmax(sc_array[0]))
                 if not np.isnan(np.sum(meta_data[vn]['sf'])):
                     sc_array[0] *= meta_data[vn]['sf']
                 if not np.isnan(np.sum(meta_data[vn]['os'])):
@@ -532,18 +531,18 @@ class Extract:
                                                 tmp_arr[0][ind[:]] * self.gsin)
                 
                 # End depths loop
-                print ' END DEPTHS LOOP '
+                self.logger.info(' END DEPTHS LOOP ')
             # End Looping over vars
-            print ' END VAR LOOP '
+            self.logger.info(' END VAR LOOP ')
             # ! Skip sc_bdy permutation
             
             x = sc_array[0]
             y = np.isnan(x)
             z = np.invert(np.isnan(x))
             x[y] = 0
-            print 'nans: ', np.sum(y[:])
+            self.logger.info('nans: %s', np.sum(y[:]))
             #x = x[np.invert(y)]
-            print x.shape, np.sum(x[z], dtype=np.float64), np.amin(x), np.amax(x)
+            self.logger.info('%s %s %s %s', x.shape, np.sum(x[z], dtype=np.float64), np.amin(x), np.amax(x))
 
             # Calculate weightings to be used in interpolation from
             # source data to dest bdy pts. Only need do once.
@@ -553,14 +552,14 @@ class Extract:
                 # dist_tot is currently 2D so extend along depth
                 # axis to allow single array calc later, also remove
                 # any invalid pts using our eldritch data_ind
-                print 'DIST TOT ZEROS BEFORE ', np.sum(self.dist_tot == 0)
+                self.logger.info('DIST TOT ZEROS BEFORE %s', np.sum(self.dist_tot == 0))
                 self.dist_tot = (np.repeat(self.dist_tot, sc_z_len).reshape(
                             self.dist_tot.shape[0], 
                             self.dist_tot.shape[1], sc_z_len)).transpose(2,0,1)
                 self.dist_tot *= data_ind
-                print 'DIST TOT ZEROS ', np.sum(self.dist_tot == 0)
+                self.logger.info('DIST TOT ZEROS %s', np.sum(self.dist_tot == 0))
                 
-                print 'DIST IND ZEROS ', np.sum(data_ind == 0)
+                self.logger.info('DIST IND ZEROS %s', np.sum(data_ind == 0))
 
                 # Identify problem pts due to grid discontinuities 
                 # using dists >  lat
@@ -577,7 +576,7 @@ class Extract:
                 dist_fac = np.sum(dist_wei * data_ind, 2)
                 # identify loc where all sc pts are land
                 nan_ind = np.sum(data_ind, 2) == 0
-                print 'NAN IND : ', np.sum(nan_ind)
+                self.logger.info('NAN IND : %s ', np.sum(nan_ind))
                 
                 # Calc max zlevel to which data available on sc grid
                 data_ind = np.sum(nan_ind == 0, 0) - 1
@@ -594,10 +593,10 @@ class Extract:
                 
             # weighted averaged onto new horizontal grid
             for vn in range(self.nvar):
-                print ' sc_bdy ', np.nanmin(sc_bdy), np.nanmax(sc_bdy)
+                self.logger.info(' sc_bdy %s %s', np.nanmin(sc_bdy), np.nanmax(sc_bdy))
                 dst_bdy = (np.nansum(sc_bdy[vn,:,:,:] * dist_wei, 2) / 
                            dist_fac)
-                print ' dst_bdy ', np.nanmin(dst_bdy), np.nanmax(dst_bdy)
+                self.logger.info(' dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                 # Quick check to see we have not got bad values
                 if np.sum(dst_bdy == np.inf) > 0:
                     raise RuntimeError('''Bad values found after 
@@ -607,12 +606,12 @@ class Extract:
                     # [:,:,:,vn+1]
                     dst_bdy_2 = (np.nansum(sc_bdy[vn+1,:,:,:] * dist_wei, 2) / 
                                  dist_fac)
-                    print 'time to to rot and rep '
-                    print np.nanmin(dst_bdy), np.nanmax(dst_bdy)
-                    print self.rot_str, 'en to %s' %self.rot_dir, dst_bdy.shape
+                    self.logger.info('time to to rot and rep ')
+                    self.logger.info('%s %s',  np.nanmin(dst_bdy), np.nanmax(dst_bdy))
+                    self.logger.info( '%s en to %s %s' , self.rot_str,self.rot_dir, dst_bdy.shape)
                     dst_bdy = self.rot_rep(dst_bdy, dst_bdy_2, self.rot_str,
                                       'en to %s' %self.rot_dir, self.dst_gcos, self.dst_gsin)
-                    print np.nanmin(dst_bdy), np.nanmax(dst_bdy)
+                    self.logger.info('%s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                 # Apply 1-2-1 filter along bdy pts using NN ind self.id_121
                 if self.first:
                     tmp_valid = np.invert(np.isnan(
@@ -625,12 +624,12 @@ class Extract:
                            tmp_valid, 2))
                 # Set land pts to zero
 
-                print ' pre dst_bdy[nan_ind] ', np.nanmin(dst_bdy), np.nanmax(dst_bdy)
+                self.logger.info(' pre dst_bdy[nan_ind] %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                 dst_bdy[nan_ind] = 0
-                print ' post dst_bdy ', np.nanmin(dst_bdy), np.nanmax(dst_bdy)
+                self.logger.info(' post dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                 # Remove any data on dst grid that is in land
                 dst_bdy[:,np.isnan(self.bdy_z)] = 0
-                print ' 3 dst_bdy ', np.nanmin(dst_bdy), np.nanmax(dst_bdy)
+                self.logger.info(' 3 dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
 
                 # If we have depth dimension
                 if not self.isslab:
@@ -686,10 +685,10 @@ class Extract:
     # THIS FUNCTION MAY BE BROKEN
     def rot_rep(self, pxin, pyin, cd_type, cd_todo, gcos, gsin):
         if cd_todo.lower() in ['en to i', 'ij to e']:
-            print 'en to i or ij to e'
+            self.logger.info('en to i or ij to e')
             x,y = pxin, pyin
         elif cd_todo.lower() in ['en to j', 'ij to n']:
-            print 'en to j or ij to n'
+            self.logger.info('en to j or ij to n')
             x,y = pyin, pxin*-1
         else:
             raise SyntaxError('rot_rep cd_todo %s is invalid' %cd_todo)

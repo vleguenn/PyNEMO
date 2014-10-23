@@ -16,6 +16,7 @@ from datetime import datetime
 
 from netCDF4 import Dataset
 import numpy as np
+import logging
 
 class Coord:
 
@@ -24,7 +25,8 @@ class Coord:
     # Init with nc fname and dictionary of bdy inds
     def __init__(self, fname, bdy_ind):
         self.bdy_ind = bdy_ind
-        print fname
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug( fname )
         if not fname:
             fname = 'F:/NEMO_bdy_tools/first/toreador.nc'
          
@@ -124,9 +126,9 @@ class Coord:
             for dim in vardic[ind]:
                 if nc is not None:
                     data = nc.variables['%s%s%s'%(unt, dim, ind)][:]
-                    print ind, self.bdy_ind[ind].bdy_i[:,1], data.shape, dim, unt, ind
+                    self.logger.debug('%s %s %s %s %s %s', ind, self.bdy_ind[ind].bdy_i[:,1], data.shape, dim, unt, ind)
                     data = data.squeeze()
-                    print ind, self.bdy_ind[ind].bdy_i[:,1], data.shape
+                    self.logger.debug('%s %s %s', ind, self.bdy_ind[ind].bdy_i[:,1], data.shape)
                     data = data[(self.bdy_ind[ind].bdy_i[:,1]),
                                 (self.bdy_ind[ind].bdy_i[:,0])]
                 elif len(vardic[ind]) == 1:
