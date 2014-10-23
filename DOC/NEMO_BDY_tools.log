@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.6.30)  15 SEP 2014 13:15
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.6.30)  23 OCT 2014 09:42
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -471,16 +471,47 @@ Package: natbib 2010/09/13 8.31b (PWD, AO)
 LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count127
 )
+Package minitoc Info: I0024
+(minitoc)             PREPARING MINITOCS FROM NEMO_BDY_tools.toc on input line 
+234.
+Package minitoc Info: I0033
+(minitoc)             Writing NEMO_BDY_tools.mtc1.
+\openout3 = `NEMO_BDY_tools.mtc1'.
 
-Package minitoc Warning: W0010
-(minitoc)                No file NEMO_BDY_tools.toc. 
-(minitoc)                MINITOCS NOT PREPARED on input line 234.
+Package minitoc Info: I0033
+(minitoc)             Writing NEMO_BDY_tools.mtc2.
+\openout3 = `NEMO_BDY_tools.mtc2'.
+
+Package minitoc Info: I0033
+(minitoc)             Writing NEMO_BDY_tools.mtc3.
+\openout3 = `NEMO_BDY_tools.mtc3'.
+
+Package minitoc Info: I0033
+(minitoc)             Writing NEMO_BDY_tools.mtc4.
+\openout3 = `NEMO_BDY_tools.mtc4'.
+
+Package minitoc Info: I0033
+(minitoc)             Writing NEMO_BDY_tools.mtc5.
+\openout3 = `NEMO_BDY_tools.mtc5'.
 
 \@indexfile=\write5
 \openout5 = `NEMO_BDY_tools.idx'.
 
+
 Writing index file NEMO_BDY_tools.idx
-No file NEMO_BDY_tools.aux.
+(./NEMO_BDY_tools.aux (./TexFiles/Chapters/Abstracts_Foreword.aux)
+(./TexFiles/Chapters/Introduction.aux) (./TexFiles/Chapters/Chap_qs.aux
+
+LaTeX Warning: Label `dom' multiply defined.
+
+
+LaTeX Warning: Label `nam' multiply defined.
+
+) (./TexFiles/Chapters/Chap_Setup.aux
+
+LaTeX Warning: Label `s_coord' multiply defined.
+
+) (./TexFiles/Chapters/Chap_examples.aux))
 \openout1 = `NEMO_BDY_tools.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 249.
@@ -498,6 +529,7 @@ LaTeX Font Info:    ... okay on input line 249.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 249.
 LaTeX Font Info:    ... okay on input line 249.
 LaTeX Font Info:    Try loading font information for OT1+ptm on input line 249.
+
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
@@ -560,6 +592,8 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 249.
 LaTeX Info: Redefining \pageref on input line 249.
 LaTeX Info: Redefining \nameref on input line 249.
+
+(./NEMO_BDY_tools.out) (./NEMO_BDY_tools.out)
 \@outlinefile=\write6
 \openout6 = `NEMO_BDY_tools.out'.
 
@@ -591,7 +625,7 @@ Package minitoc(hints) Warning: W0023
 (minitoc(hints))                --- It may be the consequence 
 (minitoc(hints))                of loading the ``hyperref'' package.
 
-<./TexFiles/Figures/NEMO_logo_Black.pdf, id=4, 823.075pt x 260.975pt>
+<./TexFiles/Figures/NEMO_logo_Black.pdf, id=91, 823.075pt x 260.975pt>
 File: ./TexFiles/Figures/NEMO_logo_Black.pdf Graphic file (type pdf)
 
 <use ./TexFiles/Figures/NEMO_logo_Black.pdf>
@@ -624,24 +658,27 @@ File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 {/usr/local/texlive/2012/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./TexFi
 les/Figures/NEMO_logo_Black.pdf>] [2
 
-]
+] (./NEMO_BDY_tools.toc
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 2.
+ [1
+
+])
 \tf@toc=\write7
 \openout7 = `NEMO_BDY_tools.toc'.
 
- [1
-
-] [2
-
-]
+ [2]
 \openout2 = `./TexFiles/Chapters/Abstracts_Foreword.aux'.
 
- (./TexFiles/Chapters/Abstracts_Foreword.texpdfTeX warning (ext4): destination 
-with the same identifier (name{page.1}) has been already used, duplicate ignore
-d
+
+(./TexFiles/Chapters/Abstracts_Foreword.texpdfTeX warning (ext4): destination w
+ith the same identifier (name{page.1}) has been already used, duplicate ignored
+
 <to be read again> 
                    \relax 
 l.47 \chapter
              *{Disclaimer} [1
+
 
 
 ]pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
@@ -665,8 +702,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 62--65
 
 ]
 Chapitre 1.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 23.
 [5]
 Underfull \hbox (badness 10000) in paragraph at lines 46--48
 
@@ -683,9 +718,9 @@ Underfull \hbox (badness 10000) in paragraph at lines 58--60
  []
 
 [6]) [7]
-\openout2 = `./TexFiles/Chapters/Chap_Setup.aux'.
+\openout2 = `./TexFiles/Chapters/Chap_qs.aux'.
 
- (./TexFiles/Chapters/Chap_Setup.tex
+ (./TexFiles/Chapters/Chap_qs.tex
 Overfull \hbox (52.24316pt too wide) in paragraph at lines 2--6
 []\OT1/ptm/m/n/10.95 ==========================================================
 ======
@@ -721,50 +756,120 @@ Overfull \hbox (35.24316pt too wide) in paragraph at lines 15--19
 
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
-File: ./TexFiles/Namelist/namgrd.nml  (verbatim)
-[9
+) [9
 
 ]
-File: ./TexFiles/Namelist/namvert.nml  (verbatim)
+\openout2 = `./TexFiles/Chapters/Chap_Setup.aux'.
+
+ (./TexFiles/Chapters/Chap_Setup.tex
+Overfull \hbox (52.24316pt too wide) in paragraph at lines 2--6
+[]\OT1/ptm/m/n/10.95 ==========================================================
+======
+ []
+
+
+Overfull \hbox (35.24316pt too wide) in paragraph at lines 2--6
+\OT1/ptm/m/n/10.95 ============================================================
+==== 
+ []
+
+[10
+
+
+]
+Chapitre 3.
+
+Underfull \hbox (badness 10000) in paragraph at lines 9--10
+
+ []
+
+
+Overfull \hbox (35.24316pt too wide) in paragraph at lines 15--19
+\OT1/ptm/m/n/10.95 ============================================================
+====
+ []
+
+
+Overfull \hbox (35.24316pt too wide) in paragraph at lines 15--19
+\OT1/ptm/m/n/10.95 ============================================================
+==== 
+ []
+
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 57.
-File: ./TexFiles/Namelist/namsco.nml  (verbatim)
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 33.
+[11
 
-
-LaTeX Warning: Reference `Fig_LBC_bdy_geom' on page 10 undefined on input line 
-84.
-
-
-Overfull \hbox (2.00946pt too wide) in paragraph at lines 88--106
+]
+Overfull \hbox (2.00946pt too wide) in paragraph at lines 54--72
 []\OT1/ptm/m/n/10.95 The boun-dary geo-me-try for each set may be de-fi-ned in 
 a na-me-list nambdy[]index
  []
 
-
-LaTeX Warning: Reference `Fig_LBC_nc_header' on page 10 undefined on input line
- 108.
-
-[10]
-<./TexFiles/Figures/Fig_LBC_bdy_geom.pdf, id=153, 675.74185pt x 304.40726pt>
+<./TexFiles/Figures/Fig_LBC_bdy_geom.pdf, id=263, 675.74185pt x 304.40726pt>
 File: ./TexFiles/Figures/Fig_LBC_bdy_geom.pdf Graphic file (type pdf)
 
 <use ./TexFiles/Figures/Fig_LBC_bdy_geom.pdf>
 Package pdftex.def Info: ./TexFiles/Figures/Fig_LBC_bdy_geom.pdf used on input 
-line 140.
+line 106.
 (pdftex.def)             Requested size: 360.0pt x 162.1758pt.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 142.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 108.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/sc' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/sc' tried instead on input line 142.
- [11 <./TexFiles/Figures/Fig_LBC_bdy_geom.pdf>]
-<./TexFiles/Figures/Fig_LBC_nc_header.pdf, id=170, 597.23125pt x 845.1575pt>
+(Font)              Font shape `OT1/ptm/b/sc' tried instead on input line 108.
+ [12 <./TexFiles/Figures/Fig_LBC_bdy_geom.pdf>]
+File: ./TexFiles/Namelist/namgrd.nml  (verbatim)
+File: ./TexFiles/Namelist/namvert.nml  (verbatim)
+File: ./TexFiles/Namelist/namsco.nml  (verbatim)
+
+No file ./TexFiles/Namelist/namextra.nml.
+[13]
+<./TexFiles/Figures/Fig_LBC_nc_header.pdf, id=281, 597.23125pt x 845.1575pt>
 File: ./TexFiles/Figures/Fig_LBC_nc_header.pdf Graphic file (type pdf)
 
 <use ./TexFiles/Figures/Fig_LBC_nc_header.pdf>
 Package pdftex.def Info: ./TexFiles/Figures/Fig_LBC_nc_header.pdf used on input
- line 193.
+ line 228.
 (pdftex.def)             Requested size: 360.0pt x 509.4455pt.
-) [12] [13 <./TexFiles/Figures/Fig_LBC_nc_header.pdf>]
+) [14] [15 <./TexFiles/Figures/Fig_LBC_nc_header.pdf>]
+\openout2 = `./TexFiles/Chapters/Chap_examples.aux'.
+
+ (./TexFiles/Chapters/Chap_examples.tex
+Overfull \hbox (52.24316pt too wide) in paragraph at lines 2--6
+[]\OT1/ptm/m/n/10.95 ==========================================================
+======
+ []
+
+
+Overfull \hbox (35.24316pt too wide) in paragraph at lines 2--6
+\OT1/ptm/m/n/10.95 ============================================================
+==== 
+ []
+
+[16
+
+
+]
+Chapitre 4.
+
+Underfull \hbox (badness 10000) in paragraph at lines 9--10
+
+ []
+
+
+Overfull \hbox (35.24316pt too wide) in paragraph at lines 15--19
+\OT1/ptm/m/n/10.95 ============================================================
+====
+ []
+
+
+Overfull \hbox (35.24316pt too wide) in paragraph at lines 15--19
+\OT1/ptm/m/n/10.95 ============================================================
+==== 
+ []
+
+) [17
+
+]
 No file NEMO_BDY_tools.ind.
 No file NEMO_BDY_tools.bbl.
 Package minitoc Info: I0009
@@ -797,40 +902,32 @@ Package minitoc(hints) Warning: W0024
 (minitoc(hints))                Some hints have been written 
 (minitoc(hints))                in the NEMO_BDY_tools.log file.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 299.
-[14
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 301.
+[18
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 299.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 301.
  (./NEMO_BDY_tools.aux (./TexFiles/Chapters/Abstracts_Foreword.aux)
-(./TexFiles/Chapters/Introduction.aux) (./TexFiles/Chapters/Chap_Setup.aux))
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 299.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 299.
+(./TexFiles/Chapters/Introduction.aux) (./TexFiles/Chapters/Chap_qs.aux)
+(./TexFiles/Chapters/Chap_Setup.aux) (./TexFiles/Chapters/Chap_examples.aux))
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 301.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 301.
+Package rerunfilecheck Info: File `NEMO_BDY_tools.out' has not changed.
+(rerunfilecheck)             Checksum: D0756933AE09991152B94F7919610C59;1308.
 
 
-Package rerunfilecheck Warning: File `NEMO_BDY_tools.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
+LaTeX Warning: There were multiply-defined labels.
 
-Package rerunfilecheck Info: Checksums for `NEMO_BDY_tools.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  AAD7856F1CEAC6491FDE34C4F0B9A76D;536.
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 299.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 301.
  ) 
 Here is how much of TeX's memory you used:
- 11217 strings out of 493488
- 162204 string characters out of 3141326
+ 11307 strings out of 493488
+ 163771 string characters out of 3141326
  293963 words of memory out of 3000000
- 14084 multiletter control sequences out of 15000+200000
+ 14121 multiletter control sequences out of 15000+200000
  35367 words of font info for 87 fonts, out of 3000000 for 9000
  957 hyphenation exceptions out of 8191
- 37i,11n,43p,282b,508s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 37i,12n,45p,282b,529s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
 xlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texl
@@ -839,10 +936,10 @@ ve/2012/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2012/
 texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2012/texmf-dist
 /fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/typ
 e1/urw/times/utmri8a.pfb>
-Output written on NEMO_BDY_tools.pdf (18 pages, 725537 bytes).
+Output written on NEMO_BDY_tools.pdf (22 pages, 732186 bytes).
 PDF statistics:
- 230 PDF objects out of 1000 (max. 8388607)
- 167 compressed objects within 2 object streams
- 51 named destinations out of 1000 (max. 500000)
- 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 355 PDF objects out of 1000 (max. 8388607)
+ 287 compressed objects within 3 object streams
+ 68 named destinations out of 1000 (max. 500000)
+ 192 words of extra memory for PDF output out of 10000 (max. 10000000)
 

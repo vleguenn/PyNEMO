@@ -1,9 +1,22 @@
 \BOOKMARK [0][]{chapter.1}{Introduction}{}% 1
-\BOOKMARK [0][]{chapter.2}{Overview of BDY Tools }{}% 2
+\BOOKMARK [0][]{chapter.2}{Quick Start Guide }{}% 2
 \BOOKMARK [1][]{section.2.1}{Overview}{chapter.2}% 3
-\BOOKMARK [1][]{section.2.2}{Grid Information}{chapter.2}% 4
-\BOOKMARK [1][]{section.2.3}{Vertical coordinate}{chapter.2}% 5
-\BOOKMARK [2][]{subsection.2.3.1}{S-coordinate}{section.2.3}% 6
-\BOOKMARK [2][]{subsection.2.3.2}{Boundary geometry}{section.2.3}% 7
-\BOOKMARK [2][]{subsection.2.3.3}{Input boundary data files}{section.2.3}% 8
-\BOOKMARK [0][]{figure.caption.8}{Index}{}% 9
+\BOOKMARK [1][]{section.2.2}{Setup}{chapter.2}% 4
+\BOOKMARK [1][]{section.2.3}{The Domain}{chapter.2}% 5
+\BOOKMARK [1][]{section.2.4}{Namelist}{chapter.2}% 6
+\BOOKMARK [1][]{section.2.5}{Output}{chapter.2}% 7
+\BOOKMARK [0][]{chapter.3}{Overview of BDY Tools }{}% 8
+\BOOKMARK [1][]{section.3.1}{Overview}{chapter.3}% 9
+\BOOKMARK [2][]{subsection.3.1.1}{Boundary geometry}{section.3.1}% 10
+\BOOKMARK [2][]{subsection.3.1.2}{Defining the regional domain}{section.3.1}% 11
+\BOOKMARK [1][]{section.3.2}{Grid Information}{chapter.3}% 12
+\BOOKMARK [1][]{section.3.3}{Vertical coordinate}{chapter.3}% 13
+\BOOKMARK [2][]{subsection.3.3.1}{S-coordinate}{section.3.3}% 14
+\BOOKMARK [2][]{subsection.3.3.2}{unstructured open boundaries options}{section.3.3}% 15
+\BOOKMARK [2][]{subsection.3.3.3}{Post Extraction}{section.3.3}% 16
+\BOOKMARK [2][]{subsection.3.3.4}{Input boundary data files}{section.3.3}% 17
+\BOOKMARK [2][]{subsection.3.3.5}{Debugging}{section.3.3}% 18
+\BOOKMARK [0][]{chapter.4}{Examples}{}% 19
+\BOOKMARK [1][]{section.4.1}{Simple box domain}{chapter.4}% 20
+\BOOKMARK [1][]{section.4.2}{AMM12}{chapter.4}% 21
+\BOOKMARK [0][]{section.4.2}{Index}{}% 22

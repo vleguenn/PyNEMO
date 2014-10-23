@@ -30,40 +30,6 @@ options, but those that exist at accessed through a NEMO style namelist that is 
 when the main python call is made. The following sections summarise the inputs 
 required to produce a set of BDY files to force a regional NEMO simulation.
 
-\section{Grid Information}
-\label{s_coord}
-%--------------------------------------------namvert-------------------------------------------------------
-\namdisplay{./TexFiles/Namelist/namgrd.nml} 
-%--------------------------------------------------------------------------------------------------------------
-
-There is no clean way given a coordinates.nc file and bathymetry.nc file to generate the grid information
-from the proposed regional simulation, without replicating a lot of the domzgr.F90  code. At this early stage
-in writing BDY tools it was deamed cleaner and safer if this information is required as input. This is easily 
-achieved by running the proposed regional simulation for a single timestep with \np{nn\_msh} set to 3 in the 
-\NEMO namelist file. This will output 3 files: msh\_hgr.nc, msh\_zgr.nc and mask.nc.
-A mask from the source grid is also required (\np{cn\_src\_msk}). It is often the case the data have
-be post processed and are missing relavent meta data to determine where the land ocean divide 
-is (e.g. the land values in an ice field are set to zero). The tools rely on the masks and do not 
-search for missing\_value or \_FillValue properties as these have been found to be unreliable. 
-However, scale\_factor and off\_set are still read from the source files if they exist and applied to
-the relevant data.
-
-\section{Vertical coordinate}
-\label{vert_coord}
-%--------------------------------------------namvert-------------------------------------------------------
-\namdisplay{./TexFiles/Namelist/namvert.nml} 
-%--------------------------------------------------------------------------------------------------------------
-
-\subsection{S-coordinate}
-\label{s_coord}
-%--------------------------------------------namvert-------------------------------------------------------
-\namdisplay{./TexFiles/Namelist/namsco.nml} 
-%--------------------------------------------------------------------------------------------------------------
-
-
-
-
-%----------------------------------------------
 \subsection{Boundary geometry}
 \label{BDY_geometry}
 
@@ -143,6 +109,75 @@ Example of geometry of unstructured open boundary}
 \end{center}   \end{figure}
 %>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+
+\subsection{Defining the regional domain}
+\label{domain}
+
+2 options:
+
+read in mask - how is this defined : netcdf file listed in namelist? if not present gui pops up?
+
+generate new mask using gui
+
+
+\section{Grid Information}
+\label{s_coord}
+%--------------------------------------------namvert-------------------------------------------------------
+\namdisplay{./TexFiles/Namelist/namgrd.nml} 
+%--------------------------------------------------------------------------------------------------------------
+
+There is no clean way given a coordinates.nc file and bathymetry.nc file to generate the grid information
+from the proposed regional simulation, without replicating a lot of the domzgr.F90  code. At this early stage
+in writing BDY tools it was deamed cleaner and safer if this information is required as input. This is easily 
+achieved by running the proposed regional simulation for a single timestep with \np{nn\_msh} set to 3 in the 
+\NEMO namelist file. This will output 3 files: msh\_hgr.nc, msh\_zgr.nc and mask.nc.
+A mask from the source grid is also required (\np{cn\_src\_msk}). It is often the case the data have
+be post processed and are missing relavent meta data to determine where the land ocean divide 
+is (e.g. the land values in an ice field are set to zero). The tools rely on the masks and do not 
+search for missing\_value or \_FillValue properties as these have been found to be unreliable. 
+However, scale\_factor and off\_set are still read from the source files if they exist and applied to
+the relevant data.
+
+\section{Vertical coordinate}
+\label{vert_coord}
+%--------------------------------------------namvert-------------------------------------------------------
+\namdisplay{./TexFiles/Namelist/namvert.nml} 
+%--------------------------------------------------------------------------------------------------------------
+
+
+
+
+\subsection{S-coordinate}
+\label{s_coord}
+%--------------------------------------------namvert-------------------------------------------------------
+\namdisplay{./TexFiles/Namelist/namsco.nml} 
+%--------------------------------------------------------------------------------------------------------------
+
+
+\subsection{unstructured open boundaries options}
+\label{bdyopts}
+
+
+
+
+\subsection{Post Extraction}
+\label{pe}
+%--------------------------------------------namvert-------------------------------------------------------
+\namdisplay{./TexFiles/Namelist/namextra.nml} 
+%--------------------------------------------------------------------------------------------------------------
+
+weighting gauss nearest linear bicube?
+the use of weighting function - auto generate to right length? truncated by fr smoothing red
+use of fr / auto? / 
+fr in search and fr in smoothing
+fr set to small is nearest neighbour (talk in terms of grid res + pictorial e.g.)
+
+
+
+
+
+%----------------------------------------------
+
 %----------------------------------------------
 \subsection{Input boundary data files}
 \label{BDY_data}
@@ -198,5 +233,7 @@ Example of the header for a coordinates.bdy.nc file}
 
 %----------------------------------------------
 
+\subsection{Debugging}
+\label{Debug}
 
 
