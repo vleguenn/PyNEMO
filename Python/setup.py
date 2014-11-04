@@ -16,7 +16,7 @@ setup(
       long_description = long_description,
       
       #The projectt's main homepage
-      url = 'http://ccpforge.cse.rl.ac.uk/gf/project/pynemo/',
+      url = 'http://ccpforge.cse.rl.ac.uk/gf/project/src/',
       
       #Author details
       author='James Harle, Srikanth Nagella, Shirley Crompton',

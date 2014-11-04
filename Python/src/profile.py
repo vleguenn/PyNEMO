@@ -484,6 +484,12 @@ def extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,Grid_V2,year,month,ft
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbrdta',np.ones([1,num_bdy['v']]))
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'time_counter',time_counter)   
                     
+def extract_write_tidal_data(tide_cons):
+    if tide_cons.size() <= 0 :
+        return
+    for f in range(tide_cons.size()):
+        pass
+                        
 def interpolate_data(extract, Year, Month, Time_indexes):
     
     for variable_name in extract.d_bdy:
