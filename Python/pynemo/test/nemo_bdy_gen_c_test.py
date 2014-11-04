@@ -4,8 +4,8 @@ Unit test for nemo_bdy_gen_c. Boundary class
 @author: Mr. Srikanth Nagella
 '''
 import unittest
-from src.nemo_bdy_gen_c import *
-from src.nemo_bdy_msk_c import *
+from pynemo.nemo_bdy_gen_c import *
+from pynemo.nemo_bdy_msk_c import *
 class Test(unittest.TestCase):
 
     settings={}

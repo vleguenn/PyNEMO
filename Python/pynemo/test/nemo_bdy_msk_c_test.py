@@ -4,7 +4,7 @@ Unit test to nemo_bdy_msk_c
 @author: Srikanth Nagella
 '''
 import unittest
-from src.nemo_bdy_msk_c import * 
+from pynemo.nemo_bdy_msk_c import * 
 
 class Test(unittest.TestCase):
 

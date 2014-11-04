@@ -6,7 +6,7 @@ Created on 6 Oct 2014
 import unittest
 
 import os
-from src.nemo_bdy_ncgen import CreateBDYNetcdfFile
+from pynemo.nemo_bdy_ncgen import CreateBDYNetcdfFile
 class Test(unittest.TestCase):
 
     def setUp(self):

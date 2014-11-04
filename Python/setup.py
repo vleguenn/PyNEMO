@@ -38,7 +38,7 @@ setup(
       
       keywords='Oceanography NEMO',
       
-      packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+      packages=['pynemo'],
       
       install_requires=['netCDF4','scipy','numpy'],
       
@@ -50,7 +50,7 @@ setup(
       
       entry_points={
                     'console_scripts':[
-                        'pyNEMO=src:profile',
+                        'pyNEMO=pynemo:profile',
                         ],
                     },
       )

@@ -4,7 +4,7 @@ Will be testing the reading of the file and expected settings
 @author: Mr. Srikanth Nagella
 '''
 import unittest
-from src.nemo_bdy_setup import * 
+from pynemo.nemo_bdy_setup import * 
 
 import os
 class Test(unittest.TestCase):
