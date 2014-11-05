@@ -9,7 +9,7 @@
 class Depth:
 
     def __init__(self):
-        def gen_depth(self), bdy_ind_i, bdy_ind_j, hmin): #, sco, hc):
+        def gen_depth(self):#, bdy_ind_i, bdy_ind_j, hmin): #, sco, hc):
         '''
         #dst_zgr = '/work/jofa/grid/mesh_zgr_zps.nc'
         bdy_ind_i = self.bdy_i[:,0]

@@ -8,7 +8,7 @@ with open(path.join(here, 'DESCRIPTION.rst'),encoding='utf-8') as f:
     long_description = f.read()
     
 setup(
-      name = 'pyNEMO',
+      name = 'pynemo',
       
       version='0.1',
       
@@ -38,9 +38,9 @@ setup(
       
       keywords='Oceanography NEMO',
       
-      packages=['pynemo'],
+      packages=['pynemo','pynemo.tests'],
       
-      install_requires=['netCDF4','scipy','numpy'],
+      install_requires=['netCDF4','scipy','numpy','matplotlib'],
       
       #The data files that needs to be included in packaging
       package_data={
@@ -50,7 +50,7 @@ setup(
       
       entry_points={
                     'console_scripts':[
-                        'pyNEMO=pynemo:profile',
+                        'pynemo=pynemo:profile',
                         ],
                     },
       )

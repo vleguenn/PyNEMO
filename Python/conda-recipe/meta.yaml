@@ -1,0 +1,36 @@
+package:
+  name: pynemo
+
+#source:
+#  svn_url: http://ccpforge.cse.rl.ac.uk/svn/pynemo/trunk/Python
+
+#build:
+#  number: 0
+  
+requirements:
+  build:
+    - python
+    - numpy
+    - setuptools
+    - scipy
+    - netcdf4
+    - matplotlib
+
+  run:
+    - python
+    - numpy
+    - scipy
+    - netcdf4
+    - matplotlib
+
+#test:
+#  files:
+#    - ../data/grid_C/NNA_R12_bathy_meter_bench.nc
+#  requires:
+#    - nose
+#  imports:
+#    - nosetests
+    
+about:
+  home: http://ccpforge.cse.rl.ac.uk/gf/project/pynemo/
+  license:  CeCILL license
