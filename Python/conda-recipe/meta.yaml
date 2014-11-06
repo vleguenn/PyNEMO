@@ -1,6 +1,6 @@
 package:
   name: pynemo
-
+  version: "0.1"
 #source:
 #  svn_url: http://ccpforge.cse.rl.ac.uk/svn/pynemo/trunk/Python
 
