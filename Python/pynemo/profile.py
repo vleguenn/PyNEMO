@@ -24,6 +24,7 @@ import nemo_bdy_source_coord as source_coord
 import nemo_bdy_dst_coord as dst_coord
 import nemo_bdy_ice
 import nemo_bdy_extr_tm3
+import nemo_bdy_tide
 
 from netCDF4 import Dataset
 import numpy as np
@@ -129,6 +130,14 @@ def go():
     
     logger.info( clock() - start)
     
+    # may need to rethink grid info
+    # tracer 3d frs over rw
+    # tracer 2d frs over rw (i.e. ice)
+    # dyn 2d over 1st rim of T grid (i.e. ssh)
+    # dyn 2d over 1st rim
+    # dyn 2d frs over rw
+    # dyn 3d over 1st rim
+    # dyn 3d frs over rw
     
     Grid_U.bdy_i = Grid_U.bdy_i[Grid_U.bdy_r == 0, :]
     Grid_V.bdy_i = Grid_V.bdy_i[Grid_V.bdy_r == 0, :]
@@ -283,7 +292,8 @@ def go():
     source_time['t'] = nemo_bdy_src_time
     """
 
-    
+    extract_tide = nemo_bdy_tide.Extract(Setup.settings,DstCoord,Grid_T)
+    extract_tide.extract_con('m2')
 
 
     # Enter Years Loop
