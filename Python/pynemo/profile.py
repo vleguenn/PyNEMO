@@ -25,6 +25,8 @@ import nemo_bdy_dst_coord as dst_coord
 import nemo_bdy_ice
 import nemo_bdy_extr_tm3
 import nemo_bdy_tide
+import nemo_bdy_tide2
+import nemo_bdy_tide_ncgen
 
 from netCDF4 import Dataset
 import numpy as np
@@ -41,7 +43,7 @@ logging.basicConfig(level=logging.INFO)
     
     
             
-def go(): 
+def go(setup_filepath=0, bathymeter_filepath=0, coord_output_filepath=None): 
     #Logger
     logger = logging.getLogger(__name__)
     logger.info('START')   
@@ -51,7 +53,7 @@ def go():
     
     logger.info( clock() - start)
     start = clock()
-    Setup = setup.Setup(0) # default settings file
+    Setup = setup.Setup(setup_filepath) # default settings file
     settings = Setup.settings
 
     
@@ -64,7 +66,7 @@ def go():
     
     #This is to create mask. a future improvement will be to use GUI.
     start = clock()
-    Mask = msk.Mask(0, med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
+    Mask = msk.Mask(bathymeter_filepath, med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
 
     logger.info( clock() - start)
     logger.info( 'Done Mask')
@@ -120,7 +122,7 @@ def go():
         logger.info( 'bdy_ind %s %s %s', k, bdy_ind[k].bdy_i.shape, bdy_ind[k].bdy_r.shape)
     
     start = clock()
-    co_set = coord.Coord(None, bdy_ind)
+    co_set = coord.Coord(coord_output_filepath, bdy_ind)
     logger.info( 'done coord gen')
     logger.info( clock() - start)
     start = clock()
@@ -295,12 +297,15 @@ def go():
 
 
     # Example tide extraction TODO complete loop over constituents read in from namelist
-    extract_tide_z = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid_T)
-    extract_tide_z.extract_con('m2')
-    extract_tide_u = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid_U)
-    extract_tide_u.extract_con('m2')
-    extract_tide_v = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid_V)
-    extract_tide_v.extract_con('m2')
+    for Grid in [Grid_T,Grid_U,Grid_V]:
+        extract_write_tidal_data(Setup, DstCoord, Grid, num_bdy, settings["clname"])
+#        extract_tide_z = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid_T)
+#        extract_tide_z.extract_con('m2')
+#        extract_tide_u = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid_U)
+#        extract_tide_u.extract_con('m2')
+#        extract_tide_v = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid_V)
+#        extract_tide_v.extract_con('m2')
+        
     
     
     # Enter Years Loop
@@ -501,12 +506,48 @@ def extract_write_v_data(Setup,SourceCoord,DstCoord,Grid_V,Grid_V2,year,month,ft
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'nbrdta',np.ones([1,num_bdy['v']]))
     nemo_bdy_ncpop.WriteDataToFile(output_filename_v,'time_counter',time_counter)   
                     
-def extract_write_tidal_data(tide_cons):
-    if tide_cons.size() <= 0 :
-        return
-    for f in range(tide_cons.size()):
-        pass
-                        
+def extract_write_tidal_data(Setup, DstCoord, Grid, num_bdy,tide_cons):
+    extract_tide = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid)
+    for tide_con in tide_cons:
+        const_name = Setup.settings['clname'][tide_con]
+        const_name = const_name.replace("'","").lower() 
+        extract_tide.extract_con(const_name)
+        if Grid.grid_type == 't' :
+            output_filename_tide = Setup.settings['dst_dir']+Setup.settings['fn']+"_bdytide_rotT_"+const_name+"_grid_"+Grid.grid_type+".nc"
+            nemo_bdy_tide_ncgen.CreateBDYTideNetcdfFile(output_filename_tide, num_bdy['z'], DstCoord.lonlat['t']['lon'].shape[1], DstCoord.lonlat['t']['lon'].shape[0], 
+                                                        "tidal elevation components for:"+tide_con, Setup.settings['fv'],'T')
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'z1', extract_tide.harm_Re[const_name])
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'z2', extract_tide.harm_Im[const_name])  
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'bdy_msk',DstCoord.bdy_msk) 
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nav_lon',DstCoord.lonlat['t']['lon']) 
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nav_lat',DstCoord.lonlat['t']['lat']) 
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nbidta',Grid.bdy_i[np.where(Grid.bdy_r==0),0]+1)                                 
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nbjdta',Grid.bdy_i[np.where(Grid.bdy_r==0),1]+1)
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nbrdta',Grid.bdy_r[np.where(Grid.bdy_r==0)]+1)
+        elif Grid.grid_type == 'u':
+            output_filename_tide = Setup.settings['dst_dir']+Setup.settings['fn']+"_bdytide_rotT_"+const_name+"_grid_"+Grid.grid_type+".nc"
+            nemo_bdy_tide_ncgen.CreateBDYTideNetcdfFile(output_filename_tide, num_bdy['u'], DstCoord.lonlat['t']['lon'].shape[1], DstCoord.lonlat['t']['lon'].shape[0], 
+                                                        "tidal east velocity components for:"+tide_con, Setup.settings['fv'],'U')
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'u1', extract_tide.harm_Re[const_name])
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'u2', extract_tide.harm_Im[const_name])              
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'nav_lon', DstCoord.lonlat['u']['lon'])
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'nav_lat', DstCoord.lonlat['u']['lat'])
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'nbidta', Grid.bdy_i[:, 0]+1)                
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'nbjdta', Grid.bdy_i[:, 1]+1)                
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'nbrdta', np.ones([1, num_bdy['u']]))      
+        elif Grid.grid_type == 'v':
+            output_filename_tide = Setup.settings['dst_dir']+Setup.settings['fn']+"_bdytide_rotT_"+const_name+"_grid_"+Grid.grid_type+".nc"            
+            nemo_bdy_tide_ncgen.CreateBDYTideNetcdfFile(output_filename_tide, num_bdy['v'], DstCoord.lonlat['t']['lon'].shape[1], DstCoord.lonlat['t']['lon'].shape[0], 
+                                                        "tidal north velocity components for:"+tide_con, Setup.settings['fv'],'V')
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'v1', extract_tide.harm_Re[const_name])
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide, 'v2', extract_tide.harm_Im[const_name])                          
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nav_lon',DstCoord.lonlat['u']['lon'])
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nav_lat',DstCoord.lonlat['u']['lat'])
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nbidta',Grid.bdy_i[:,0]+1)                
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nbjdta',Grid.bdy_i[:,1]+1)                
+            nemo_bdy_ncpop.WriteDataToFile(output_filename_tide,'nbrdta',np.ones([1,num_bdy['v']]))                                                    
+                     
+        
 def interpolate_data(extract, Year, Month, Time_indexes):
     
     for variable_name in extract.d_bdy:
@@ -530,4 +571,4 @@ def interpolate_data(extract, Year, Month, Time_indexes):
         
                   
 
-go()
+go(bathymeter_filepath='../data/grid_C/NNA_R12_bathy_meter_bench.nc',coord_output_filepath='../data/toreador.nc')
