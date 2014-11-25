@@ -292,10 +292,17 @@ def go():
     source_time['t'] = nemo_bdy_src_time
     """
 
-    extract_tide = nemo_bdy_tide.Extract(Setup.settings,DstCoord,Grid_T)
-    extract_tide.extract_con('m2')
 
 
+    # Example tide extraction TODO complete loop over constituents read in from namelist
+    extract_tide_z = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid_T)
+    extract_tide_z.extract_con('m2')
+    extract_tide_u = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid_U)
+    extract_tide_u.extract_con('m2')
+    extract_tide_v = nemo_bdy_tide2.Extract(Setup.settings,DstCoord,Grid_V)
+    extract_tide_v.extract_con('m2')
+    
+    
     # Enter Years Loop
     # Loop not yet implemented
     years = [1979]

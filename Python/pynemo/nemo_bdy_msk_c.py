@@ -40,7 +40,7 @@ class Mask:
 
         # Read from default location
         if ncfname == 0:
-            ncfname = '../data/grid_C/NNA_R12_bathy_meter_bench.nc'
+            ncfname = '/Users/jdha/Projects/pynemo_data/NEMO_bdy_tools/grid_C/NNA_R12_bathy_meter_bench.nc'
 
         # Open and read bathymetry netcdf file
         nc = Dataset(ncfname, 'r')
@@ -52,6 +52,11 @@ class Mask:
         tmp = bdy_msk[3:398,3:348]
         tmp[tmp == -1] = 1
         bdy_msk[3:398,3:348] = tmp
+        
+        tmp = bdy_msk[0:59,280:350]
+        tmp[tmp == 1] = -1
+        bdy_msk[0:59,280:350] = tmp
+        
         # Debug line
         self.logger.debug ('bdy_msk FINAL: Total: %s , | 1s: %s | -1s: %s | 0s: %s',  
                           np.sum(bdy_msk[:,:]),np.sum(bdy_msk[:]==1),np.sum(bdy_msk[:]==-1),np.sum(bdy_msk[:] == 0))
