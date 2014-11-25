@@ -66,6 +66,7 @@
     clname(1)      = 'M2'                 ! constituent name
     clname(2)      = 'S2'         
     clname(3)      = 'K2'        
+    ln_trans       = .true.
 
 !-----------------------------------------------------------------------
 !  Time information
