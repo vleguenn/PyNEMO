@@ -35,6 +35,7 @@
    sn_dst_hgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_C/mesh_hgr_zps.nc'
    sn_dst_zgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_C/mesh_zgr_zps.nc'
    sn_src_msk = 'F:/NEMO_bdy_tools/bdy_matlab/grid_low_res_C/mask.nc'
+   sn_bathy   = 'F:/NEMO_bdy_tools/bdy_matlab/grid_C/NNA_R12_bathy_meter_bench.nc'
 
 !-----------------------------------------------------------------------
 !  I/O 
@@ -77,7 +78,10 @@
     nn_month_end    = 12          !  month end (default = 12 is years>1)
     sn_dst_calendar = 'gregorian' !  output calendar format
     nn_base_year    = 1960        !  base year for time counter
-
+	sn_tide_grid   = 'F:/NEMO_bdy_tools/bdy_matlab/bdy_matlab/tmd/DATA/grid_tpxo7.2.nc'
+	sn_tide_h	   = 'F:/NEMO_bdy_tools/bdy_matlab/bdy_matlab/tmd/DATA/h_tpxo7.2.nc'
+	sn_tide_u	   = 'F:/NEMO_bdy_tools/bdy_matlab/bdy_matlab/tmd/DATA/u_tpxo7.2.nc'
+	
 !-----------------------------------------------------------------------
 !  Additional parameters
 !-----------------------------------------------------------------------

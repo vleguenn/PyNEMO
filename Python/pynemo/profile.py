@@ -42,7 +42,7 @@ import copy
    
     
             
-def go(setup_filepath=0, bathymeter_filepath=0, coord_output_filepath=None): 
+def go(setup_filepath=0): 
     #Logger
     logger = logging.getLogger(__name__)
     logger.info('START')   
@@ -66,7 +66,7 @@ def go(setup_filepath=0, bathymeter_filepath=0, coord_output_filepath=None):
     
     #This is to create mask. a future improvement will be to use GUI.
     start = clock()
-    Mask = msk.Mask(bathymeter_filepath, med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
+    Mask = msk.Mask(settings['bathy'], med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
 
     logger.info( clock() - start)
     logger.info( 'Done Mask')
@@ -122,7 +122,7 @@ def go(setup_filepath=0, bathymeter_filepath=0, coord_output_filepath=None):
         logger.info( 'bdy_ind %s %s %s', k, bdy_ind[k].bdy_i.shape, bdy_ind[k].bdy_r.shape)
     
     start = clock()
-    co_set = coord.Coord(coord_output_filepath, bdy_ind)
+    co_set = coord.Coord(settings['dst_dir']+'/toreador.nc', bdy_ind)
     logger.info( 'done coord gen')
     logger.info( clock() - start)
     start = clock()
