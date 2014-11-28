@@ -50,7 +50,12 @@ setup(
       
       entry_points={
                     'console_scripts':[
-                        'pynemo=pynemo:profile',
+                        'pynemo=pynemo:pynemo',
                         ],
                     },
       )
+
+from bbfreeze import Freezer
+f = Freezer("pynemo", includes=("_strptime",))
+f.addScript("pynemo/profile.py")        # If there are multiple source files, just repeat this to add more
+f() # starts the freezing process
