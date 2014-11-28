@@ -39,14 +39,14 @@ import nemo_bdy_ncpop
 import logging
 from netcdftime import date2num, datetime
 import copy
-logging.basicConfig(level=logging.INFO)
-    
+   
     
             
 def go(setup_filepath=0, bathymeter_filepath=0, coord_output_filepath=None): 
     #Logger
     logger = logging.getLogger(__name__)
     logger.info('START')   
+    
     start = clock()
     SourceCoord = source_coord.SourceCoord()
     DstCoord = dst_coord.DstCoord()
@@ -570,5 +570,3 @@ def interpolate_data(extract, Year, Month, Time_indexes):
         extract.d_bdy[variable_name][Year]['data'] =  tmp.transpose(0,2,1)
         
                   
-
-go(bathymeter_filepath='../data/grid_C/NNA_R12_bathy_meter_bench.nc',coord_output_filepath='../data/toreador.nc')

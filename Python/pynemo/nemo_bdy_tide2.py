@@ -26,17 +26,17 @@ class Extract:
         
         dst_lon = np.array([x if x > 0 else x+360 for x in dst_lon])
       
-        fileIDb = '/Users/jdha/Projects/pynemo_data/DATA/grid_tpxo7.2.nc' # TPX bathymetry file
+        fileIDb = '../data/tide/grid_tpxo7.2.nc' # TPX bathymetry file
         nb = Dataset(fileIDb) # Open the TPX bathybetry file using the NetCDF4-Python library
 
         # Open the TPX Datafiles using the NetCDF4-Python library
             
         if self.g_type == 't':    
-            self.fileID = '/Users/jdha/Projects/pynemo_data/DATA/h_tpxo7.2.nc' # TPX sea surface height file
+            self.fileID = '../data/tide/h_tpxo7.2.nc' # TPX sea surface height file
             self.var_Im = 'hIm' 
             self.var_Re = 'hRe' 
         elif (self.g_type == 'u') or (self.g_type == 'v') :
-            self.fileID = '/Users/jdha/Projects/pynemo_data/DATA/u_tpxo7.2.nc' # TPX velocity file
+            self.fileID = '../data/tide/u_tpxo7.2.nc' # TPX velocity file
             self.var_Im = 'UIm' 
             self.var_Re = 'URe' 
             self.var_Im2 = 'VIm' 
@@ -68,7 +68,7 @@ class Extract:
               
         # We will average velocities onto the T grid as there is a rotation to be done 
         # Also need to account for east-west wrap-around
-        nc = Dataset('/Users/jdha/Projects/pynemo_data/DATA/h_tpxo7.2.nc')
+        nc = Dataset('../data/tide/h_tpxo7.2.nc')
         lon = np.ravel(np.concatenate([nc.variables['lon_z'][-2:,:], 
                                        nc.variables['lon_z'][:,:], 
                                        nc.variables['lon_z'][0:2,:]]))
