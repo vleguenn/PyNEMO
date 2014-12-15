@@ -118,6 +118,9 @@ class GridAngle:
         if j < 0:
             jj -= j
             j = 0
+        if i < 0:
+            ii -= i
+            i = 0
              
         if map:
             case = self.M_T

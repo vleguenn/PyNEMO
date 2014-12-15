@@ -655,7 +655,7 @@ class Extract:
                     data_out = dst_bdy
                     data_out[np.isnan(self.bdy_z)] = np.NaN
                 entry = self.d_bdy[self.var_nam[vn]][year]
-                if entry['data'] == None:
+                if entry['data'] is None:
                     # Create entry with singleton 3rd dimension
                     entry['data'] = np.array([data_out])
                 else:
