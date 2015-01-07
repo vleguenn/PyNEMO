@@ -5,37 +5,38 @@ Entry for the project
 '''
 
 import sys, getopt
-import profile
+import pynemo.profile
 import logging
 
 # Logging set to info
 logging.basicConfig(level=logging.INFO)
 
 def main():
-    bathyfile = ''
-    coordfile = ''
+    """ Main function which checks the command line parameters and
+        passes them to the profile module for processing """
+
     setup_file = ''
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"hs:",["setup="])
+        opts = getopt.getopt(sys.argv[1:], "hs:", ["setup="])
     except getopt.GetoptError:
         print "usage: pynemo -s <namelist.bdy> "
         sys.exit(2)
-    
+
     for opt, arg in opts:
         if opt == "-h":
             print "usage: pynemo -s <namelist.bdy> "
             sys.exit()
-        elif opt in ("-s","--setup") :
+        elif opt in ("-s", "--setup"):
             setup_file = arg
 
     if setup_file == "":
         print "usage: pynemo -s <namelist.bdy> "
         sys.exit(2)
-        
+
     #Logger
-    logger = logging.getLogger(__name__)
+    #logger = logging.getLogger(__name__)
 
-    profile.go(setup_file)
+    pynemo.profile.go(setup_file)
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     main()
