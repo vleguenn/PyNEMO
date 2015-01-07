@@ -11,7 +11,7 @@ import logging
 # Logging set to info
 logging.basicConfig(level=logging.INFO)
 
-if __name__ == "__main__" :
+def main():
     bathyfile = ''
     coordfile = ''
     setup_file = ''
@@ -36,3 +36,6 @@ if __name__ == "__main__" :
     logger = logging.getLogger(__name__)
 
     profile.go(setup_file)
+
+if __name__ == "__main__" :
+    main()
