@@ -38,7 +38,7 @@ setup(
       
       keywords='Oceanography NEMO',
       
-      packages=['pynemo','pynemo.tests'],
+      packages=['pynemo','pynemo.tests','pynemo.gui'],
       
       install_requires=['netCDF4','scipy','numpy','matplotlib'],
       
@@ -50,12 +50,8 @@ setup(
       
       entry_points={
                     'console_scripts':[
-                        'pynemo=pynemo:pynemo',
+                        'pynemo=pynemo.pynemo:main',
+                        'pynemo_settings_editor=pynemo.pynemo_settings_editor:main'
                         ],
                     },
       )
-
-from bbfreeze import Freezer
-f = Freezer("pynemo", includes=("_strptime",))
-f.addScript("pynemo/profile.py")        # If there are multiple source files, just repeat this to add more
-f() # starts the freezing process
