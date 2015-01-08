@@ -29,18 +29,18 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T,Grid_U,Grid_V,comp):
     dst_lon[dst_lon<0.0]=dst_lon[dst_lon<0.0]+360.0
     
     #extract the surface elevation at each z-point
-    tpxo_z = tpxo_extract_HC.TPXO_Extract(dst_lat, dst_lon, g_type)
+    tpxo_z = tpxo_extract_HC.TpxoExtract(dst_lat, dst_lon, g_type)
     
     #convert back the z-longitudes into the usual conventions (-180E/+180E)
     dst_lon[dst_lon>180.0]=dst_lon[dst_lon>180.0]-360.0    
     
     #check if elevation data are missing
-    ind = np.where((np.isnan(tpxo_z.amp)) | (np.isnan(tpxo_z.Gph)))
+    ind = np.where((np.isnan(tpxo_z.amp)) | (np.isnan(tpxo_z.gph)))
     if ind[0].size > 0:
         print 'Missing elveation along the open boundary'
     
     ampz = tpxo_z.amp
-    phaz = tpxo_z.Gph
+    phaz = tpxo_z.gph
     ampz[ind] = 0.0
     phaz[ind] = 0.0
     
@@ -52,8 +52,8 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T,Grid_U,Grid_V,comp):
     #convert the U-longitudes into the TMD conventions (0/360E)    
     dst_lon[dst_lon<0.0]=dst_lon[dst_lon<0.0]+360.0
     
-    tpxo_ux = tpxo_extract_HC.TPXO_Extract(dst_lat,dst_lon,Grid_U.grid_type)
-    tpxo_vx = tpxo_extract_HC.TPXO_Extract(dst_lat,dst_lon,Grid_V.grid_type)
+    tpxo_ux = tpxo_extract_HC.TpxoExtract(dst_lat,dst_lon,Grid_U.grid_type)
+    tpxo_vx = tpxo_extract_HC.TpxoExtract(dst_lat,dst_lon,Grid_V.grid_type)
         
     ampuX = tpxo_ux.amp
     phauX = tpxo_ux.Gph
@@ -84,8 +84,8 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T,Grid_U,Grid_V,comp):
     #convert the U-longitudes into the TMD conventions (0/360E)    
     dst_lon[dst_lon<0.0]=dst_lon[dst_lon<0.0]+360.0
     
-    tpxo_uy = tpxo_extract_HC.TPXO_Extract(dst_lat,dst_lon,Grid_U.grid_type)
-    tpxo_vy = tpxo_extract_HC.TPXO_Extract(dst_lat,dst_lon,Grid_V.grid_type)
+    tpxo_uy = tpxo_extract_HC.TpxoExtract(dst_lat,dst_lon,Grid_U.grid_type)
+    tpxo_vy = tpxo_extract_HC.TpxoExtract(dst_lat,dst_lon,Grid_V.grid_type)
         
     ampuY = tpxo_uy.amp
     phauY = tpxo_uy.Gph

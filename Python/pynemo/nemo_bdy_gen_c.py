@@ -43,13 +43,13 @@ class Boundary:
         rw = self.settings['rimwidth']
         rm = rw - 1
         self.grid_type = grid.lower()
-        # Throw an error for grid type confusion
+        # Throw an error for grid grid_type confusion
         if grid not in ['t', 'u', 'v', 'f']:
             self.logger.error('Grid Type not correctly specified:'+grid)
-            raise ValueError("""%s is invalid grid type;  
+            raise ValueError("""%s is invalid grid grid_type;  
                                 must be 't', 'u', 'v' or 'f'""" %grid)
 
-        # Configure grid type
+        # Configure grid grid_type
         if grid is not 't':
             # We need to copy this before changing, because the original will be 
             # needed in calculating later grid boundary types

@@ -29,6 +29,7 @@ import numpy as np
 import scipy.spatial as sp
 from netCDF4 import Dataset
 from netcdftime import utime
+from nemo_bdy_lib import rot_rep
 #from netCDF4 import date2num, num2date
 
 import nemo_bdy_grid_angle
@@ -72,7 +73,7 @@ class Extract:
             elif self.rot_str == 'v':
                 self.rot_dir = 'j'
             else:
-                raise ValueError('Invalid rotation grid type: %s' 
+                raise ValueError('Invalid rotation grid grid_type: %s' 
                                  %self.rot_str)
 
         dst_lon = DC.bdy_lonlat[self.g_type]['lon']
@@ -609,7 +610,7 @@ class Extract:
                     self.logger.info('time to to rot and rep ')
                     self.logger.info('%s %s',  np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                     self.logger.info( '%s en to %s %s' , self.rot_str,self.rot_dir, dst_bdy.shape)
-                    dst_bdy = self.rot_rep(dst_bdy, dst_bdy_2, self.rot_str,
+                    dst_bdy = rot_rep(dst_bdy, dst_bdy_2, self.rot_str,
                                       'en to %s' %self.rot_dir, self.dst_gcos, self.dst_gsin)
                     self.logger.info('%s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                 # Apply 1-2-1 filter along bdy pts using NN ind self.id_121
@@ -682,19 +683,6 @@ class Extract:
         return alpha.flatten(1)[beta.flatten(1)].reshape(
                                                    beta.shape, order='F')
     
-    # THIS FUNCTION MAY BE BROKEN
-    def rot_rep(self, pxin, pyin, cd_type, cd_todo, gcos, gsin):
-        if cd_todo.lower() in ['en to i', 'ij to e']:
-            self.logger.info('en to i or ij to e')
-            x,y = pxin, pyin
-        elif cd_todo.lower() in ['en to j', 'ij to n']:
-            self.logger.info('en to j or ij to n')
-            x,y = pyin, pxin*-1
-        else:
-            raise SyntaxError('rot_rep cd_todo %s is invalid' %cd_todo)
-        # cd_type = superfluous?
-        return x * gcos + y * gsin
-
     # Convert numeric date from source to dest
     def convert_date(self, date):
         val = self.S_cal.num2date(date)

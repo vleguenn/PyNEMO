@@ -8,7 +8,7 @@ import scipy.spatial as sp
 from netCDF4 import Dataset
 import copy # DEBUG ONLY- allows multiple runs without corruption
 import nemo_bdy_grid_angle
-from nemo_bdy_extr_tm3 import rot_rep
+#from nemo_bdy_extr_tm3 import rot_rep
 
 class Extract:
 
@@ -30,13 +30,13 @@ class Extract:
         nb = Dataset(fileIDb) # Open the TPX bathybetry file using the NetCDF4-Python library
 
         # Open the TPX Datafiles using the NetCDF4-Python library
-                    T_GridAngles = nemo_bdy_grid_angle.GridAngle(
-                       self.settings['src_hgr'], imin, imax, jmin, jmax, 't')
-                RotStr_GridAngles = nemo_bdy_grid_angle.GridAngle(
-                         self.settings['dst_hgr'], 1, maxI, 1, maxJ, self.rot_str)
+#            T_GridAngles = nemo_bdy_grid_angle.GridAngle(
+#                       self.settings['src_hgr'], imin, imax, jmin, jmax, 't')
+#            RotStr_GridAngles = nemo_bdy_grid_angle.GridAngle(
+#                         self.settings['dst_hgr'], 1, maxI, 1, maxJ, self.rot_str)
             
-            self.gcos = T_GridAngles.cosval
-            self.gsin = T_GridAngles.sinval
+#            self.gcos = T_GridAngles.cosval
+#            self.gsin = T_GridAngles.sinval
             
         if self.g_type == 't':    
             self.fileID = '/Users/jdha/Projects/pynemo_data/DATA/h_tpxo7.2.nc' # TPX sea surface height file
@@ -129,7 +129,7 @@ class Extract:
             
             else: # Convert transports to velocities
                 
-                if self.key_tr == TRUE: # We convert to velocity using tidal model bathymetry
+                if self.key_tr == True: # We convert to velocity using tidal model bathymetry
                 
                     self.harm_Im[con] = np.sum(vIm[self.nn_id]*self.nn_wei,axis=1)/np.sum(self.bat[self.nn_id]*self.nn_wei,axis=1)
                     self.harm_Re[con] = np.sum(vRe[self.nn_id]*self.nn_wei,axis=1)/np.sum(self.bat[self.nn_id]*self.nn_wei,axis=1)

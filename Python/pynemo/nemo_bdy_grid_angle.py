@@ -28,7 +28,7 @@ class GridAngle:
         self.CD_T = cd_type.lower()
         self.logger = logging.getLogger(__name__)
         if self.CD_T not in ['t', 'u', 'v', 'f']:
-            raise ValueError('Unknown grid type %s' %cd_type)
+            raise ValueError('Unknown grid grid_type %s' %cd_type)
         self.M_T = self.MAP[self.CD_T]
         
         self.logger.debug( 'Grid Angle: ', self.CD_T)

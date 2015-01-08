@@ -568,17 +568,17 @@ def interpolate_data(extract, Year, Month, Time_indexes):
     
     for variable_name in extract.d_bdy:
         if monthrange(Year,Month)[1] == 29: #leap year
-            x = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,0,0]),1)).transpose()))                        
-            y = extract.d_bdy[variable_name][Year]['data'].transpose(0, 2, 1)
-            interp1fn = interp1d(x,y,axis=0)
+            lon = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,0,0]),1)).transpose()))                        
+            lat = extract.d_bdy[variable_name][Year]['data'].transpose(0, 2, 1)
+            interp1fn = interp1d(lon,lat,axis=0)
             extra_axis = np.append(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,0,0])-2+0.2,0.2),
                                            np.arange(len(extract.d_bdy[variable_name][Year]['data'][:,0,0])-2+1/6.0,
                                                      len(extract.d_bdy[variable_name][Year]['data'][:,0,0])-1+1/6.0,1/6.0))
             extract.d_bdy[variable_name][Year]['data'] = interp1fn(extra_axis)
         else:
-            x = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,0,0]),1)).transpose()))
-            y = extract.d_bdy[variable_name][Year]['data'].transpose(0, 2, 1)
-            interp1fn = interp1d(x,y,axis=0)
+            lon = np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,0,0]),1)).transpose()))
+            lat = extract.d_bdy[variable_name][Year]['data'].transpose(0, 2, 1)
+            interp1fn = interp1d(lon,lat,axis=0)
             extract.d_bdy[variable_name][Year]['data'] = interp1fn(np.squeeze(np.asarray(np.mat(np.arange(0,len(extract.d_bdy[variable_name][Year]['data'][:,0,0])-1+0.2,0.2)).transpose())))      #added 0.2 to include boundary
         tmp = np.squeeze(extract.d_bdy[variable_name][Year]['data'][Time_indexes,:,:]) 
         if len(tmp.shape) == 2:            

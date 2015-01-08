@@ -198,6 +198,8 @@ class Extract:
                                       'en to %s' %self.rot_dir, self.gcos, self.gsin)
                 self.harm_Re[con] = rot_rep(harm_Re, harm_Re2, self.g_type,
                                       'en to %s' %self.rot_dir, self.gcos, self.gsin)
+                self.harm_Im[con][self.msk]=0.
+                self.harm_Re[con][self.msk]=0.
               
             nc.close()
                                     
