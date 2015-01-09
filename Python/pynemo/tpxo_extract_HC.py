@@ -14,18 +14,18 @@ import numpy as np
 
 class TpxoExtract(object):
     """ This is TPXO model extract_hc.c implementation in python"""
-    def __init__(self, lat, lon, grid_type):
+    def __init__(self, settings, lat, lon, grid_type):
         """initialises the Extract of tide information from the netcdf
            Tidal files"""
         #read the grid file
-        self.grid = Dataset('../data/tide/grid_tpxo7.2.nc')
+        self.grid = Dataset(settings['tide_grid'])#../data/tide/grid_tpxo7.2.nc')
         #read the height_dataset file
-        self.height_dataset = Dataset('../data/tide/h_tpxo7.2.nc')
+        self.height_dataset = Dataset(settings['tide_h'])#../data/tide/h_tpxo7.2.nc')
         #read the velocity_dataset file
-        self.velocity_dataset = Dataset('../data/tide/u_tpxo7.2.nc')
+        self.velocity_dataset = Dataset(settings['tide_u'])#../data/tide/u_tpxo7.2.nc')
 
         height_z = self.grid.variables['hz']
-        mask_z = self.grid.variables['mask_z']
+        mask_z = self.grid.variables['mz']
         lon_z = self.height_dataset.variables['lon_z'][:, 0]
         lat_z = self.height_dataset.variables['lat_z'][0, :]
         lon_resolution = lon_z[1] - lon_z[0]
@@ -86,13 +86,13 @@ class TpxoExtract(object):
         index = np.where((np.isnan(depth)) & (depth_mask > 0))
 
         if index[0].size != 0:
-            depth[index] = self.BLinterp(lon_z, lat_z, height_z, lon[index], lat[index])
+            depth[index] = bilinear_interpolation(lon_z, lat_z, height_z, lon[index], lat[index])
 
         if grid_type == 'z' or grid_type == 't':
             self.amp, self.gph = self.interpolate_constituents(self.height_dataset,
                                                                'hRe', 'hIm', 'lon_z', 'lat_z',
-                                                               lon, lat, maskname='mask_z')
-        elif grid_type == 'velocity_dataset':
+                                                               lon, lat, maskname='mz')
+        elif grid_type == 'u':
             self.amp, self.gph = self.interpolate_constituents(self.velocity_dataset,
                                                                'URe', 'UIm', 'lon_u', 'lat_u',
                                                                lon, lat, depth, maskname='mu')
@@ -145,11 +145,11 @@ class TpxoExtract(object):
         data_temp = np.zeros((data.shape[0], lon.shape[0], 2, ))
         for cons_index in range(data.shape[0]):
             #interpolate real values
-            data_temp[cons_index, :, 0] = self.interpolate_data(x_values, y_values,
+            data_temp[cons_index, :, 0] = interpolate_data(x_values, y_values,
                                                                 data[cons_index, :, :].real,
                                                                 maskedpoints, lonlat)
             #interpolate imag values
-            data_temp[cons_index, :, 1] = self.interpolate_data(x_values, y_values,
+            data_temp[cons_index, :, 1] = interpolate_data(x_values, y_values,
                                                                 data[cons_index, :, :].imag,
                                                                 maskedpoints, lonlat)
 

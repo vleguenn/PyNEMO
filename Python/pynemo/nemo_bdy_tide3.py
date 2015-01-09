@@ -29,7 +29,7 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T,Grid_U,Grid_V,comp):
     dst_lon[dst_lon<0.0]=dst_lon[dst_lon<0.0]+360.0
     
     #extract the surface elevation at each z-point
-    tpxo_z = tpxo_extract_HC.TpxoExtract(dst_lat, dst_lon, g_type)
+    tpxo_z = tpxo_extract_HC.TpxoExtract(setup.settings,dst_lat, dst_lon, g_type)
     
     #convert back the z-longitudes into the usual conventions (-180E/+180E)
     dst_lon[dst_lon>180.0]=dst_lon[dst_lon>180.0]-360.0    
@@ -52,13 +52,13 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T,Grid_U,Grid_V,comp):
     #convert the U-longitudes into the TMD conventions (0/360E)    
     dst_lon[dst_lon<0.0]=dst_lon[dst_lon<0.0]+360.0
     
-    tpxo_ux = tpxo_extract_HC.TpxoExtract(dst_lat,dst_lon,Grid_U.grid_type)
-    tpxo_vx = tpxo_extract_HC.TpxoExtract(dst_lat,dst_lon,Grid_V.grid_type)
+    tpxo_ux = tpxo_extract_HC.TpxoExtract(setup.settings,dst_lat,dst_lon,Grid_U.grid_type)
+    tpxo_vx = tpxo_extract_HC.TpxoExtract(setup.settings,dst_lat,dst_lon,Grid_V.grid_type)
         
     ampuX = tpxo_ux.amp
-    phauX = tpxo_ux.Gph
+    phauX = tpxo_ux.gph
     ampvX = tpxo_vx.amp
-    phavX = tpxo_vx.Gph
+    phavX = tpxo_vx.gph
     
     #check if ux data are missing
     ind = np.where((np.isnan(ampuX)) | (np.isnan(phauX)))
@@ -84,13 +84,13 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T,Grid_U,Grid_V,comp):
     #convert the U-longitudes into the TMD conventions (0/360E)    
     dst_lon[dst_lon<0.0]=dst_lon[dst_lon<0.0]+360.0
     
-    tpxo_uy = tpxo_extract_HC.TpxoExtract(dst_lat,dst_lon,Grid_U.grid_type)
-    tpxo_vy = tpxo_extract_HC.TpxoExtract(dst_lat,dst_lon,Grid_V.grid_type)
+    tpxo_uy = tpxo_extract_HC.TpxoExtract(setup.settings,dst_lat,dst_lon,Grid_U.grid_type)
+    tpxo_vy = tpxo_extract_HC.TpxoExtract(setup.settings,dst_lat,dst_lon,Grid_V.grid_type)
         
     ampuY = tpxo_uy.amp
-    phauY = tpxo_uy.Gph
+    phauY = tpxo_uy.gph
     ampvY = tpxo_vy.amp
-    phavY = tpxo_vy.Gph
+    phavY = tpxo_vy.gph
     
     #check if ux data are missing
     ind = np.where((np.isnan(ampuY)) | (np.isnan(phauY)))
