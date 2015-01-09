@@ -17,7 +17,7 @@ def main():
 
     setup_file = ''
     try:
-        opts = getopt.getopt(sys.argv[1:], "hs:", ["setup="])
+        opts, args_unused = getopt.getopt(sys.argv[1:], "hs:", ["setup="])
     except getopt.GetoptError:
         print "usage: pynemo -s <namelist.bdy> "
         sys.exit(2)
