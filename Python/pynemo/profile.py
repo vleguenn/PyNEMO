@@ -27,7 +27,6 @@ import nemo_bdy_source_coord as source_coord
 import nemo_bdy_dst_coord as dst_coord
 import nemo_bdy_ice
 import nemo_bdy_extr_tm3
-import nemo_bdy_tide
 import nemo_bdy_tide2
 import nemo_bdy_tide3
 import nemo_bdy_tide_ncgen
