@@ -50,7 +50,7 @@ setup(
       
       entry_points={
                     'console_scripts':[
-                        'pynemo=pynemo.pynemo:main',
+                        'pynemo=pynemo.pynemo_exe:main',
                         'pynemo_settings_editor=pynemo.pynemo_settings_editor:main'
                         ],
                     },
