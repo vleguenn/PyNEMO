@@ -3,6 +3,7 @@
 #######                                          #######
 ## Written by John Farey, August 2012                 ##
 ########################################################
+from __builtin__ import str
 
 '''
 Invoke with a text file location, class init reads and deciphers variables.
@@ -29,9 +30,9 @@ class Setup:
             raise
         data = namelist.readlines()
         
-        # Dictionary of all the vars in the file
-        self.settings = self._assign(self._trim(data))
-
+        # Dictionary of all the vars in the file and a seperate settings for boolean values        
+        self.settings, self.bool_settings = self._assign(self._trim(data))
+        
         namelist.close()
 
 # # # # # # #
@@ -49,7 +50,7 @@ class Setup:
         return data
 
     # x = string, checks type, returns name and val. Raises error for ambiguous
-    def _get_val(self, vars, x):
+    def _get_val(self, vars, bool_vars, x):
         t = x[0][0:2].lower()
         n = x[0][3:].lower().strip() # 3 -> 0 to keep type info
         v = x[1].strip()
@@ -57,9 +58,13 @@ class Setup:
        
         if t == 'ln':
             if v.find('true') is not -1:
-                vars[n] = True
+                if vars.has_key(n) != True:
+                    vars[n] = True
+                bool_vars[n] = True
             elif v.find('false') is not -1:
-                vars[n] = False
+                if vars.has_key(n) != True:
+                    vars[n] = False
+                bool_vars[n] = False
             else:
                 raise ValueError('Cannot assign %s to %s, must be boolean' 
                                                                     %(v,n))
@@ -94,7 +99,7 @@ class Setup:
         name = x[0][3:].lower().strip() # 3 -> 0 to keep type info    
         v = x[1].strip()
         index = '-1'
-        value = ''    
+        value = ''
         if t == 'ln':
             if v.find('true') is not -1:
                 value = True
@@ -149,13 +154,14 @@ class Setup:
     # Returns tidy dictionary of var names and values
     def _assign(self, data):
         vars = {}
+        bool_vars = {}
         for line in data:
             x = line.split('=', 2)
-            self._get_val(vars, x)
+            self._get_val(vars, bool_vars, x)
 #            n,v = self._get_val(x)
 #            vars[n] = v
 
-        return vars
+        return vars, bool_vars
 
     def strip_comments(self,line):
         line = line.rsplit('!')[0].strip()
@@ -186,11 +192,15 @@ class Setup:
                     line_without_comments = self.strip_comments(line)
                     if line_without_comments == '':
                         continue
+                    print line_without_comments
                     data_name, data_index, data_value = self._get_var_name_value(line_without_comments)
                     
                     if data_name == name:
                         #found the variable line
                         if data_index == index:
+                            if type(data_value).__name__ == 'bool' and type(value).__name__ != 'bool':
+                                  data[count]=self._replace_var_value(line, name, index, data_value, self.bool_settings[name])
+                                  continue
                             var_found = True
                             if data_value == value:
                                 break
