@@ -3,108 +3,131 @@ Editor for namelist.bdy file
 
 @author: Mr. Srikanth Nagella
 '''
-
+# pylint: disable=E1103
+# pylint: disable=no-name-in-module
+# pylint: disable=E1002
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import SIGNAL,SLOT 
+from PyQt4.QtCore import pyqtSignal
 
-import sys
 import ast
 
-class NameListEditor(QtGui.QDialog):
+class NameListEditor(QtGui.QWidget):
     '''
     This class creates a gui for the Namelist file options
     '''
-    new_settings={}
-
+    new_settings = {} #temporary variable to store the settings as they are changed in the GUI
+    mask_update = pyqtSignal(str) #fires when there are changes to the settings
     def __init__(self, setup):
         '''
         Constructor for setting up the gui using the settings
         '''
         super(NameListEditor, self).__init__()
         self.settings = setup.settings
-        self.setup    = setup
-        self.initUI()
-        
-    def initUI(self):
+        self.bool_settings = setup.bool_settings
+        self.setup = setup
+        self.init_ui()
+
+    def init_ui(self):
         '''
         Initialises the UI components of the GUI
         '''
         client = QtGui.QWidget(self)
         # Create the Layout to Grid
-        grid = QtGui.QGridLayout()      
-        
+        grid = QtGui.QGridLayout()
+
         # Loop through the settings and create widgets for each setting
         index = 0
         for setting in self.settings:
             # initialises setting Widget
             label = QtGui.QLabel(setting)
-            if type(self.settings[setting]).__name__ in ['str','float','double','int','time','dict']:                                               
-                text  = QtGui.QLineEdit(self)
+            if type(self.settings[setting]).__name__ in ['str', 'float', 'double',
+                                                         'int', 'time', 'dict']:
+                text = QtGui.QLineEdit(self)
                 text.setText(str(self.settings[setting]))
-                text.textChanged.connect(lambda value=setting,var_name=setting: self.labelChanged(value,var_name))
+                text.textChanged.connect(lambda value=setting,\
+                                         var_name=setting: self.label_changed(value, var_name))
+                if self.bool_settings.has_key(setting):
+                    chkbox = QtGui.QCheckBox(self)
+                    chkbox.setChecked(self.bool_settings[setting])
+                    chkbox.stateChanged.connect(lambda value=setting,\
+                                                var_name=setting:\
+                                                self.state_changed(value, var_name))
+                    grid.addWidget(chkbox, index, 0)
+
             elif type(self.settings[setting]).__name__ == 'bool':
                 text = QtGui.QComboBox(self)
-                text.insertItem(0,'True')
-                text.insertItem(1,'False')                
+                text.insertItem(0, 'True')
+                text.insertItem(1, 'False')
                 if self.settings[setting]:
                     text.setCurrentIndex(0)
                 else:
                     text.setCurrentIndex(1)
-                text.currentIndexChanged.connect(lambda value=setting, var_name=setting: self.comboIndexChanged(value,var_name))
-            
-            grid.addWidget(label, index, 0)
-            grid.addWidget(text,  index, 1)
-            index=index+1
-            
+                text.currentIndexChanged.connect(lambda value=setting,\
+                                                 var_name=setting:\
+                                                 self.combo_index_changed(value, var_name))
+
+            grid.addWidget(label, index, 1)
+            grid.addWidget(text, index, 2)
+            index = index+1
+
         client.setLayout(grid)
-        
         #scrollbars
-        scrollArea = QtGui.QScrollArea(self)
-        scrollArea.setWidget(client)
-        
+        scroll_area = QtGui.QScrollArea(self)
+        scroll_area.setWidget(client)
+
         #save cancel buttons
-        btnWidget = QtGui.QWidget(self)
-        hboxLayout = QtGui.QHBoxLayout(self)
-        btnSave = QtGui.QPushButton('Save')
-        btnSave.clicked.connect(self._btn_save_callback)
-        self.btnCancel = QtGui.QPushButton('Cancel')
-        self.btnCancel.clicked.connect(self._btn_cancel_callback)
-        hboxLayout.addWidget(btnSave)
-        hboxLayout.addWidget(self.btnCancel)
-        btnWidget.setLayout(hboxLayout)
-        
-        boxLayout = QtGui.QVBoxLayout(self)
-        boxLayout.addWidget(scrollArea)
-        boxLayout.addWidget(btnWidget)
-        
-        
-        self.setLayout(boxLayout) 
-        #set the Dialog title
-        self.setWindowTitle("PyNEMO Settings Editor")           
-        #show the window           
+        btn_widget = QtGui.QWidget(self)
+        hbox_layout = QtGui.QHBoxLayout(self)
+        btn_save = QtGui.QPushButton('Save')
+        btn_save.clicked.connect(self._btn_save_callback)
+        self.btn_cancel = QtGui.QPushButton('Cancel')
+        self.btn_cancel.clicked.connect(self._btn_cancel_callback)
+        hbox_layout.addWidget(btn_save)
+        hbox_layout.addWidget(self.btn_cancel)
+        btn_widget.setLayout(hbox_layout)
+
+        box_layout = QtGui.QVBoxLayout(self)
+        box_layout.addWidget(scroll_area)
+        box_layout.addWidget(btn_widget)
+
+        self.setLayout(box_layout)
+        #show the window
         self.show()
-        
-    def labelChanged(self,value,name):
+
+    def label_changed(self, value, name):
+        """ callback when the text is changed in the text box"""
         self.new_settings[name] = unicode(value).encode('utf_8')
-#        print self.new_settings
-        
-    def comboIndexChanged(self,value,name):
+
+    def combo_index_changed(self, value, name):
+        """ callback when the True/False drop down for the settings which has boolean value
+        is changed"""
         if value == 0:
             self.new_settings[name] = True
         else:
             self.new_settings[name] = False
-            
+
+    def state_changed(self, state, name):
+        """ callback when the check box  state is changed. This updates the bool_setting """
+        if state == QtCore.Qt.Checked:
+            self.bool_settings[name] = True
+        else:
+            self.bool_settings[name] = False
+
     def _btn_save_callback(self):
+        """ callback when save button is clicked. this method writes takes the settings values in
+        GUI and write them back to file."""
         #copy the the modified values to settings and call the setup save
-        print self.settings
         for setting in self.new_settings:
-            if (type(self.settings[setting]).__name__ == 'dict') & (type(self.new_settings[setting]).__name__ != 'dict') :
+            if (type(self.settings[setting]).__name__ == 'dict') & \
+                (type(self.new_settings[setting]).__name__ != 'dict'):
                 self.new_settings[setting] = ast.literal_eval(self.new_settings[setting])
             self.settings[setting] = self.new_settings[setting]
-        print self.settings
+
         self.setup.settings = self.settings
-        self.setup.write()
-    
+        self.setup.write() #write settings back to file
+        self.mask_update.emit(self.settings['bathy'])
+
     def _btn_cancel_callback(self):
+        """ callback when cancel button is clicked """
         self.close()
 
