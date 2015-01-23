@@ -208,6 +208,7 @@ class NemoNavigationToolbar(NavigationToolbar):
                 self.zoom()
             elif self._actions['rectangle'].isChecked() == True:
                 self._actions['rectangle'].setChecked(False)
+                self.drawing_tool.emit("") # clear the rectangle selector
             self._active = None
             self.drawing_tool.emit('freehand')
             self._update_buttons_checked()
@@ -223,6 +224,7 @@ class NemoNavigationToolbar(NavigationToolbar):
                 self.zoom()
             elif self._actions['freehand'].isChecked() == True:
                 self._actions['freehand'].setChecked(False)
+                self.drawing_tool.emit("") # clear the freehand selector
             self._active = None
             self.drawing_tool.emit('rectangle')
             self._update_buttons_checked()

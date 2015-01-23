@@ -18,7 +18,7 @@ class PolygonEditor(object):
     '''
 
     show_verts = True
-    epsilon = 5 #pixels threshold
+    epsilon = 1 #threshold
     def __init__(self, axis, canvas):
         '''
         initialises the editable polygon object
@@ -47,7 +47,6 @@ class PolygonEditor(object):
             self.xy_values = np.array([(xval, yval), ])
         else:
             self.xy_values = np.concatenate((self.xy_values, [[xval, yval], ]), axis=0)
-        print self.xy_values, self.xy_values.shape[0]
         self.refresh()
 
     def refresh(self):
@@ -151,6 +150,8 @@ class PolygonEditor(object):
         if event.button != 1:
             return
         self._ind = self.get_index_under_point(event)
+        if self._ind == None:
+            self.insert_datapoint(event)
 
     def button_release_callback(self, event):
         """ callback to mouse release event """
@@ -255,6 +256,7 @@ class BoxEditor(object):
         """ disables or removes the box selector """
         self.reset_polygon()
         self.rectangle_selector.set_active(False)
+        self.canvas.draw()
 
     def reset_polygon(self):
         """ resets rectangle polygon """

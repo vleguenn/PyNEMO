@@ -5,7 +5,7 @@ Entry for the project
 '''
 
 import sys, getopt
-import pynemo.profile
+from . import profile
 import logging
 
 # Logging set to info
@@ -17,7 +17,7 @@ def main():
 
     setup_file = ''
     try:
-        opts, args_unused = getopt.getopt(sys.argv[1:], "hs:", ["setup="])
+        opts, dummy_args = getopt.getopt(sys.argv[1:], "hs:", ["setup="])
     except getopt.GetoptError:
         print "usage: pynemo -s <namelist.bdy> "
         sys.exit(2)
@@ -36,7 +36,7 @@ def main():
     #Logger
     #logger = logging.getLogger(__name__)
 
-    pynemo.profile.go(setup_file)
+    profile.go(setup_file)
 
 if __name__ == "__main__":
     main()
