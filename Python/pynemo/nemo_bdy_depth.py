@@ -9,15 +9,12 @@
 class Depth:
 
     def __init__(self):
-        def gen_depth(self):#, bdy_ind_i, bdy_ind_j, hmin): #, sco, hc):
-        '''
+        #def gen_depth(self):#, bdy_ind_i, bdy_ind_j, hmin): #, sco, hc):
+        
         #dst_zgr = '/work/jofa/grid/mesh_zgr_zps.nc'
-        bdy_ind_i = self.bdy_i[:,0]
-        bdy_ind_j = self.bdy_i[:,1]
-        nbdy = len(bdy_ind_i)
-        '''
-
-
+        #bdy_ind_i = self.bdy_i[:,0]
+        #bdy_ind_j = self.bdy_i[:,1]
+        #nbdy = len(bdy_ind_i)
         sco = self.settings['sco'] #False
         hc = self.settings['hc']#150
 
@@ -68,7 +65,7 @@ class Depth:
 
             # Replace deep levels that are not used with NaN
             wrk2[mbathy + 1 < k] = np.NaN
-`           wrk1[mbathy < k] = np.NaN
+            wrk1[mbathy < k] = np.NaN
 
 
             # Set u and v grid point depths

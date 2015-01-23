@@ -30,7 +30,6 @@ requirements:
 #    - nose
 #  imports:
 #    - nosetests
-    
 about:
   home: http://ccpforge.cse.rl.ac.uk/gf/project/pynemo/
   license:  CeCILL license

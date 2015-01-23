@@ -49,12 +49,13 @@ class Enter:
         for date in range(first_date, last_date + 1):
             nc = Dataset(sc_time[date], 'r')
             if key_vec:
+                pass
                 #nc_2 = Dataset
                 # FIX ME
 
             # We shouldnt have to worry about counters
             sc_bdy = np.zeros(nvar, sc_z_len, source_ind['ind'].shape[0],
-                                  source_ind['ind'].shape[1]))
+                                  source_ind['ind'].shape[1])
             ind_vec = {}
             # distinctive variable name since it gets lost in the huge loop
             for shoggoth in range(nvar):
@@ -109,15 +110,14 @@ class Enter:
         
             # Finished reading Source data
 
-            for depth_val in range(sc_z_len):
-                tmp_arrays = []
-                if not key_vec:
-                    tmp_arr.append(sc_arrays[0][:,:depth_val]
+            #for depth_val in range(sc_z_len):
+            #    tmp_arrays = []
+            #    if not key_vec:
+            #        tmp_arrays.append(sc_arrays[0][:,:depth_val]
 
-
-# # # # # # # 
 
     def _fv_mv_to_zero(self, scarr, indvec, sc_fields, pos):
+        
         for x in 'mv', 'fv':
             if not np.isnan(sc_fields[x][pos]):
                 ind_vec[x] = scarr == sc_fields[x][pos]
