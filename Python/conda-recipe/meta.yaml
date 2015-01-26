@@ -17,6 +17,7 @@ requirements:
     - scipy
     - netcdf4
     - matplotlib
+    - basemap
 
   run:
     - python
@@ -24,6 +25,7 @@ requirements:
     - scipy
     - netcdf4
     - matplotlib
+    - basemap
 
 #test:
 #  files:
