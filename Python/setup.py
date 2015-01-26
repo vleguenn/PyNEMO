@@ -40,7 +40,7 @@ setup(
       
       packages=['pynemo','pynemo.tests','pynemo.gui'],
       
-      install_requires=['netCDF4','scipy','numpy','matplotlib'],
+      install_requires=['netCDF4','scipy','numpy','matplotlib', 'basemap'],
       
       include_package_data=True,
       #The data files that needs to be included in packaging
