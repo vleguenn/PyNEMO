@@ -42,8 +42,10 @@ setup(
       
       install_requires=['netCDF4','scipy','numpy','matplotlib'],
       
+      include_package_data=True,
       #The data files that needs to be included in packaging
-      package_data={
+      package_data={'': ['gui/*.png'],
+                    
                     },
       #If files are needs outside the installed packages
       data_files=[],
