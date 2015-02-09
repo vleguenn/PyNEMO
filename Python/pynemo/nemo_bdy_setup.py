@@ -138,6 +138,11 @@ class Setup:
         if type(value).__name__ == 'bool':
             value = str(value).lower()
             new_value = str(new_value).lower()
+        elif type(value).__name__ == 'str': #an empty string need to search for ''
+            print value, new_value
+            if value == '':
+                value = '\'\''
+                new_value = '\''+new_value+'\''             
         return original_line.replace(value,new_value,1)
     
     def _get_var_name(self,line):
@@ -187,12 +192,13 @@ class Setup:
                 count = -1
                 var_found = False
                 for line in data:
+#                    print line
                     count = count + 1
                     #find the variable
                     line_without_comments = self.strip_comments(line)
                     if line_without_comments == '':
                         continue
-                    print line_without_comments
+                    #print line_without_comments
                     data_name, data_index, data_value = self._get_var_name_value(line_without_comments)
                     
                     if data_name == name:
@@ -200,7 +206,9 @@ class Setup:
                         if data_index == index:
                             if type(data_value).__name__ == 'bool' and type(value).__name__ != 'bool':
                                   data[count]=self._replace_var_value(line, name, index, data_value, self.bool_settings[name])
+#                                  print 'replaced the boolean value'
                                   continue
+#                            print 'not the boolean and continueing'
                             var_found = True
                             if data_value == value:
                                 break

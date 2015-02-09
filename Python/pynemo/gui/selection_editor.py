@@ -12,13 +12,15 @@ from matplotlib.artist import Artist
 from matplotlib.mlab import dist_point_to_segment
 from matplotlib.widgets import RectangleSelector
 
+
+polygon_alpha = 0.2
 class PolygonEditor(object):
     '''
     This edits the polygons drawn on the map
     '''
 
     show_verts = True
-    epsilon = 1 #threshold
+    epsilon = 3 #threshold
     def __init__(self, axis, canvas):
         '''
         initialises the editable polygon object
@@ -65,7 +67,7 @@ class PolygonEditor(object):
             self.reset_polygon()
         else: # more than 2 points if polygon is not created then creates one and draws
             if self.polygon == None:
-                self.polygon = Polygon(self.xy_values, animated=True)
+                self.polygon = Polygon(self.xy_values, animated=True, alpha=polygon_alpha)
                 self.polygon.add_callback(self.polygon_changed)
                 self.axis.add_patch(self.polygon)
             else:
@@ -244,7 +246,7 @@ class BoxEditor(object):
                               [x2_val, y2_val, ],
                               [x2_val, y1_val, ], ])
         self.reset_polygon()
-        self.polygon = Polygon(xy_values, animated=False)
+        self.polygon = Polygon(xy_values, animated=False, alpha=polygon_alpha)
         self.axes.add_patch(self.polygon)
         self.canvas.draw()
 

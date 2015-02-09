@@ -27,8 +27,9 @@ class InputWindow(QtGui.QDialog):
         self.mpl_widget = MatplotlibWidget()
 
         #connect namelistedit to matplotlibwidget
-        self.nl_editor.mask_update.connect(self.mpl_widget.set_bathymetry_file)
-        self.mpl_widget.set_bathymetry_file(setup.settings['bathy'])
+        self.nl_editor.bathymetry_update.connect(self.mpl_widget.set_bathymetry_file)
+        self.nl_editor.mask_update.connect(self.mpl_widget.save_mask_file)
+        self.mpl_widget.set_bathymetry_file(setup.settings['bathy'], setup.settings['mask_file'])
 
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(self.nl_editor)

@@ -16,7 +16,9 @@ class NameListEditor(QtGui.QWidget):
     This class creates a gui for the Namelist file options
     '''
     new_settings = {} #temporary variable to store the settings as they are changed in the GUI
-    mask_update = pyqtSignal(str) #fires when there are changes to the settings
+    bathymetry_update = pyqtSignal(str,str) #fires when there are changes to the settings
+    mask_update = pyqtSignal(str) #fires when there mask data to be saved is fired
+    
     def __init__(self, setup):
         '''
         Constructor for setting up the gui using the settings
@@ -125,7 +127,14 @@ class NameListEditor(QtGui.QWidget):
 
         self.setup.settings = self.settings
         self.setup.write() #write settings back to file
-        self.mask_update.emit(self.settings['bathy'])
+       
+        try:
+        #only emit the saving of mask file if the mask file name is set and boolean value is set 
+            if self.settings['mask_file'] is not None and self.bool_settings['mask_file']:
+                self.mask_update.emit(self.settings['mask_file'])
+        except KeyError:
+            print 'Set mask_file key in the setting .bdy file'
+        self.bathymetry_update.emit(self.settings['bathy'],self.settings['mask_file'])
 
     def _btn_cancel_callback(self):
         """ callback when cancel button is clicked """
