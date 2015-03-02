@@ -5,7 +5,7 @@ Entry for the project
 '''
 
 import sys, getopt
-from . import profile
+import profile
 import logging
 
 # Logging set to info

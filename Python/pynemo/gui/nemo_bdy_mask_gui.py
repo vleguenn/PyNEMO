@@ -11,6 +11,7 @@ import numpy as np
 from .selection_editor import PolygonEditor, BoxEditor
 import os.path
 from PyQt4.QtCore import pyqtSignal, pyqtSlot
+from pynemo.utils import gcoms_break_depth
 import logging
 
 mask_alpha = 0.3
@@ -21,6 +22,9 @@ class Mask(object):
     data = None
     bathy_data = None
     mask_file = None
+    min_depth = 200.0
+    mask_type = 0
+    
     def __init__(self, bathymetry_file=None, mask_file=None):
         """Initialises the Mask data"""
         self.set_mask_file(mask_file)
@@ -58,7 +62,7 @@ class Mask(object):
                 self.data = self.bathy_nc.variables['Bathymetry']
                 self.data = np.asarray(self.data[:, :])
                 self.data = np.around((self.data + .5).clip(0, 1))
-            self.bathy_data = self.bathy_nc.variables['Bathymetry']
+            self.bathy_data = self.bathy_nc.variables['Bathymetry'][:,:]
         except IOError:
             self.logger.error('Cannot open bathymetry file')
 
@@ -88,7 +92,43 @@ class Mask(object):
             tmp[pixels:-pixels, pixels:-pixels] = False
             self.data[tmp] = -1
 
+    def add_mask(self, index):
+        out_index = None
+        if self.mask_type == None:
+            out_index = index
+        elif self.mask_type == 1: #minimum depth
+            out_index = self._get_bathy_depth_index(index,self.min_depth)
+        elif self.mask_type == 2: # shelf break
+            dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
+            out_index = self._get_bathy_depth_index(index, shelf_break)
+        tmp = self.data[out_index]
+        tmp[tmp == 1] = -1
+        self.data[out_index] = tmp            
+        
+    def _get_bathy_depth_index(self, index, depth):
+        output_index = self.bathy_data < depth
+        output_index = np.logical_and(index,output_index)
+        return output_index
+    
+    def remove_mask(self,index):
+        out_index = None
+        if self.mask_type == None:
+            out_index = index
+        elif self.mask_type == 1: #minimum depth
+            out_index = self._get_bathy_depth_index(index,self.min_depth)
+        elif self.mask_type == 2: # shelf break
+            dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
+            out_index = self._get_bathy_depth_index(index, shelf_break)
+        tmp = self.data[out_index]
+        tmp[tmp == -1] = 1
+        self.data[out_index] = tmp   
+    
+    def set_minimum_depth_mask(self, depth):
+        self.min_depth = depth
 
+    def set_mask_type(self, mask_type):
+        self.mask_type = mask_type
+        
     def apply_mediterrian_mask(self):
         """ This is mediterrian mask specific for the test bathymetry file """
         tmp = self.data[0:59, 280:350]
@@ -141,38 +181,6 @@ class MatplotlibWidget(QtGui.QWidget):
                 self._drawing_tool.enable()
                 self.canvas.draw()
 
-#     def create_basemap(self):
-#         """ Draws the basemap and contour with mask information"""
-#         if self.mask == None:
-#             return
-#         #give some extra space for the mask to be shown on map
-#         minlon = self.mask.lon.min()-1
-#         maxlon = self.mask.lon.max()+1
-#         minlat = self.mask.lat.min()-1
-#         maxlat = self.mask.lat.max()+1
-# #        basemap = Basemap(projection='cyl', llcrnrlat=minlat, urcrnrlat=maxlat,\
-# #                    llcrnrlon=minlon, urcrnrlon=maxlon, resolution='c', ax=self.axes)
-#
-#         basemap = Basemap(projection='cea', llcrnrlat=minlat, urcrnrlat=maxlat,\
-#                     llcrnrlon=minlon, urcrnrlon=maxlon, resolution='c', ax=self.axes)
-#
-# #        basemap = Basemap(projection='merc', llcrnrlat=minlat, urcrnrlat=maxlat,\
-# #                    llcrnrlon=minlon, urcrnrlon=maxlon, resolution='c', ax=self.axes)
-#         basemap.drawcoastlines()
-#         # draw parallels and meridians.
-#         basemap.drawparallels(np.arange(-90., 91., 30.))
-#         basemap.drawmeridians(np.arange(-180., 181., 60.))
-#         basemap.drawmapboundary(fill_color='aqua')
-#         clevs = [-1, 0, 1]
-#         bathy_clevs = np.arange(-1,5300,100)
-#         x_vals, y_vals = basemap(self.mask.lon, self.mask.lat)
-#         basemap.contourf(x_vals, y_vals, self.mask.bathy_data, bathy_clevs ,
-#                            cmap=plt.get_cmap('GnBu'))#cmap=cm.s3pcpn)
-#         basemap.contourf(x_vals, y_vals, self.mask.data, clevs,
-#                            cmap=plt.get_cmap('autumn'), alpha=mask_alpha)
-# #        basemap.contourf(x_vals, y_vals, )
-# #        plt.title("Equidistant Cylindrical Projection")
-#         self.canvas.draw()
     def create_basemap(self):
         """ Draws the basemap and contour with mask information"""
         if self.mask == None:
@@ -183,39 +191,21 @@ class MatplotlibWidget(QtGui.QWidget):
         minlat = self.mask.lat.min()-1
         maxlat = self.mask.lat.max()+1
 
-#        basemap = Basemap(projection='cyl', llcrnrlat=minlat, urcrnrlat=maxlat,\
-#                    llcrnrlon=minlon, urcrnrlon=maxlon, resolution='c', ax=self.axes)
-
-#        basemap = Basemap(projection='tmerc', llcrnrlat=minlat, urcrnrlat=maxlat,\
-#                    llcrnrlon=minlon, urcrnrlon=maxlon, resolution='c', lon_0=-4.36,
-#                     lat_0=54.7,ax=self.axes)
-#        basemap = Basemap(projection='merc', llcrnrlat=minlat, urcrnrlat=maxlat,\
-#                    llcrnrlon=minlon, urcrnrlon=maxlon, resolution='c', ax=self.axes)
-#        basemap.drawcoastlines()
-        # draw parallels and meridians.
-#        basemap.drawparallels(np.arange(-90., 91., 30.))
-#        basemap.drawmeridians(np.arange(-180., 181., 60.))
-#        basemap.drawmapboundary(fill_color='aqua')
         clevs = [-1, 0, 1]
         bathy_clevs = np.arange(-1, 5300, 100)
         x = np.arange(0, self.mask.lon.shape[0])
         y = np.arange(0, self.mask.lon.shape[1])
         x_vals, y_vals = np.meshgrid(y, x)
-#        x_vals = self.mask.lon
-#        y_vals = self.mask.lat
         Z = self.mask.bathy_data[...].astype(np.float64)
         self.axes.contourf(x_vals, y_vals, Z, 10, cmap=plt.get_cmap('GnBu'))#cmap=cm.s3pcpn)
         self.axes.contourf(x_vals, y_vals, self.mask.data, 5, cmap=plt.get_cmap('autumn'),\
                            alpha=mask_alpha)
-#        basemap.contourf(x_vals, y_vals, )
-#        plt.title("Equidistant Cylindrical Projection")
         self.canvas.draw()
 
     def add_mask(self):
         """ adds the selected region in the drawing tool to the mask """
         if self._drawing_tool_name != "" and self.mask != None:
             if self._drawing_tool.polygon != None:
-#                grid = zip(self.mask.lon.ravel(), self.mask.lat.ravel())
                 x = np.arange(0, self.mask.lon.shape[0])
                 y = np.arange(0, self.mask.lon.shape[1])
                 x_vals, y_vals = np.meshgrid(y, x)
@@ -225,9 +215,7 @@ class MatplotlibWidget(QtGui.QWidget):
                 p_path = Path(self._drawing_tool.polygon.xy)
                 index = p_path.contains_points(grid)
                 index = index.reshape(self.mask.lon.shape)
-                tmp = self.mask.data[index]
-                tmp[tmp == 1] = -1
-                self.mask.data[index] = tmp
+                self.mask.add_mask(index)
                 self._drawing_tool.reset()
                 self.axes.clear()
                 self.create_basemap()
@@ -236,7 +224,6 @@ class MatplotlibWidget(QtGui.QWidget):
         """ removes the selected region in the drawing tool from the mask """
         if self._drawing_tool_name != "" and self.mask != None:
             if self._drawing_tool.polygon != None:
-#                grid = zip(self.mask.lon.ravel(), self.mask.lat.ravel())
                 x = np.arange(0, self.mask.lon.shape[0])
                 y = np.arange(0, self.mask.lon.shape[1])
                 x_vals, y_vals = np.meshgrid(y, x)
@@ -246,9 +233,7 @@ class MatplotlibWidget(QtGui.QWidget):
                 p_path = Path(self._drawing_tool.polygon.xy)
                 index = p_path.contains_points(grid)
                 index = index.reshape(self.mask.lon.shape)
-                tmp = self.mask.data[index]
-                tmp[tmp == -1] = 1
-                self.mask.data[index] = tmp
+                self.mask.remove_mask(index)
                 self._drawing_tool.reset()
                 self.axes.clear()
                 self.create_basemap()
@@ -295,6 +280,10 @@ class NemoNavigationToolbar(NavigationToolbar):
                           ('Border', 'Border selection', 'border', 'border'),\
                           ('plus', 'Add mask', 'add_mask', 'add_mask'),\
                           ('minus', 'Remove mask', 'remove_mask', 'remove_mask'),\
+                          (None, None, None, None),\
+                          ('Normal','Normal Mask','normal_mask','normal_mask'),\
+                          ('MinHeight', 'Min Height Mask', 'min_height_mask', 'min_height_mask'),\
+                          ('ShelfBreak','Shelf Break Mask','shelf_break_mask','shelf_break_mask'),\
                           (None, None, None, None)\
                           )
         NavigationToolbar.__init__(self, canvas, parent)
@@ -305,7 +294,13 @@ class NemoNavigationToolbar(NavigationToolbar):
         self._actions['border'].setIcon(set_icon('border.png'))
         self._actions['add_mask'].setIcon(set_icon('plus.png'))
         self._actions['remove_mask'].setIcon(set_icon('minus.png'))
-
+        self._actions['normal_mask'].setIcon((set_icon('all_mask.png')))
+        self._actions['normal_mask'].setCheckable(True)
+        self._actions['min_height_mask'].setIcon((set_icon('min_height.png')))
+        self._actions['min_height_mask'].setCheckable(True)
+        self._actions['shelf_break_mask'].setIcon((set_icon('shelf_break.png')))
+        self._actions['shelf_break_mask'].setCheckable(True)
+        self.update_height_mask(0)
 
     def freehand(self, *dummy):
         """ callback for freehand button clicked """
@@ -358,27 +353,36 @@ class NemoNavigationToolbar(NavigationToolbar):
         elif self._actions['freehand'].isChecked() == True:
             return 'freehand'
         return None
+    
+    def normal_mask(self, *dummy):
+        """ enable the normal mask button """
+        self.update_height_mask(0)
+    
+    def min_height_mask(self, *dummy):
+        """ enables the minimum height mask """
+        self.update_height_mask(1)
+    
+    def shelf_break_mask(self, *dummy):
+        """ enables the shelf break mask button """
+        self.update_height_mask(2)
+    
+    def update_height_mask(self, btn_id):
+        """ update the height mask buttons in the interface """
+        self._actions['normal_mask'].setChecked(False)
+        self._actions['min_height_mask'].setChecked(False)
+        self._actions['shelf_break_mask'].setChecked(False)
+        try:
+            self.parent.mask.mask_type = btn_id
+        except AttributeError:
+            pass
+        if btn_id == 0:
+            self._actions['normal_mask'].setChecked(True)
+        elif btn_id == 1:
+            self._actions['min_height_mask'].setChecked(True)
+        elif btn_id == 2:
+            self._actions['shelf_break_mask'].setChecked(True)
 
 def set_icon(name):
     """ Creates an icon based on the file found in the module directory with input name"""
     return QtGui.QIcon(os.path.join(os.path.dirname(__file__), name))
 
-#if __name__ == '__main__':
-#    mask = Mask('..\..\data\grid_C\NNA_R12_bathy_meter_bench.nc')
-#    app = QtGui.QApplication(sys.argv)
-#    widget = MatplotlibWidget()
-#    widget.set_bathymetry_file('..\..\data\grid_C\NNA_R12_bathy_meter_bench.nc')
-#    #mask=mask)
-#    fig = widget.figure
-#    ax = widget.axes#fig.add_subplot(111)
-#     map = Basemap(projection='cyl',llcrnrlat=-90,urcrnrlat=90,\
-#             llcrnrlon=-180,urcrnrlon=180,resolution='c', ax=ax)
-#     map.drawcoastlines()
-#     map.fillcontinents(color='coral',lake_color='aqua')
-#         # draw parallels and meridians.
-#     map.drawparallels(np.arange(-90.,91.,30.))
-#     map.drawmeridians(np.arange(-180.,181.,60.))
-#     map.drawmapboundary(fill_color='aqua')
-#    fig.canvas.draw()
-#    widget.show()
-#    app.exec_()
