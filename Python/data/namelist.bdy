@@ -52,8 +52,8 @@
 !-----------------------------------------------------------------------
     ln_coords_file = .true.               !  =T : produce bdy coordinates files
     cn_coords_file = 'coordinates.bdy.nc' !  name of bdy coordinates files (if ln_coords_file=.TRUE.)
-    ln_mask_file   = .false.              !  =T : read mask from file
-    cn_mask_file   = ''                   !  name of mask file (if ln_mask_file=.TRUE.)
+    ln_mask_file   = .true.              !  =T : read mask from file
+    cn_mask_file   = 'F:/NEMO_bdy_tools/mask_file1.nc'                   !  name of mask file (if ln_mask_file=.TRUE.)
     ln_dyn2d       = .true.               !  boundary conditions for barotropic fields
     ln_dyn3d       = .true.               !  boundary conditions for baroclinic velocities
     ln_tra         = .true.               !  boundary conditions for T and S
@@ -95,3 +95,5 @@
     nn_alpha    = 0               !  Euler rotation angle
     nn_beta     = 0               !  Euler rotation angle
     nn_gamma    = 0               !  Euler rotation angle
+	rn_mask_max_depth = 100.0	  !  Maximum depth to be ignored for the mask
+	rn_mask_shelfbreak_dist = 200.0    !  Distance from the shelf break

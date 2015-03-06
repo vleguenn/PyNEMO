@@ -23,12 +23,15 @@ class Mask(object):
     bathy_data = None
     mask_file = None
     min_depth = 200.0
+    shelfbreak_dist = 200.0
     mask_type = 0
     
-    def __init__(self, bathymetry_file=None, mask_file=None):
+    def __init__(self, bathymetry_file=None, mask_file=None, min_depth = 200.0, shelfbreak_dist = 200.0):
         """Initialises the Mask data"""
         self.set_mask_file(mask_file)
         self.set_bathymetry_file(bathymetry_file)
+        self.min_depth = min_depth
+        self.shelfbreak_dist = shelfbreak_dist
         self.logger = logging.getLogger(__name__)
 
     def set_mask_file(self, mask_file):
@@ -94,7 +97,7 @@ class Mask(object):
 
     def add_mask(self, index):
         out_index = None
-        if self.mask_type == None:
+        if self.mask_type == None or self.mask_type == 0:
             out_index = index
         elif self.mask_type == 1: #minimum depth
             out_index = self._get_bathy_depth_index(index,self.min_depth)
@@ -144,13 +147,21 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 # pylint: disable=E1002
 class MatplotlibWidget(QtGui.QWidget):
     """This class is a QWidget for pyNEMO mask plot"""
-    def __init__(self, parent=None, mask=None, *args, **kwargs):
+    min_depth = 200.0
+    shelfbreak_dist = 200.0
+    mask_type = 0
+    def __init__(self, parent=None, mask=None, min_depth = 200.0, shelfbreak_dist = 200.0,*args, **kwargs):
         """ Initialises the mask, matplot and the navigation toolbar """
         super(MatplotlibWidget, self).__init__(parent)
         #QtGui.QWidget.__init__(self, parent)
         self.figure = Figure(*args, **kwargs)
         self.canvas = FigureCanvas(self.figure)
         self.mask = mask
+        self.min_depth = min_depth
+        self.shelfbreak_dist = shelfbreak_dist
+        if self.mask is not None:
+            self.mask.min_depth = min_depth
+            self.mask.shelfbreak_dist = shelfbreak_dist
         self.toolbar = NemoNavigationToolbar(self.canvas, self)
         self.toolbar.drawing_tool.connect(self.drawing_tool_callback)
         self.axes = self.figure.add_subplot(111)
@@ -248,10 +259,16 @@ class MatplotlibWidget(QtGui.QWidget):
             self.axes.clear()
             self.create_basemap()
 
-    @pyqtSlot(str,str)
+    def set_mask_type(self,type):
+        """ Sets the mask type """
+        self.mask_type = type
+        self.mask.mask_type = type
+        
+    @pyqtSlot(str, str)
     def set_bathymetry_file(self, bathymetry_filename, mask_file):
         """ Set the bathymetry file """
-        self.mask = Mask(bathymetry_filename, mask_file)
+        self.mask = Mask(bathymetry_filename, mask_file, self.min_depth, self.shelfbreak_dist)
+        self.mask.mask_type = self.mask_type
         self.create_basemap()
         
     @pyqtSlot(str)
@@ -259,7 +276,15 @@ class MatplotlibWidget(QtGui.QWidget):
         """ Save the mask data to mask_file """
         if self.mask is not None:
             self.mask.save_mask(mask_file)
-
+            
+    @pyqtSlot(float, float)
+    def set_mask_settings(self, min_depth, shelfbreak_dist):
+        """ Mask settings update """
+        self.min_depth = min_depth
+        self.shelfbreak_dist = shelfbreak_dist
+        self.mask.min_depth = min_depth
+        self.mask.shelfbreak_dist = shelfbreak_dist
+        
 class NemoNavigationToolbar(NavigationToolbar):
     """ This is custom toolbar for the nemo which includes additional buttons
     for drawing tool and (add,remove) for mask in addtion to default NavigationToolbar
@@ -372,7 +397,7 @@ class NemoNavigationToolbar(NavigationToolbar):
         self._actions['min_height_mask'].setChecked(False)
         self._actions['shelf_break_mask'].setChecked(False)
         try:
-            self.parent.mask.mask_type = btn_id
+            self.parent.set_mask_type(btn_id)
         except AttributeError:
             pass
         if btn_id == 0:

@@ -18,7 +18,7 @@ class NameListEditor(QtGui.QWidget):
     new_settings = {} #temporary variable to store the settings as they are changed in the GUI
     bathymetry_update = pyqtSignal(str,str) #fires when there are changes to the settings
     mask_update = pyqtSignal(str) #fires when there mask data to be saved is fired
-    
+    mask_settings_update = pyqtSignal(float, float) #fires when there is mask settings update
     def __init__(self, setup):
         '''
         Constructor for setting up the gui using the settings
@@ -79,7 +79,7 @@ class NameListEditor(QtGui.QWidget):
 
         #save cancel buttons
         btn_widget = QtGui.QWidget(self)
-        hbox_layout = QtGui.QHBoxLayout(self)
+        hbox_layout = QtGui.QHBoxLayout(self)      
         btn_save = QtGui.QPushButton('Save')
         btn_save.clicked.connect(self._btn_save_callback)
         self.btn_cancel = QtGui.QPushButton('Cancel')
@@ -134,6 +134,12 @@ class NameListEditor(QtGui.QWidget):
                 self.mask_update.emit(self.settings['mask_file'])
         except KeyError:
             print 'Set mask_file key in the setting .bdy file'
+            
+        try:
+            self.mask_settings_update.emit(float(self.settings['mask_max_depth']), float(self.settings['mask_shelfbreak_dist']))
+        except KeyError:
+            print 'Set the mask setting mask_max_depth and mask_shelfbreak_dist'
+            
         self.bathymetry_update.emit(self.settings['bathy'],self.settings['mask_file'])
 
     def _btn_cancel_callback(self):

@@ -188,7 +188,7 @@ def _replace_var_value(original_line, value, new_value):
         if value == '':
             value = '\'\''
             new_value = '\''+new_value+'\''
-    return original_line.replace(value, new_value, 1)
+    return original_line.replace(str(value), str(new_value), 1)
 
 def _get_var_name(line):
     """ parses the line to find the name and if it is part of the array '()'
