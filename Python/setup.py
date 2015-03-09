@@ -38,7 +38,7 @@ setup(
       
       keywords='Oceanography NEMO',
       
-      packages=['pynemo','pynemo.tests','pynemo.gui'],
+      packages=['pynemo','pynemo.tests','pynemo.gui','pynemo.utils'],
       
       install_requires=['netCDF4','scipy','numpy','matplotlib', 'basemap'],
       
