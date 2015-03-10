@@ -3,6 +3,8 @@ This is unit test for gcoms_break_depth
 
 @author: Mr. Srikanth Nagella
 '''
+# pylint: disable=E1103
+# pylint: disable=no-name-in-module
 import unittest
 from pynemo.utils import gcoms_break_depth
 from netCDF4 import Dataset

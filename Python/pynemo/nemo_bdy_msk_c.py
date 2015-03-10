@@ -18,7 +18,8 @@
 # Attributes: bdy_msk
 
 # reduced option not implemented
-
+# pylint: disable=E1103
+# pylint: disable=no-name-in-module
 from netCDF4 import Dataset
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D

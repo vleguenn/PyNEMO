@@ -1,49 +1,47 @@
-#
-#
-# Written by John Kazimierz Farey, Sep 2012
-# Port of Matlab code of James Harle
-#
-#
-
 '''
-Count var is not implemented, I suggest handling multi entry files
-via splitting up in src_time module
-
-Initial arguments:
-setup: dictionary
-SourceCoord : source coordinates object
-DstCoord: destination coordinates object
-Grid: t, u, v or f. Decides how to run
-var_nam: netcdf file variable names
-Grid_2: Rotation grid, defaults to None if unneeded
-fnames_2: source_time dictionary of secondary grid for rotation
-years: year of data to be extracted
-months: month of data to be extracted
+This Module defines the extraction of the data from the source grid and does the 
+interpolation onto the destination grid
+This is a port of Matlab code written by James Harle
+@author: John Kazimierz Farey
+@author: Mr. Srikanth Nagella
 '''
 
+# pylint: disable=E1103
+# pylint: disable=no-name-in-module
 
+# External Imports
 from calendar import monthrange, isleap
 from datetime import datetime
-
 import numpy as np
 import scipy.spatial as sp
 from netCDF4 import Dataset
 from netcdftime import utime
 from nemo_bdy_lib import rot_rep
-#from netCDF4 import date2num, num2date
-
-import nemo_bdy_grid_angle
-from nemo_bdy_lib import sub2ind
-
 import copy # DEBUG ONLY- allows multiple runs without corruption
 import logging
 
+# Local Imports
+import nemo_bdy_grid_angle
+from nemo_bdy_lib import sub2ind
+
+#TODO: Convert the 'F' ordering to 'C'
 class Extract:
 
-
-                # SourceCoord, DstCoord, grid, Setup dict, 
     def __init__(self, setup, SourceCoord, DstCoord, Grid, var_nam, 
                  Grid_2=None, fnames_2=None, years=[1979], months=[11]):
+        """Initialises the Extract object.
+        
+        Keyword arguments:
+        setup -- nemo setup object containing the settings nemo_bdy_setup.Setup
+        SourceCoord -- Source Grid coordinates
+        DstCoord -- Destination Grid coordinates
+        Grid -- Grid Information 't', 'u', 'v' or 'f' and source time
+        var_name -- netcdf file variable names
+        Grid_2 -- A secondary grid to specify a rotation (default None)
+        fnames_2 -- source_time dictionary of secondary grid for rotation (default None)
+        years -- A list of years to extract (default [1979])
+        months -- A list of months to extract (default [11])
+        """
 
         self.logger = logging.getLogger(__name__)
         self.g_type = Grid.grid_type
@@ -340,29 +338,14 @@ class Extract:
         self.d_bdy = {}
         for v in range(self.nvar):
             self.d_bdy[self.var_nam[v]] = {}
-            
-            
-        #    for year in years:
-        #        self.d_bdy[self.var_nam[v]][year] = {'data': None, 'date': {}}
-
-        
-        # This loop should be removed. Once the module is initialised 
-        # necessary attributes, the extract_month function should be called
-        # externally 
-        #
-        # Extract source data level by level and interpolate onto bc points
-        # Determine stretch factors for calendar out based on calendar in
-        #for year in years:
-        #    for month in months:
-        #        self.extract_month(year, month)
-        
-# # # # # # # # # # # # # # # # # # # # #
-
-     # # # # # # # # # 
-    # # Functions # # 
-   # # # # # # # # #    
-
+       
     def extract_month(self, year, month):
+        """Extracts monthly data and interpolates onto the destination grid
+        
+        Keyword arguments:
+        year -- year of data to be extracted
+        month -- month of the year to be extracted
+        """
         self.logger.info('extract_month function called')
         # Check year entry exists in d_bdy, if not create it.
         for v in range(self.nvar):
@@ -504,7 +487,7 @@ class Extract:
                     sc_array[0] *= meta_data[vn]['sf']
                 if not np.isnan(np.sum(meta_data[vn]['os'])):
                     sc_array[0] += meta_data[vn]['os']
-                
+
                 if self.key_vec:
                     sc_array[1][t_mask == 0] = np.NaN
                     if not np.isnan(np.sum(meta_data[vn + 1]['sf'])):
@@ -525,18 +508,18 @@ class Extract:
                         tmp_arr[1] = sc_array[1][0,dep,:,:].flatten(1) #[:,:,dep]
                         # Include in the collapse the rotation from the
                         # grid to real zonal direction, ie ij -> e
-                        sc_bdy[vn, dep, :] = (tmp_arr[0][ind[:]] * self.gcos - 
+                        sc_bdy[vn, dep, :] = (tmp_arr[0][ind[:]] * self.gcos -
                                               tmp_arr[1][ind[:]] * self.gsin)
                         # Include... meridinal direction, ie ij -> n
                         sc_bdy[vn+1, dep, :] = (tmp_arr[1][ind[:]] * self.gcos +
                                                 tmp_arr[0][ind[:]] * self.gsin)
-                
+
                 # End depths loop
                 self.logger.info(' END DEPTHS LOOP ')
             # End Looping over vars
             self.logger.info(' END VAR LOOP ')
             # ! Skip sc_bdy permutation
-            
+
             x = sc_array[0]
             y = np.isnan(x)
             z = np.invert(np.isnan(x))
@@ -555,11 +538,11 @@ class Extract:
                 # any invalid pts using our eldritch data_ind
                 self.logger.info('DIST TOT ZEROS BEFORE %s', np.sum(self.dist_tot == 0))
                 self.dist_tot = (np.repeat(self.dist_tot, sc_z_len).reshape(
-                            self.dist_tot.shape[0], 
+                            self.dist_tot.shape[0],
                             self.dist_tot.shape[1], sc_z_len)).transpose(2,0,1)
                 self.dist_tot *= data_ind
                 self.logger.info('DIST TOT ZEROS %s', np.sum(self.dist_tot == 0))
-                
+
                 self.logger.info('DIST IND ZEROS %s', np.sum(data_ind == 0))
 
                 # Identify problem pts due to grid discontinuities 
@@ -591,11 +574,11 @@ class Extract:
 
                 # ? Attribute only used on first run so clear. 
                 del self.dist_tot
-                
+
             # weighted averaged onto new horizontal grid
             for vn in range(self.nvar):
                 self.logger.info(' sc_bdy %s %s', np.nanmin(sc_bdy), np.nanmax(sc_bdy))
-                dst_bdy = (np.nansum(sc_bdy[vn,:,:,:] * dist_wei, 2) / 
+                dst_bdy = (np.nansum(sc_bdy[vn,:,:,:] * dist_wei, 2) /
                            dist_fac)
                 self.logger.info(' dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                 # Quick check to see we have not got bad values
@@ -605,7 +588,7 @@ class Extract:
                 # weight vector array and rotate onto dest grid
                 if self.key_vec:
                     # [:,:,:,vn+1]
-                    dst_bdy_2 = (np.nansum(sc_bdy[vn+1,:,:,:] * dist_wei, 2) / 
+                    dst_bdy_2 = (np.nansum(sc_bdy[vn+1,:,:,:] * dist_wei, 2) /
                                  dist_fac)
                     self.logger.info('time to to rot and rep ')
                     self.logger.info('%s %s',  np.nanmin(dst_bdy), np.nanmax(dst_bdy))
@@ -621,7 +604,7 @@ class Extract:
                     self.first = False
 
                 dst_bdy = (np.nansum(dst_bdy.flatten(1)[self.id_121] * 
-                           self.tmp_filt, 2) / np.sum(self.tmp_filt * 
+                           self.tmp_filt, 2) / np.sum(self.tmp_filt *
                            tmp_valid, 2))
                 # Set land pts to zero
 
@@ -636,21 +619,21 @@ class Extract:
                 if not self.isslab:
                     # If all else fails fill down using deepest pt
                     dst_bdy = dst_bdy.flatten(1)
-                    dst_bdy += ((dst_bdy == 0) * 
-                                dst_bdy[data_ind].repeat(sc_z_len)) 
+                    dst_bdy += ((dst_bdy == 0) *
+                                dst_bdy[data_ind].repeat(sc_z_len))
                     # Weighted averaged on new vertical grid
-                    dst_bdy = (dst_bdy[self.z_ind[:,0]] * self.z_dist[:,0] + 
+                    dst_bdy = (dst_bdy[self.z_ind[:,0]] * self.z_dist[:,0] +
                                dst_bdy[self.z_ind[:,1]] * self.z_dist[:,1])
                     data_out = dst_bdy.reshape(self.dst_dep.shape, order='F')
 
                     # If z-level replace data below bed !!! make stat
                     # of this as could be problematic
                     ind_z = self.bdy_z.repeat(len(self.dst_dep))
-                    ind_z = ind_z.reshape(len(self.dst_dep), 
+                    ind_z = ind_z.reshape(len(self.dst_dep),
                                           len(self.bdy_z), order='F')
                     ind_z -= self.dst_dep
                     ind_z = ind_z < 0
-                    
+
                     data_out[ind_z] = np.NaN
                 else:
                     data_out = dst_bdy
@@ -660,10 +643,10 @@ class Extract:
                     # Create entry with singleton 3rd dimension
                     entry['data'] = np.array([data_out])
                 else:
-                    entry['data'] = np.concatenate((entry['data'], 
+                    entry['data'] = np.concatenate((entry['data'],
                                                    np.array([data_out])))
                 entry['date'] = sc_time[f] #count skipped
-            
+
             nc.close()
             if self.key_vec:
                 nc_2.close()
@@ -672,27 +655,43 @@ class Extract:
     # end month
 #end year
 # End great loop of crawling chaos
-            
-                
-# # # # # # # # # # # # # # # # #                        
 
 
     # Allows reference of two equal sized but misshapen arrays
     # equivalent to Matlab alpha(beta(:)) 
     def _flat_ref(self, alpha, beta):
+        """Extract input index elements from array and order them in Fotran array
+        and returns the new array
+        
+        Keywork arguments:
+        alpha -- input array
+        beta -- index array 
+        """
         return alpha.flatten(1)[beta.flatten(1)].reshape(
                                                    beta.shape, order='F')
-    
+
     # Convert numeric date from source to dest
-    def convert_date(self, date):
-        val = self.S_cal.num2date(date)
-        return self.D_cal.date2num(val)
-    
+ #   def convert_date(self, date):
+ #       val = self.S_cal.num2date(date)
+ #       return self.D_cal.date2num(val)
+
     def convert_date_to_destination_num(self, date):
+        """Converts the input date to destination calender and returns the number
+        
+        Keyword arguments:
+        date -- input date
+        """
         return self.D_cal.date2num(date)
 
-    # Translate Calendars
     def cal_trans(self, source, dest, year, month):
+        """Translate between calendars and return scale factor and number of days in month
+        
+        Keyword arguments:
+        source -- source calendar
+        dest -- destination calendar
+        year -- input year
+        month -- input month  
+        """
         vals = {'gregorian': 365. + isleap(year), 'noleap': 
                 365., '360_day': 360.}
         if source not in vals.keys():
@@ -709,11 +708,18 @@ class Extract:
 
     # BEWARE FORTRAN V C ordering
     # Replicates and tiles an array
-    def _trig_reptile(self, trig, size):
-        trig = np.transpose(trig, (2, 1, 0)) # Matlab 2 0 1
-        return np.tile(trig, (1, size, 1)) # Matlab size 1 1
+    #def _trig_reptile(self, trig, size):
+    #    trig = np.transpose(trig, (2, 1, 0)) # Matlab 2 0 1
+    #    return np.tile(trig, (1, size, 1)) # Matlab size 1 1
 
     def _get_meta_data(self, fname, var, source_dic):
+        """returns the netcdf meta data for input variable
+        
+        Keyword arguments:
+        fname -- netcdf file name/path
+        var -- variable to which the metadata need to be extracted
+        source_dic -- input/output metadata dictionary
+        """
         nc = Dataset(fname, 'r')
         try:
             source_att = nc.variables[var].ncattrs()

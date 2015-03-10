@@ -3,6 +3,8 @@ Rewritting the break depth implementation from matlab version
 
 @author: Mr. Srikanth Nagella
 '''
+# pylint: disable=E1103
+# pylint: disable=no-name-in-module
 import numpy as np
 import math
 #import matplotlib.pyplot as plt

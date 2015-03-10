@@ -3,12 +3,14 @@
 
 
 '''
+# pylint: disable=E1103
+# pylint: disable=no-name-in-module
 import numpy as np
 import scipy.spatial as sp
 from netCDF4 import Dataset
 import copy # DEBUG ONLY- allows multiple runs without corruption
-import nemo_bdy_grid_angle
-from nemo_bdy_lib import rot_rep
+from pynemo import nemo_bdy_grid_angle
+from pynemo.nemo_bdy_lib import rot_rep
 
 class Extract:
 
