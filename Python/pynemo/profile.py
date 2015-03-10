@@ -28,8 +28,8 @@ import nemo_bdy_source_coord as source_coord
 import nemo_bdy_dst_coord as dst_coord
 import nemo_bdy_ice
 import nemo_bdy_extr_tm3
-import nemo_bdy_tide3
-import nemo_bdy_tide_ncgen
+from tide import nemo_bdy_tide3
+from tide import nemo_bdy_tide_ncgen
 
 from netCDF4 import Dataset
 import numpy as np

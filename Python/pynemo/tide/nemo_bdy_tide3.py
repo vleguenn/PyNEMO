@@ -7,7 +7,7 @@ Module to extract constituents for the input grid mapped onto output grid
 # pylint: disable=E1103
 # pylint: disable=no-name-in-module
 import copy
-from pynemo import tpxo_extract_HC
+import tpxo_extract_HC
 import numpy as np
 from netCDF4 import Dataset
 from pynemo import nemo_bdy_grid_angle
