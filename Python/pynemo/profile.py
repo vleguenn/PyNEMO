@@ -37,6 +37,7 @@ from scipy.interpolate import interp1d
 
 import nemo_bdy_ncgen
 import nemo_bdy_ncpop
+from gui.nemo_bdy_mask import Mask as Mask_File
 #import pickle
 
 import logging
@@ -64,14 +65,18 @@ def go(setup_filepath=0):
     logger.info('Done Setup')
     # default file, region settingas
 
-    #This is to create mask. a future improvement will be to use GUI.
+    # Use mask from the file if exists otherwise use default mask from nemo_bdy_msk_c
     start = clock()
-    Mask = msk.Mask(settings['bathy'], med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
-
+    if Setup.bool_settings['mask_file'] and settings['mask_file'] is not None:
+        Mask =  Mask_File(settings['bathy'], settings['mask_file'])
+        bdy_msk = Mask.data
+    else:
+        Mask = msk.Mask(settings['bathy'], med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
+        bdy_msk = Mask.bdy_msk
     logger.info(clock() - start)
     logger.info('Done Mask')
 
-    bdy_msk = Mask.bdy_msk
+    
     DstCoord.bdy_msk = bdy_msk == 1
 
     start = clock()

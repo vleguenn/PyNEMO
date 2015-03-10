@@ -1,5 +1,5 @@
 '''
-
+Mask Class to hold the mask information and operation on mask
 
 @author: Mr. Srikanth Nagella
 '''
@@ -94,6 +94,7 @@ class Mask(object):
             self.data[tmp] = -1
 
     def add_mask(self, index):
+        """ Adds the masks for the given index values depending on the type of mask selected"""
         out_index = None
         if self.mask_type == None or self.mask_type == 0:
             out_index = index
@@ -111,11 +112,14 @@ class Mask(object):
             self.data[out_index] = tmp            
         
     def _get_bathy_depth_index(self, index, depth):
+        """ returns the indexes in the input index which have bathymetry depth greather than the 
+            input depth"""
         output_index = self.bathy_data < depth
         output_index = np.logical_and(index,output_index)
         return output_index
     
     def remove_mask(self,index):
+        """ Removes the mask for the given index values depending on the type of mask selected """
         out_index = None
         if self.mask_type == None:
             out_index = index
@@ -132,9 +136,12 @@ class Mask(object):
         self.min_depth = depth
 
     def set_mask_type(self, mask_type):
+        """ Sets the mask type """
         self.mask_type = mask_type
         
     def remove_small_regions(self, index):
+        """ Removes the small regions in the selection area and takes only the largest area
+            for mask"""
         #prepare the regions
         mask_data = np.zeros(self.data.shape)
         mask_data[index] = self.data[index]        
