@@ -1,5 +1,5 @@
 '''
-This Module defines the extraction of the data from the source grid and does the 
+This Module defines the extraction of the data from the source grid and does the
 interpolation onto the destination grid
 This is a port of Matlab code written by James Harle
 @author: John Kazimierz Farey
@@ -27,10 +27,10 @@ from nemo_bdy_lib import sub2ind
 #TODO: Convert the 'F' ordering to 'C'
 class Extract:
 
-    def __init__(self, setup, SourceCoord, DstCoord, Grid, var_nam, 
+    def __init__(self, setup, SourceCoord, DstCoord, Grid, var_nam,
                  Grid_2=None, fnames_2=None, years=[1979], months=[11]):
         """Initialises the Extract object.
-        
+
         Keyword arguments:
         setup -- nemo setup object containing the settings nemo_bdy_setup.Setup
         SourceCoord -- Source Grid coordinates
@@ -58,7 +58,7 @@ class Extract:
         self.var_nam = var_nam
         sc_z = SC.zt[0]
         sc_z_len = len(sc_z)
-        
+
         # We can infer rot_str and rot_dir
         if Grid_2:
             bdy_vel = Grid_2.bdy_i
@@ -71,7 +71,7 @@ class Extract:
             elif self.rot_str == 'v':
                 self.rot_dir = 'j'
             else:
-                raise ValueError('Invalid rotation grid grid_type: %s' 
+                raise ValueError('Invalid rotation grid grid_type: %s'
                                  %self.rot_str)
 
         dst_lon = DC.bdy_lonlat[self.g_type]['lon']
@@ -82,35 +82,33 @@ class Extract:
             dst_dep = np.zeros([1])
         self.isslab = len(dst_dep) == 1
         if dst_dep.size == len(dst_dep):
-            dst_dep = np.ones([1,len(dst_lon)])
+            dst_dep = np.ones([1, len(dst_lon)])
 
         # ??? Should this be read from settings?
         wei_121 = np.array([0.5, 0.25, 0.25])
 
-        #years = [1979]
-        #months = [11] #12
-        
         SC.lon = SC.lon.squeeze()
         SC.lat = SC.lat.squeeze()
-        
+
         # Make function of grid resolution
         fr = 0.1
 
         # infer key_vec
         if Grid_2 is not None:
             self.key_vec = True
-        else: 
+        else:
             self.key_vec = False
 
         num_bdy = len(dst_lon)
         self.nvar = len(self.var_nam)
         if self.key_vec:
-            self.nvar = self.nvar / 2 
+            self.nvar = self.nvar / 2
             if self.nvar != 1:
-                self.logger.error('Code not written yet to handle more than one pair of rotated vectors')
- 
-        self.logger.info( 'nvar: %s', self.nvar)
-        self.logger.info( 'key vec: %s', self.key_vec)
+                self.logger.error('Code not written yet to handle more than\
+                                   one pair of rotated vectors')
+
+        self.logger.info('nvar: %s', self.nvar)
+        self.logger.info('key vec: %s', self.key_vec)
 
         # Find subset of source data set required to produce bdy points
 
@@ -123,22 +121,22 @@ class Extract:
         twolegs = np.logical_and(two, legs)
 
         dejavu = np.logical_and(ivegot, twolegs)
-        dejavu = np.where(dejavu!=0)
+        dejavu = np.where(dejavu != 0)
         dejavu_sorted_index = np.argsort(dejavu[1])
 
-        sub_j  = dejavu[0][dejavu_sorted_index]
-        sub_i  = dejavu[1][dejavu_sorted_index]
+        sub_j = dejavu[0][dejavu_sorted_index]
+        sub_i = dejavu[1][dejavu_sorted_index]
 #        dejavu = np.argwhere(dejavu.flatten(0) != 0)#.flatten(1)
 
 #        sub_j, sub_i = np.unravel_index(dejavu.sort(axis=0), SC.lon.shape)
 
         # Find I/J range
         imin = np.maximum(np.amin(sub_i) - 2, 0)
-        imax = np.minimum(np.amax(sub_i) + 2, len(SC.lon[0,:]) - 1) + 1
+        imax = np.minimum(np.amax(sub_i) + 2, len(SC.lon[0, :]) - 1) + 1
         jmin = np.maximum(np.amin(sub_j) - 2, 0)
-        jmax = np.minimum(np.amax(sub_j) + 2, len(SC.lon[:,0]) - 1) + 1
+        jmax = np.minimum(np.amax(sub_j) + 2, len(SC.lon[:, 0]) - 1) + 1
 
-        self.logger.info(' \n imin: %d\n imax: %d\n jmin: %d\n jmax: %d\n',imin,imax,jmin,jmax)
+        self.logger.info(' \n imin: %d\n imax: %d\n jmin: %d\n jmax: %d\n', imin, imax, jmin, jmax)
         # SC.lon: big matrix from an nc, dst_lon - bdy_lon_t
         SC.lon = SC.lon[jmin:jmax, imin:imax]
         SC.lat = SC.lat[jmin:jmax, imin:imax]
@@ -146,17 +144,17 @@ class Extract:
         # Init of gsin* and gcos* at first call for rotation of vectors
         if self.key_vec:
             dst_gcos = np.ones([maxJ, maxI])
-            dst_gsin = np.zeros([maxJ,maxI])
-            T_GridAngles = nemo_bdy_grid_angle.GridAngle(
-                       self.settings['src_hgr'], imin, imax, jmin, jmax, 't')
-            RotStr_GridAngles = nemo_bdy_grid_angle.GridAngle(
-                         self.settings['dst_hgr'], 1, maxI, 1, maxJ, self.rot_str)
-            
+            dst_gsin = np.zeros([maxJ, maxI])
+            T_GridAngles = nemo_bdy_grid_angle.GridAngle(self.settings['src_hgr'], imin,
+                                                         imax, jmin, jmax, 't')
+            RotStr_GridAngles = nemo_bdy_grid_angle.GridAngle(self.settings['dst_hgr'], 1,
+                                                              maxI, 1, maxJ, self.rot_str)
+
             self.gcos = T_GridAngles.cosval
             self.gsin = T_GridAngles.sinval
-            dst_gcos[1:,1:] = RotStr_GridAngles.cosval
-            dst_gsin[1:,1:] = RotStr_GridAngles.sinval
-            
+            dst_gcos[1:, 1:] = RotStr_GridAngles.cosval
+            dst_gsin[1:, 1:] = RotStr_GridAngles.sinval
+
             # BEWARE THE ETERNAL FORTRAN C CONFLICT
             dst_gcos = np.tile(np.array([dst_gcos]), (sc_z_len, 1, 1))
             dst_gsin = np.tile(np.array([dst_gsin]), (sc_z_len, 1, 1))
@@ -165,22 +163,22 @@ class Extract:
             tmp_gcos = np.zeros((sc_z_len, bdy_vel.shape[0]))
             tmp_gsin = np.zeros((sc_z_len, bdy_vel.shape[0]))
             for p in range(bdy_vel.shape[0]):
-                tmp_gcos[:,p] = dst_gcos[:, bdy_vel[p,1], bdy_vel[p,0]]
-                tmp_gsin[:,p] = dst_gsin[:, bdy_vel[p,1], bdy_vel[p,0]]
+                tmp_gcos[:, p] = dst_gcos[:, bdy_vel[p, 1], bdy_vel[p, 0]]
+                tmp_gsin[:, p] = dst_gsin[:, bdy_vel[p, 1], bdy_vel[p, 0]]
 
             self.dst_gcos = tmp_gcos
             self.dst_gsin = tmp_gsin
 
 
-        # Determine size of source data subset  
-        dst_len_z = len(dst_dep[:,0])
+        # Determine size of source data subset
+        dst_len_z = len(dst_dep[:, 0])
 
         source_dims = SC.lon.shape
 
         # Find nearest neighbour on the source grid to each dst bdy point
         # Ann Query substitute
-        source_tree = sp.cKDTree(zip(SC.lon.ravel(order='F'), 
-                                 SC.lat.ravel(order='F')))
+        source_tree = sp.cKDTree(zip(SC.lon.ravel(order='F'),
+                                     SC.lat.ravel(order='F')))
         dst_pts = zip(dst_lon[:].ravel(order='F'), dst_lat[:].ravel(order='F'))
         nn_dist, nn_id = source_tree.query(dst_pts, k=1)
 
@@ -194,40 +192,40 @@ class Extract:
         # FIG NOT IMPLEMENTED
 
         # Index out of bounds error check not implemented
-        
+
         # Determine 9 nearest neighbours based on distance
         ind = sub2ind(source_dims, i_sp, j_sp)
         ind_rv = np.ravel(ind, order='F')
         sc_lon_rv = np.ravel(SC.lon, order='F')
         sc_lat_rv = np.ravel(SC.lat, order='F')
         sc_lon_ind = sc_lon_rv[ind_rv]
-        
-        diff_lon = sc_lon_ind - np.repeat(dst_lon,9).T
+
+        diff_lon = sc_lon_ind - np.repeat(dst_lon, 9).T
         diff_lon = diff_lon.reshape(ind.shape, order='F')
         out = np.abs(diff_lon) > 180
         diff_lon[out] = -np.sign(diff_lon[out]) * (360 - np.abs(diff_lon[out]))
-        
+
         dst_lat_rep = np.repeat(dst_lat.T, 9)
         diff_lon_rv = np.ravel(diff_lon, order='F')
         dist_merid = diff_lon_rv * np.cos(dst_lat_rep * np.pi / 180)
         dist_zonal = sc_lat_rv[ind_rv] - dst_lat_rep
-        
-        dist_tot = np.power((np.power(dist_merid, 2) + 
-                            np.power(dist_zonal, 2)), 0.5)
+
+        dist_tot = np.power((np.power(dist_merid, 2) +
+                             np.power(dist_zonal, 2)), 0.5)
         dist_tot = dist_tot.reshape(ind.shape, order='F').T
         # Get sort inds, and sort
         dist_ind = np.argsort(dist_tot, axis=1, kind='mergesort')
-        dist_tot = dist_tot[np.arange(dist_tot.shape[0])[:,None], dist_ind]
+        dist_tot = dist_tot[np.arange(dist_tot.shape[0])[:, None], dist_ind]
 
         # Shuffle ind to reflect ascending dist of source and dst points
         ind = ind.T
         for p in range(ind.shape[0]):
-            ind[p,:] = ind[p,dist_ind[p,:]]
+            ind[p, :] = ind[p, dist_ind[p, :]]
 
         if self.key_vec:
             self.gcos = self.gcos.flatten(1)[ind].reshape(ind.shape, order='F')
             self.gsin = self.gsin.flatten(1)[ind].reshape(ind.shape, order='F')
-        
+
         sc_ind = {}
         sc_ind['ind'] = ind
         sc_ind['imin'], sc_ind['imax'] = imin, imax
@@ -245,15 +243,15 @@ class Extract:
             tmp_lat = dst_lat.copy()
             tmp_lat[r_id] = -9999
             source_tree = sp.cKDTree(zip(tmp_lon.ravel(order='F'),
-                                     tmp_lat.ravel(order='F')))
+                                         tmp_lat.ravel(order='F')))
             dst_pts = zip(dst_lon[rr_id].ravel(order='F'),
                           dst_lat[rr_id].ravel(order='F'))
-            junk, an_id = source_tree.query(dst_pts, k=3, 
-                                            distance_upper_bound=fr)    
-            id_121[rr_id,:] = an_id
+            junk, an_id = source_tree.query(dst_pts, k=3,
+                                            distance_upper_bound=fr)
+            id_121[rr_id, :] = an_id
 #            id_121[id_121 == len(dst_lon)] = 0
 
-        reptile = np.tile(id_121[:,0], 3).reshape(id_121.shape, order='F')
+        reptile = np.tile(id_121[:, 0], 3).reshape(id_121.shape, order='F')
         tmp_reptile = reptile * (id_121 == len(dst_lon))
         id_121[id_121 == len(dst_lon)] = 0
         tmp_reptile[tmp_reptile == len(dst_lon)] = 0
@@ -262,21 +260,21 @@ class Extract:
 
         rep_dims = (id_121.shape[0], id_121.shape[1], sc_z_len)
         # These tran/tiles work like matlab. Tested with same Data.
-        id_121 = id_121.repeat(sc_z_len).reshape(rep_dims).transpose(2,0,1)
+        id_121 = id_121.repeat(sc_z_len).reshape(rep_dims).transpose(2, 0, 1)
         reptile = np.arange(sc_z_len).repeat(num_bdy).reshape(sc_z_len, 
                                                               num_bdy)
         reptile = reptile.repeat(3).reshape(num_bdy, 3, sc_z_len, 
-                                            order='F').transpose(2,0,1)
-  
+                                            order='F').transpose(2, 0, 1)
+
         id_121 = sub2ind((sc_z_len, num_bdy), id_121, reptile)
 
-        tmp_filt = wei_121.repeat(num_bdy).reshape(num_bdy, len(wei_121), 
+        tmp_filt = wei_121.repeat(num_bdy).reshape(num_bdy, len(wei_121),
                                                    order='F')
         tmp_filt = tmp_filt.repeat(sc_z_len).reshape(num_bdy, len(wei_121),
-                                                     sc_z_len).transpose(2,0,1)
+                                                     sc_z_len).transpose(2, 0, 1)
 
         # Fig not implemented
-        
+
         if self.isslab != 1:
             # Determine vertical weights for the linear interpolation 
             # onto Dst grid
@@ -285,16 +283,16 @@ class Extract:
             z_ind = np.zeros((num_bdy * dst_len_z, 2), dtype=np.int64)
             source_tree = sp.cKDTree(zip(sc_z.ravel(order='F')))
             junk, nn_id = source_tree.query(zip(dst_dep_rv), k=1)
-            
+
             # WORKAROUND: the tree query returns out of range val when
             # dst_dep point is NaN, causing ref problems later.
             nn_id[nn_id == sc_z_len] = sc_z_len-1
             sc_z[nn_id]
             # Find next adjacent point in the vertical
-            z_ind[:,0] = nn_id
-            z_ind[sc_z[nn_id] > dst_dep_rv[:], 1] = nn_id[sc_z[nn_id] > 
+            z_ind[:, 0] = nn_id
+            z_ind[sc_z[nn_id] > dst_dep_rv[:], 1] = nn_id[sc_z[nn_id] >
                                                           dst_dep_rv[:]] - 1
-            z_ind[sc_z[nn_id] <= dst_dep_rv[:], 1] = nn_id[sc_z[nn_id] <= 
+            z_ind[sc_z[nn_id] <= dst_dep_rv[:], 1] = nn_id[sc_z[nn_id] <=
                                                            dst_dep_rv[:]] + 1
             # Adjust out of range values
             z_ind[z_ind == -1] = 0
@@ -302,7 +300,7 @@ class Extract:
 
             # Create weightings array
             sc_z[z_ind]
-            z_dist = np.abs(sc_z[z_ind] - dst_dep.T.repeat(2).reshape(len(dst_dep_rv),2))
+            z_dist = np.abs(sc_z[z_ind] - dst_dep.T.repeat(2).reshape(len(dst_dep_rv), 2))
             rat = np.sum(z_dist, axis=1)
             z_dist = 1 - (z_dist / rat.repeat(2).reshape(len(rat), 2))
 
@@ -310,9 +308,8 @@ class Extract:
             # Replicating this part of matlab is difficult without causing
             # a Memory Error. This workaround may be +/- brilliant
             # In theory it maximises memory efficiency
-            z_ind[:,:] += (np.arange(0, (num_bdy) * sc_z_len, sc_z_len)
-                           [np.arange(num_bdy).repeat(2*dst_len_z)].reshape(
-                                                                z_ind.shape))
+            z_ind[:, :] += (np.arange(0, (num_bdy) * sc_z_len, sc_z_len)
+                           [np.arange(num_bdy).repeat(2*dst_len_z)].reshape(z_ind.shape))
         else:
             z_ind = np.zeros([1,1])
             z_dist = np.zeros([1,1])

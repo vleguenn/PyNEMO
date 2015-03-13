@@ -26,11 +26,12 @@ class Mask(object):
     
     def __init__(self, bathymetry_file=None, mask_file=None, min_depth = 200.0, shelfbreak_dist = 200.0):
         """Initialises the Mask data"""
+        self.logger = logging.getLogger(__name__)
         self.set_mask_file(mask_file)
         self.set_bathymetry_file(bathymetry_file)
         self.min_depth = min_depth
         self.shelfbreak_dist = shelfbreak_dist
-        self.logger = logging.getLogger(__name__)
+
 
     def set_mask_file(self, mask_file):
         """Reads the mask data from the mask file"""
