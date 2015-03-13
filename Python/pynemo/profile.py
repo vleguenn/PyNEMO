@@ -14,9 +14,18 @@
 
 # pylint: disable=E1103
 # pylint: disable=no-name-in-module
+
+#External imports
 from time import clock
 from calendar import monthrange
+import numpy as np
+from scipy.interpolate import interp1d
+import logging
+from netCDF4 import Dataset
+from netcdftime import datetime
+import copy
 
+#local imports
 import nemo_bdy_setup as setup
 import nemo_bdy_msk_c as msk
 import nemo_bdy_gen_c as gen_grid
@@ -30,19 +39,13 @@ import nemo_bdy_ice
 import nemo_bdy_extr_tm3
 from tide import nemo_bdy_tide3
 from tide import nemo_bdy_tide_ncgen
-
-from netCDF4 import Dataset
-import numpy as np
-from scipy.interpolate import interp1d
+import pynemo_settings_editor
 
 import nemo_bdy_ncgen
 import nemo_bdy_ncpop
 from gui.nemo_bdy_mask import Mask as Mask_File
 #import pickle
 
-import logging
-from netcdftime import datetime
-import copy
 
 def go(setup_filepath=0, mask_gui=False):
     #Logger
@@ -69,7 +72,8 @@ def go(setup_filepath=0, mask_gui=False):
     start = clock()
     if mask_gui:
         #Open the gui to create a mask
-        #open_settings_window()
+        exit_status, Mask = pynemo_settings_editor.open_settings_dialog(Setup)
+        bdy_msk = Mask.data
         Setup.refresh()
     else:
         try:

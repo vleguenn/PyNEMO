@@ -30,7 +30,7 @@ class InputWindow(QtGui.QDialog):
         self.nl_editor.bathymetry_update.connect(self.mpl_widget.set_bathymetry_file)
         self.nl_editor.mask_update.connect(self.mpl_widget.save_mask_file)
         self.nl_editor.mask_settings_update.connect(self.mpl_widget.set_mask_settings)
-    
+
         if setup.bool_settings['mask_file']: 
             try: #Try to load with bathy and mask file
                 self.mpl_widget.set_bathymetry_file(setup.settings['bathy'], setup.settings['mask_file'])
@@ -38,7 +38,7 @@ class InputWindow(QtGui.QDialog):
                 self.mpl_widget.set_bathymetry_file(setup.settings['bathy'],None)
         else:
             self.mpl_widget.set_bathymetry_file(setup.settings['bathy'],None)
-                
+
         self.mpl_widget.set_mask_settings(float(setup.settings['mask_max_depth']), float(setup.settings['mask_shelfbreak_dist']))
 
         hbox = QtGui.QHBoxLayout()

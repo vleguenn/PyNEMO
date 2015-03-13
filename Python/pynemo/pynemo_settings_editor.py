@@ -10,18 +10,42 @@ from PyQt4 import QtGui
 from gui.nemo_bdy_input_window import InputWindow
 import nemo_bdy_setup
 
-import sys
-def main():
+import sys, getopt
+
+def open_settings_window(fname):
     """ Main method which starts a Qt application and gives user
     an option to pick a namelist.bdy file to edit. Once user selects it
     it will open a dialog box where users can edit the parameters"""
-
     app = QtGui.QApplication(sys.argv)
-    fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file')
+    if fname is None:
+        fname = QtGui.QFileDialog.getOpenFileName(None, 'Open file')
+        
     setup = nemo_bdy_setup.Setup(fname)#'../../data/namelisttest.bdy')
     ex = InputWindow(setup)
     ex.nl_editor.btn_cancel.clicked.connect(lambda: sys.exit(0))
-    sys.exit(app.exec_())
+    return app.exec_(), ex.mpl_widget.mask
 
+def open_settings_dialog(setup):
+    app = QtGui.QApplication(sys.argv)
+    ex = InputWindow(setup)
+    ex.nl_editor.btn_cancel.clicked.connect(lambda: app.quit())
+    return app.exec_(), ex.mpl_widget.mask
+        
+def main():
+    setup_file = None
+    try:
+        opts, dummy_args = getopt.getopt(sys.argv[1:], "hs:", ["help","setup="])
+    except getopt.GetoptError:
+        print "usage: pynemo_settings_editor -s <namelist.bdy> "
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == "-h":
+            print "usage: pynemo_settings_editor -s <namelist.bdy> "
+            sys.exit()
+        elif opt in ("-s", "--setup"):
+            setup_file = arg
+ 
+    sys.exit(open_settings_window(setup_file))
 if __name__ == '__main__':
     main()

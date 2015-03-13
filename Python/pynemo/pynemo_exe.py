@@ -18,9 +18,9 @@ def main():
     setup_file = ''
     mask_gui = False
     try:
-        opts, dummy_args = getopt.getopt(sys.argv[1:], "hgs:", ["mask_gui", "setup="])
+        opts, dummy_args = getopt.getopt(sys.argv[1:], "hs:g", ["help","setup=","mask_gui"])
     except getopt.GetoptError:
-        print "usage: pynemo -s <namelist.bdy> "
+        print "usage: pynemo -g -s <namelist.bdy> "
         sys.exit(2)
 
     for opt, arg in opts:
