@@ -48,6 +48,7 @@ class Mask(object):
         except (IOError, RuntimeError):
             self.logger.error('Cannot open mask file')
             self.data = None
+            raise
 
     def set_bathymetry_file(self, bathy_file):
         """ This reads the bathymetry file and sets the land to 0 and ocean to 1 """
@@ -67,6 +68,7 @@ class Mask(object):
             self.bathy_data = self.bathy_nc.variables['Bathymetry'][:,:]
         except IOError:
             self.logger.error('Cannot open bathymetry file')
+            raise
 
     def save_mask(self, mask_file):
         """Reads the mask data from the mask file"""
@@ -86,6 +88,7 @@ class Mask(object):
             nav_lon[...] = self.lon
         except IOError:
             self.logger.info('Cannot open mask file for writing')
+            raise
 
     def apply_border_mask(self, pixels):
         """ pixels is number of pixels in the border that need applying mask"""
