@@ -67,19 +67,24 @@ def go(setup_filepath=0, mask_gui=False):
 
     # Use mask from the file if exists otherwise use default mask from nemo_bdy_msk_c
     start = clock()
-    try:
-        if Setup.bool_settings['mask_file'] and settings['mask_file'] is not None:        
-            Mask =  Mask_File(settings['bathy'], settings['mask_file'])
-            bdy_msk = Mask.data
-        elif Setup.bool_settings['mask_file']:
-            logger.error("Mask file is not given")
+    if mask_gui:
+        #Open the gui to create a mask
+        #open_settings_window()
+        Setup.refresh()
+    else:
+        try:
+            if Setup.bool_settings['mask_file'] and settings['mask_file'] is not None:        
+                Mask =  Mask_File(settings['bathy'], settings['mask_file'])
+                bdy_msk = Mask.data
+            elif Setup.bool_settings['mask_file']:
+                logger.error("Mask file is not given")
+                return
+            else:        
+                logger.warning("Using default mask with bathymetry!!!!")
+                Mask = msk.Mask(settings['bathy'], med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
+                bdy_msk = Mask.bdy_msk
+        except:
             return
-        else:        
-            logger.warning("Using default mask with bathymetry!!!!")
-            Mask = msk.Mask(settings['bathy'], med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
-            bdy_msk = Mask.bdy_msk
-    except:
-        return
 
     logger.info(clock() - start)
     logger.info('Done Mask')

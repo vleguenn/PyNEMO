@@ -46,7 +46,7 @@ class Mask(object):
             data = mask_nc.variables['mask']
             self.data = data[:,:]
         except (IOError, RuntimeError):
-            self.logger.error('Cannot open mask file')
+            self.logger.error('Cannot open mask file '+self.mask_file)
             self.data = None
             raise
 
@@ -67,7 +67,7 @@ class Mask(object):
                 self.data = np.around((self.data + .5).clip(0, 1))
             self.bathy_data = self.bathy_nc.variables['Bathymetry'][:,:]
         except IOError:
-            self.logger.error('Cannot open bathymetry file')
+            self.logger.error('Cannot open bathymetry file '+self.bathymetry_file)
             raise
 
     def save_mask(self, mask_file):
@@ -87,7 +87,7 @@ class Mask(object):
             nav_lat[...] = self.lat
             nav_lon[...] = self.lon
         except IOError:
-            self.logger.info('Cannot open mask file for writing')
+            self.logger.info('Cannot open mask file for writing '+mask_file)
             raise
 
     def apply_border_mask(self, pixels):

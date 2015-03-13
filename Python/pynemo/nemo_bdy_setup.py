@@ -22,16 +22,24 @@ class Setup(object):
         self.filename = setfile
         if not setfile: # debug
             self.filename = '../data/namelist.bdy'
+        self._load_settings()
+
+    def refresh(self):
+        """ Re loads the settings from file """
+        self._load_settings()
+        
+    def _load_settings(self):
+        """ Loads the settings from file """
         try:
             namelist = open(self.filename, 'r')
         except:
-            self.logger.error("Cannot open the file:"+setfile)
+            self.logger.error("Cannot open the file:"+self.filename)
             raise
         data = namelist.readlines()
         # Dictionary of all the vars in the file and a seperate settings for boolean values
         self.settings, self.bool_settings = _assign(_trim(data))
         namelist.close()
-
+                
     def _get_var_name_value(self, line):
         """ splits the line into key value pair. """
         key_value = line.split("=", 2)
