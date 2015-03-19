@@ -27,7 +27,6 @@ import copy
 
 #local imports
 import nemo_bdy_setup as setup
-import nemo_bdy_msk_c as msk
 import nemo_bdy_gen_c as gen_grid
 import nemo_coord_gen_pop as coord
 import nemo_bdy_zgrv2 as zgrv
@@ -69,22 +68,22 @@ def go(setup_filepath=0, mask_gui=False):
     logger.info('Done Setup')
     # default file, region settingas
 
-    # Use mask from the file if exists otherwise use default mask from nemo_bdy_msk_c
     start = clock()
     if mask_gui:
         #Open the gui to create a mask
-        exit_status, Mask = pynemo_settings_editor.open_settings_dialog(Setup)
+        _ , Mask = pynemo_settings_editor.open_settings_dialog(Setup)
         bdy_msk = Mask.data
         Setup.refresh()
     else:
         try:
+            #mask filename and mask file flag is set
             if Setup.bool_settings['mask_file'] and settings['mask_file'] is not None:        
                 Mask =  Mask_File(settings['bathy'], settings['mask_file'])
                 bdy_msk = Mask.data
             elif Setup.bool_settings['mask_file']:
                 logger.error("Mask file is not given")
                 return
-            else:        
+            else: #no mask file specified then use default 1px halo mask
                 logger.warning("Using default mask with bathymetry!!!!")
                 Mask = Mask_File(settings['bathy'])
                 Mask.apply_border_mask(Constants.DEFAULT_MASK_PIXELS)
@@ -95,7 +94,6 @@ def go(setup_filepath=0, mask_gui=False):
     logger.info(clock() - start)
     logger.info('Done Mask')
 
-    
     DstCoord.bdy_msk = bdy_msk == 1
 
     start = clock()

@@ -13,7 +13,7 @@ import numpy as np
 import logging
 
 #Local Imports
-from nemo_bdy_lib import sub2ind
+from utils.nemo_bdy_lib import sub2ind
 
 class Boundary:
     # Bearings for overlays

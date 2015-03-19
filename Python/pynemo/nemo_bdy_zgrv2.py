@@ -18,7 +18,7 @@ from netCDF4 import Dataset
 import numpy as np
 import logging
 
-from nemo_bdy_lib import sub2ind
+from utils.nemo_bdy_lib import sub2ind
 
 # Query name
 class Depth:

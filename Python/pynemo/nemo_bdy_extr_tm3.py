@@ -16,13 +16,13 @@ import numpy as np
 import scipy.spatial as sp
 from netCDF4 import Dataset
 from netcdftime import utime
-from nemo_bdy_lib import rot_rep
+from utils.nemo_bdy_lib import rot_rep
 import copy # DEBUG ONLY- allows multiple runs without corruption
 import logging
 
 # Local Imports
 import nemo_bdy_grid_angle
-from nemo_bdy_lib import sub2ind
+from utils.nemo_bdy_lib import sub2ind
 
 #TODO: Convert the 'F' ordering to 'C'
 class Extract:

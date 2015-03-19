@@ -11,7 +11,7 @@ import tpxo_extract_HC
 import numpy as np
 from netCDF4 import Dataset
 from pynemo import nemo_bdy_grid_angle
-from pynemo.nemo_bdy_lib import rot_rep
+from pynemo.utils.nemo_bdy_lib import rot_rep
 
 import logging
 

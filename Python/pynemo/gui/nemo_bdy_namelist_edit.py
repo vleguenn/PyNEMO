@@ -82,7 +82,7 @@ class NameListEditor(QtGui.QWidget):
         hbox_layout = QtGui.QHBoxLayout(self)      
         btn_save = QtGui.QPushButton('Save')
         btn_save.clicked.connect(self._btn_save_callback)
-        self.btn_cancel = QtGui.QPushButton('Cancel')
+        self.btn_cancel = QtGui.QPushButton('Close')
         self.btn_cancel.clicked.connect(self._btn_cancel_callback)
         hbox_layout.addWidget(btn_save)
         hbox_layout.addWidget(self.btn_cancel)
