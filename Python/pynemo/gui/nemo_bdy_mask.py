@@ -23,6 +23,7 @@ class Mask(object):
     min_depth = 200.0
     shelfbreak_dist = 200.0
     mask_type = 0
+
     
     def __init__(self, bathymetry_file=None, mask_file=None, min_depth = 200.0, shelfbreak_dist = 200.0):
         """Initialises the Mask data"""
