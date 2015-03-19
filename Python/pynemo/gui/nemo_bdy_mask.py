@@ -46,6 +46,9 @@ class Mask(object):
             mask_nc = Dataset(str(self.mask_file), mode="r")
             data = mask_nc.variables['mask']
             self.data = data[:,:]
+        except KeyError:
+            self.logger.error('Mask file missing have mask variable')
+            raise
         except (IOError, RuntimeError):
             self.logger.error('Cannot open mask file '+self.mask_file)
             self.data = None
@@ -67,9 +70,13 @@ class Mask(object):
                 self.data = np.asarray(self.data[:, :])
                 self.data = np.around((self.data + .5).clip(0, 1))
             self.bathy_data = self.bathy_nc.variables['Bathymetry'][:,:]
-        except IOError:
+        except KeyError:
+            self.logger.error('Bathymetry file doesnot have Bathyemetry variable')
+            raise
+        except (IOError, RuntimeError):
             self.logger.error('Cannot open bathymetry file '+self.bathymetry_file)
             raise
+
 
     def save_mask(self, mask_file):
         """Reads the mask data from the mask file"""

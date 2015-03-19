@@ -40,6 +40,7 @@ import nemo_bdy_extr_tm3
 from tide import nemo_bdy_tide3
 from tide import nemo_bdy_tide_ncgen
 import pynemo_settings_editor
+from utils import Constants
 
 import nemo_bdy_ncgen
 import nemo_bdy_ncpop
@@ -85,8 +86,9 @@ def go(setup_filepath=0, mask_gui=False):
                 return
             else:        
                 logger.warning("Using default mask with bathymetry!!!!")
-                Mask = msk.Mask(settings['bathy'], med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
-                bdy_msk = Mask.bdy_msk
+                Mask = Mask_File(settings['bathy'])
+                Mask.apply_border_mask(Constants.DEFAULT_MASK_PIXELS)
+                bdy_msk = Mask.data
         except:
             return
 
