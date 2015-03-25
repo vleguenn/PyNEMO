@@ -62,8 +62,8 @@ class Extract:
         # We can infer rot_str and rot_dir
         if Grid_2:
             bdy_vel = Grid_2.bdy_i
-            maxJ = Grid_2.maxJ
-            maxI = Grid_2.maxI
+            maxJ = Grid_2.max_j
+            maxI = Grid_2.max_i
             self.fnames_2 = Grid_2.fname_2
             self.rot_str = Grid_2.grid_type
             if self.rot_str == 'u':

@@ -39,7 +39,7 @@ def main():
     #Logger
     #logger = logging.getLogger(__name__)
 
-    profile.go(setup_file, mask_gui)
+    profile.process_bdy(setup_file, mask_gui)
 
 if __name__ == "__main__":
     main()

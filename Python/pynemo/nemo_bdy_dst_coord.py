@@ -5,4 +5,4 @@ class DstCoord:
     Equivalent to Matlab dst_coord. 
     """
     def __self__(self):
-        pass
+        self.bdy_i = None

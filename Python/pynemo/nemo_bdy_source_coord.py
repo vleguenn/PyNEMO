@@ -6,5 +6,6 @@
 class SourceCoord:
 
     def __init__(self):
-        pass
+        """ This for source coordinates object attributes initialisation """
+        self.bdy_i = None
 
