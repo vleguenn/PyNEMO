@@ -110,8 +110,9 @@ class Mask(object):
         out_index = None
         if self.mask_type == None or self.mask_type == 0:
             out_index = index
-        elif self.mask_type == 1: #minimum depth
+        elif self.mask_type == 1: #maximum depth
             out_index = self._get_bathy_depth_index(index,self.min_depth)
+            out_index = self.remove_small_regions(out_index)
         elif self.mask_type == 2: # shelf break
             dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
             out_index = self._get_bathy_depth_index(index, shelf_break)

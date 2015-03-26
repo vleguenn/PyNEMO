@@ -272,7 +272,7 @@ class NemoNavigationToolbar(NavigationToolbar):
     def update_height_mask(self, btn_id):
         """ update the height mask buttons in the interface """
         self._actions['normal_mask'].setChecked(False)
-        self._actions['min_height_mask'].setChecked(False)
+        self._actions['max_depth_mask'].setChecked(False)
         self._actions['shelf_break_mask'].setChecked(False)
         try:
             self.parent.set_mask_type(btn_id)
@@ -281,7 +281,7 @@ class NemoNavigationToolbar(NavigationToolbar):
         if btn_id == 0:
             self._actions['normal_mask'].setChecked(True)
         elif btn_id == 1:
-            self._actions['min_height_mask'].setChecked(True)
+            self._actions['max_depth_mask'].setChecked(True)
         elif btn_id == 2:
             self._actions['shelf_break_mask'].setChecked(True)
 
