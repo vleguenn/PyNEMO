@@ -185,7 +185,7 @@ class NemoNavigationToolbar(NavigationToolbar):
                           ('minus', 'Remove mask', 'remove_mask', 'remove_mask'),\
                           (None, None, None, None),\
                           ('Normal','Normal Mask','normal_mask','normal_mask'),\
-                          ('MinHeight', 'Min Height Mask', 'min_height_mask', 'min_height_mask'),\
+                          ('MaxDepth', 'Max Depth Mask', 'max_depth_mask', 'max_depth_mask'),\
                           ('ShelfBreak','Shelf Break Mask','shelf_break_mask','shelf_break_mask'),\
                           (None, None, None, None)\
                           )
@@ -199,8 +199,8 @@ class NemoNavigationToolbar(NavigationToolbar):
         self._actions['remove_mask'].setIcon(set_icon('minus.png'))
         self._actions['normal_mask'].setIcon((set_icon('all_mask.png')))
         self._actions['normal_mask'].setCheckable(True)
-        self._actions['min_height_mask'].setIcon((set_icon('min_height.png')))
-        self._actions['min_height_mask'].setCheckable(True)
+        self._actions['max_depth_mask'].setIcon((set_icon('max_depth.png')))
+        self._actions['max_depth_mask'].setCheckable(True)
         self._actions['shelf_break_mask'].setIcon((set_icon('shelf_break.png')))
         self._actions['shelf_break_mask'].setCheckable(True)
         self.update_height_mask(0)
@@ -261,7 +261,7 @@ class NemoNavigationToolbar(NavigationToolbar):
         """ enable the normal mask button """
         self.update_height_mask(0)
     
-    def min_height_mask(self, *dummy):
+    def max_depth_mask(self, *dummy):
         """ enables the minimum height mask """
         self.update_height_mask(1)
     
