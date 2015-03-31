@@ -113,6 +113,7 @@ class Mask(object):
         elif self.mask_type == 1: #maximum depth
             out_index = self._get_bathy_depth_index(index,self.min_depth)
             out_index = self.remove_small_regions(out_index)
+            out_index = self.fill_small_regions(out_index)
         elif self.mask_type == 2: # shelf break
             dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
             out_index = self._get_bathy_depth_index(index, shelf_break)
@@ -166,7 +167,15 @@ class Mask(object):
             max_area_index = np.argmax(mean_values)+1
             max_area_mask = label_mask == max_area_index
         return max_area_mask
-        
+    
+    def fill_small_regions(self, index):
+        """ This method fills the small regions of the selection area and fills them up """
+        #prepare the region with mask and land as 0, ocean as 1
+        mask_data = np.zeros(self.data.shape)
+        mask_data[index] = 1
+        #remove the small unmask holes
+        mask_withoutholes = ndimage.binary_fill_holes(mask_data)
+        return np.where(mask_withoutholes==1)
         
     def apply_mediterrian_mask(self):
         """ This is mediterrian mask specific for the test bathymetry file """

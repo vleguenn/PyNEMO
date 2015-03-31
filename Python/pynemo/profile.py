@@ -57,6 +57,7 @@ class Grid(object):
         self.max_j = None
         self.fname_2 = None
         self.source_time = None
+
 logger = logging.getLogger(__name__)
 def process_bdy(setup_filepath=0, mask_gui=False):
     """ Main entry to the processing of the bdy 
