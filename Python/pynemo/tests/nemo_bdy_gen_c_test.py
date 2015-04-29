@@ -5,13 +5,13 @@ Unit test for nemo_bdy_gen_c. Boundary class
 '''
 import unittest
 from pynemo.nemo_bdy_gen_c import *
-from pynemo.nemo_bdy_msk_c import *
+from pynemo.gui.nemo_bdy_mask import *
 class Test(unittest.TestCase):
 
     settings={}
     def setUp(self):
         self.settings['rimwidth'] = 9
-        self.Mask = Mask('data/grid_C/NNA_R12_bathy_meter_bench.nc', med=1, blk=1, hud=1, bal=1, v2=1, custom_areas=None)
+        self.Mask = Mask('data/grid_C/NNA_R12_bathy_meter_bench.nc')
         
 
     def tearDown(self):
@@ -19,10 +19,10 @@ class Test(unittest.TestCase):
 
 
     def testInvalidGridType(self):
-       self.assertRaises(ValueError,Boundary,self.Mask.bdy_msk,self.settings,'x')
+       self.assertRaises(ValueError,Boundary,self.Mask.data,self.settings,'x')
        
     def testGridTypeT(self):
-        Grid_T = Boundary(self.Mask.bdy_msk,self.settings,'t')
+        Grid_T = Boundary(self.Mask.data,self.settings,'t')
         self.assertEqual(Grid_T.grid_type,'t','Grid type is not T')
         
 

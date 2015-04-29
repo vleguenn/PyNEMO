@@ -32,6 +32,7 @@ from pynemo import nemo_bdy_gen_c as gen_grid
 from pynemo import nemo_coord_gen_pop as coord
 from pynemo import nemo_bdy_zgrv2 as zgrv
 from pynemo import nemo_bdy_src_time as source_time
+from pynemo import nemo_bdy_src_local
 
 from pynemo import nemo_bdy_source_coord as source_coord
 from pynemo import nemo_bdy_dst_coord as dst_coord
@@ -243,18 +244,23 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     logger.debug('src time')
     start = clock()
     # Create a Time handler object
-    SourceTime = source_time.SourceTime(settings['src_dir'])
+#    SourceTime = source_time.SourceTime(settings['src_dir'])
     acc = settings['src_time_adj']
 #    acc = -3168000 - 86400 # Straight out Matlab code. Question this.
 #    acc = 0
     # Extract source data on dst grid
     # Assign time info to Boundary T, U, V objects
     # FIX MY STRUCTURING
-    grid_t.source_time = SourceTime.get_source_time('t', acc)
-    grid_u.source_time = SourceTime.get_source_time('u', acc)
-    grid_v.source_time = SourceTime.get_source_time('v', acc)
+#    grid_t.source_time = SourceTime.get_source_time('t', acc)
+#    grid_u.source_time = SourceTime.get_source_time('u', acc)
+#    grid_v.source_time = SourceTime.get_source_time('v', acc)
+    grid_t.source_time = nemo_bdy_src_local.GetRepository(settings['src_dir'], 't', acc).grid_source_data['t']
+    grid_u.source_time = nemo_bdy_src_local.GetRepository(settings['src_dir'], 'u', acc).grid_source_data['u']
+    grid_v.source_time = nemo_bdy_src_local.GetRepository(settings['src_dir'], 'v', acc).grid_source_data['v']
+    
     if ice:
-        grid_ice.source_time = SourceTime.get_source_time('i', acc)
+#        grid_ice.source_time = SourceTime.get_source_time('i', acc)
+        grid_ice.source_time = nemo_bdy_src_local.GetRepository(settings['src_dir'], 'i', acc).grid_source_data['i']
 
     logger.debug(clock() - start)
     """
@@ -309,7 +315,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 #Get Date as a Number used in interpolation
                 time_counter = np.zeros([len(extract_t.sc_time)])
                 for i in range(0, len(extract_t.sc_time)):
-                    time_counter[i] = extract_t.convert_date_to_destination_num(extract_t.sc_time[i]['date'])
+                    time_counter[i] = extract_t.convert_date_to_destination_num(extract_t.sc_time[i].date)
 
                 date_start = datetime(year, month, 1, 0, 0, 0)
                 date_end = datetime(year, month, monthrange(year, month)[1], 24, 60, 60)

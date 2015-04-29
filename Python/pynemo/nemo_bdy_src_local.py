@@ -3,7 +3,8 @@ This is a interface for the getting the files.
 
 @author: Mr. Srikanth Nagella
 '''
-
+# pylint: disable=E1103
+# pylint: disable=no-name-in-module
 #External imports
 from os import listdir
 from netCDF4 import Dataset
@@ -58,7 +59,7 @@ class SourceData(object):
             self.logger.error('Cannot open the file '+self.file_name)
         return None        
             
-        
+           
 class LocalRepository(object):
     '''
     This manages the files in the local directory
@@ -133,7 +134,6 @@ class LocalRepository(object):
         days = set()
         hrs = set()
         for grid_type in self.grid_source_data.keys():
-            print grid_type, self.grid_source_data[grid_type]
             day, hr = self._delta_time_interval(self.grid_source_data[grid_type][0].seconds,
                                                 self.grid_source_data[grid_type][1].seconds)
             days.add(day)
@@ -157,4 +157,27 @@ class OpenDAPRepository(LocalRepository):
         c = Crawl(self.directory,select=[".*"+fend])
         urls = [s.get("url") for d in c.datasets for s in d.services if s.get("service").lower() == "opendap"]
         urls.sort()
-        return urls    
+        return urls
+    
+import os
+def GetRepository(src_dir, grid, t_adjust):
+    """ This method looks at teh src_dir and decides whether its a local directory or
+    a OpenDAP repository and creates appropriate object"""
+    if os.path.isdir(src_dir):
+        return LocalRepository(src_dir, grid, t_adjust)
+    elif url_exists(src_dir):
+        return OpenDAPRepository(src_dir, grid, t_adjust)
+    else:
+        print 'Invalid Data Location'
+        return None
+        
+        
+import urllib2
+def url_exists(location):
+    request = urllib2.Request(location)
+    request.get_method = lambda : 'HEAD'
+    try:
+        response = urllib2.urlopen(request)
+        return True
+    except urllib2.HTTPError:
+        return False

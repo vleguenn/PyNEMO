@@ -189,8 +189,6 @@ class Extract:
         i_sp = np.vstack((i_sp, i_sp, i_sp))
         i_sp = np.vstack((i_sp, i_sp + 1, i_sp - 1))
 
-        # FIG NOT IMPLEMENTED
-
         # Index out of bounds error check not implemented
 
         # Determine 9 nearest neighbours based on distance
@@ -360,21 +358,20 @@ class Extract:
         sc_z_len = self.sc_z_len
  
         # define src/dst cals
-        sf, ed = self.cal_trans(sc_time[0]['calendar'], 
+        sf, ed = self.cal_trans(sc_time[0].calendar, 
                                 self.settings['dst_calendar'], year, month)
         DstCal = utime('seconds since %d-1-1' %year, 
                        self.settings['dst_calendar'])
         dst_start = DstCal.date2num(datetime(year, month, 1))
         dst_end = DstCal.date2num(datetime(year, month, ed, 23, 59, 59))
 
-        self.S_cal = utime(sc_time[0]['units'], sc_time[0]['calendar'])
-#        self.D_cal = utime('seconds since %d-1-1' %year, 
-#                           self.settings['dst_calendar'])
+        self.S_cal = utime(sc_time[0].units, sc_time[0].calendar)
+
         self.D_cal = utime('seconds since %d-1-1' %self.settings['base_year'], 
                            self.settings['dst_calendar'])
 
         for date in sc_time:
-            date['date_num'] = DstCal.date2num(date['date']) * sf
+            date.seconds = DstCal.date2num(date.date) * sf
 
         # Get first and last date within range, init to cover entire range
         first_date = 0
@@ -382,11 +379,11 @@ class Extract:
         rev_seq = range(len(sc_time))
         rev_seq.reverse()
         for date in rev_seq:
-            if sc_time[date]['date_num'] < dst_start:
+            if sc_time[date].seconds < dst_start:
                 first_date = date
                 break
         for date in range(len(sc_time)):
-            if sc_time[date]['date_num'] > dst_end:
+            if sc_time[date].seconds > dst_end:
                 last_date = date
                 break
 
@@ -414,24 +411,24 @@ class Extract:
                 meta_data[v][x] = np.ones((self.nvar, 1)) * np.NaN
 
         for v in range(self.nvar):
-            meta_data[v] = self._get_meta_data(sc_time[first_date]['fname'], 
+            meta_data[v] = self._get_meta_data(sc_time[first_date].file_name, 
                                                self.var_nam[v], meta_data[v])
 
         if self.key_vec:
             n = self.nvar
             meta_data[n] = (self._get_meta_data(
-                             self.fnames_2[first_date]['fname'], 
+                             self.fnames_2[first_date].file_name, 
                              self.var_nam[n], meta_data[n]))
 
         # Loop over identified files
         for f in range(first_date, last_date + 1):
             sc_array = [None, None]
             sc_alt_arr = [None, None]
-            self.logger.info('opening nc file: %s', sc_time[f]['fname'])
-            nc = Dataset(sc_time[f]['fname'], 'r')
+            self.logger.info('opening nc file: %s', sc_time[f].file_name)
+            nc = Dataset(sc_time[f].file_name, 'r')
             # If extracting vector quantities open second file
             if self.key_vec:
-                nc_2 = Dataset(self.fnames_2[f]['fname'], 'r')
+                nc_2 = Dataset(self.fnames_2[f].file_name, 'r')
 
             # Counters not implemented
 

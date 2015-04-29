@@ -17,9 +17,6 @@ class Mask(object):
     """This is a Mask holder. which reads from a netCDF bathemetry file and
     stores it in 'data' member variable"""
 
-    data = None
-    bathy_data = None
-    mask_file = None
     min_depth = 200.0
     shelfbreak_dist = 200.0
     mask_type = 0
@@ -27,6 +24,9 @@ class Mask(object):
     
     def __init__(self, bathymetry_file=None, mask_file=None, min_depth = 200.0, shelfbreak_dist = 200.0):
         """Initialises the Mask data"""
+        self.data = None
+        self.bathy_data = None
+        self.mask_file = None
         self.logger = logging.getLogger(__name__)
         self.set_mask_file(mask_file)
         self.set_bathymetry_file(bathymetry_file)
