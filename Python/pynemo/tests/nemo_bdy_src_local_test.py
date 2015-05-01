@@ -7,6 +7,8 @@ import unittest
 
 from pynemo.nemo_bdy_src_local import LocalRepository
 from pynemo.nemo_bdy_src_local import OpenDAPRepository
+from pynemo.nemo_bdy_src_local import Data
+
 from netcdftime import utime
 class Test(unittest.TestCase):
 
@@ -27,12 +29,19 @@ class Test(unittest.TestCase):
     def testGetMetaData(self):
         repo = LocalRepository('data/srcdata_low_res_C/',['t'],0)
         self.assertGreater(repo.grid_source_data['t'][0].get_meta_data('votemper')['fv'], 9.969201E36, 'Fill Value is not read properly')
+    
+    def testGetDataVariable(self):
+        repo = LocalRepository('data/srcdata_low_res_C/',['t'],0)
+        self.assertTrue(isinstance(repo.grid_source_data['t'][0]['vosaline'], Data),"Data class not returned")
+        self.assertAlmostEquals(repo.grid_source_data['t'][0]['vosaline'][0, 0, 0, 0], 36.100665, 5, "Data values is not read properly")
         
+    @unittest.skip("Remote testing skipping")
     def testRemoteGetDirList(self):
         repo = OpenDAPRepository('http://esurgeod.noc.soton.ac.uk:8080/thredds/catalog/PyNEMO/data/catalog.xml',['t'],0)
         file_list = repo._get_dir_list('t')
         self.assertGreater(len(file_list),0,'No files found in the directory')
         
+    @unittest.skip("Remote testing skipping")
     def testRemoteGetTimeInterval(self):
         repo = OpenDAPRepository('http://esurgeod.noc.soton.ac.uk:8080/thredds/catalog/PyNEMO/data/catalog.xml',['t'],0)
         self.assertEquals(repo.day_interval,5,'Not a 5 day interval repository')

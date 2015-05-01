@@ -411,24 +411,27 @@ class Extract:
                 meta_data[v][x] = np.ones((self.nvar, 1)) * np.NaN
 
         for v in range(self.nvar):
-            meta_data[v] = self._get_meta_data(sc_time[first_date].file_name, 
-                                               self.var_nam[v], meta_data[v])
+#            meta_data[v] = self._get_meta_data(sc_time[first_date].file_name, 
+#                                               self.var_nam[v], meta_data[v])
+            meta_data[v] = sc_time[first_date].get_meta_data(self.var_nam[v], meta_data[v])
 
         if self.key_vec:
             n = self.nvar
-            meta_data[n] = (self._get_meta_data(
-                             self.fnames_2[first_date].file_name, 
-                             self.var_nam[n], meta_data[n]))
+#            meta_data[n] = (self._get_meta_data(
+#                             self.fnames_2[first_date].file_name, 
+#                             self.var_nam[n], meta_data[n]))
+            meta_data[n] = self.fnames_2[first_date].get_meta_data(self.var_nam[n], meta_data[n])
 
         # Loop over identified files
         for f in range(first_date, last_date + 1):
             sc_array = [None, None]
             sc_alt_arr = [None, None]
-            self.logger.info('opening nc file: %s', sc_time[f].file_name)
-            nc = Dataset(sc_time[f].file_name, 'r')
+            self.logger.info('opening nc file: %s', sc_time[f].file_name)            
+#            nc = Dataset(sc_time[f].file_name, 'r')
             # If extracting vector quantities open second file
-            if self.key_vec:
-                nc_2 = Dataset(self.fnames_2[f].file_name, 'r')
+#            if self.key_vec:
+#                nc_2 = Dataset(self.fnames_2[f].file_name, 'r')
+
 
             # Counters not implemented
 
@@ -439,10 +442,11 @@ class Extract:
             for vn in range(self.nvar):
                 # Extract sub-region of data
                 self.logger.info('var_nam = %s',self.var_nam[vn])
-                varid = nc.variables[self.var_nam[vn]]
+#                varid = nc.variables[self.var_nam[vn]]
+                varid = sc_time[f][self.var_nam[vn]]
                 # If extracting vector quantities open second var
                 if self.key_vec:
-                    varid_2 = nc_2.variables[self.var_nam[vn + 1]]
+                    varid_2 = self.fnames_2[f][self.var_nam[vn+1]]#nc_2.variables[self.var_nam[vn + 1]]
 
                 # Extract 3D scalar variables
                 if not self.isslab and not self.key_vec:
@@ -641,9 +645,9 @@ class Extract:
                                                    np.array([data_out])))
                 entry['date'] = sc_time[f] #count skipped
 
-            nc.close()
-            if self.key_vec:
-                nc_2.close()
+#            nc.close()
+#            if self.key_vec:
+#                nc_2.close()
         
         # Need stats on fill pts in z and horiz + missing pts...
     # end month
@@ -706,35 +710,6 @@ class Extract:
     #    trig = np.transpose(trig, (2, 1, 0)) # Matlab 2 0 1
     #    return np.tile(trig, (1, size, 1)) # Matlab size 1 1
 
-    def _get_meta_data(self, fname, var, source_dic):
-        """returns the netcdf meta data for input variable
-        
-        Keyword arguments:
-        fname -- netcdf file name/path
-        var -- variable to which the metadata need to be extracted
-        source_dic -- input/output metadata dictionary
-        """
-        nc = Dataset(fname, 'r')
-        try:
-            source_att = nc.variables[var].ncattrs()
-        except KeyError:
-            return
-
-        varid = nc.variables[var]
-        source_dic['sf'] = 1
-        source_dic['os'] = 0
-        for i in range(len(source_att)):
-            if source_att[i] == 'missing_value':
-                source_dic['mv'] = varid.missing_value[:]
-            elif source_att[i] == 'scale_factor':
-                source_dic['sf'] = varid.scale_factor[:]
-            elif source_att[i] == 'add_offset':
-                source_dic['os'] = varid.add_offset[:]
-            elif source_att[i] == '_FillValue':
-                source_dic['fv'] = varid._FillValue #[:]
-     
-        nc.close()
-        return source_dic       
 
 
 

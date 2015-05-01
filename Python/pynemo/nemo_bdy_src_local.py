@@ -7,11 +7,48 @@ This is a interface for the getting the files.
 # pylint: disable=no-name-in-module
 #External imports
 from os import listdir
-from netCDF4 import Dataset
+from netCDF4 import Dataset,Variable
 from netCDF4 import netcdftime
 import logging
 #Local Imports
 
+
+class Data(object):
+    def __init__(self, filename, variable):
+        self.variable = variable
+        self.file_name = filename
+    
+    def __str__(self):
+        return "PyNEMO Data Object from file: %s and variable %s" % self.file_name, self.variable
+    
+    def __len__(self):
+        """ Returns the length of the variable """
+        try:
+            dataset = Dataset(self.file_name, 'r')
+            dvar = dataset.variables[self.variable]
+            val  = len(dvar)
+            dataset.close()
+            return val
+        except KeyError:
+            self.logger.error('Cannot find the requested variable '+self.variable)
+        except (IOError, RuntimeError):
+            self.logger.error('Cannot open the file '+self.file_name)
+        return None
+            
+    def __getitem__(self, val):
+        """ Returns the data requested """
+        try:
+            dataset = Dataset(self.file_name, 'r')
+            dvar = dataset.variables[self.variable]
+            retval  = dvar[val]
+            dataset.close()
+            return retval
+        except KeyError:
+            self.logger.error('Cannot find the requested variable '+self.variable)
+        except (IOError, RuntimeError):
+            self.logger.error('Cannot open the file '+self.file_name)
+        return None
+         
 class SourceData(object):
     logger = logging.getLogger(__name__)
     def __init__(self):
@@ -22,6 +59,16 @@ class SourceData(object):
         self.date = None
         self.seconds = None
 
+    def __getitem__(self, val):
+        """ Returns the data requested """
+        try:
+            return Data(self.file_name, val)
+        except KeyError:
+            self.logger.error('Cannot find the requested variable '+self.variable)
+        except (IOError, RuntimeError):
+            self.logger.error('Cannot open the file '+self.file_name)
+        return None
+    
     def get_data(self, variable):
         """ Returns the requested data corresponding to the variable """
         try:
@@ -33,9 +80,9 @@ class SourceData(object):
             self.logger.error('Cannot open the file '+self.file_name)
         return None
     
-    def get_meta_data(self, variable):
+    def get_meta_data(self, variable, source_dic):
         """ Returns a dictionary with meta data information correspoinding to the variable """
-        source_dic = {}
+        #source_dic = {}
         try:
             dataset = Dataset(self.file_name, 'r')
             source_att = dataset.variables[variable].ncattrs()
