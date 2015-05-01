@@ -14,9 +14,9 @@ from calendar import monthrange, isleap
 from datetime import datetime
 import numpy as np
 import scipy.spatial as sp
-from netCDF4 import Dataset
 from netcdftime import utime
 from utils.nemo_bdy_lib import rot_rep
+from nemo_bdy_src_local import GetFile
 import copy # DEBUG ONLY- allows multiple runs without corruption
 import logging
 
@@ -390,13 +390,13 @@ class Extract:
         self.logger.info('first/last dates: %s %s', first_date, last_date)
 
         if self.first:
-            nc_3 = Dataset(self.settings['src_msk'], 'r')
-            varid_3 = nc_3.variables['tmask']
+            nc_3 = GetFile(self.settings['src_msk'])
+            varid_3 = nc_3['tmask']
             t_mask = varid_3[:1, :sc_z_len, j_run, i_run]
             if self.key_vec:
-                varid_3 = nc_3.variables['umask']
+                varid_3 = nc_3['umask']
                 u_mask = varid_3[:1, :sc_z_len, j_run, extended_i]
-                varid_3 = nc_3.variables['vmask']
+                varid_3 = nc_3['vmask']
                 v_mask = varid_3[:1, :sc_z_len, extended_j, i_run]
             nc_3.close()
 
@@ -417,9 +417,6 @@ class Extract:
 
         if self.key_vec:
             n = self.nvar
-#            meta_data[n] = (self._get_meta_data(
-#                             self.fnames_2[first_date].file_name, 
-#                             self.var_nam[n], meta_data[n]))
             meta_data[n] = self.fnames_2[first_date].get_meta_data(self.var_nam[n], meta_data[n])
 
         # Loop over identified files
@@ -427,12 +424,6 @@ class Extract:
             sc_array = [None, None]
             sc_alt_arr = [None, None]
             self.logger.info('opening nc file: %s', sc_time[f].file_name)            
-#            nc = Dataset(sc_time[f].file_name, 'r')
-            # If extracting vector quantities open second file
-#            if self.key_vec:
-#                nc_2 = Dataset(self.fnames_2[f].file_name, 'r')
-
-
             # Counters not implemented
 
             sc_bdy = np.zeros((len(self.var_nam), sc_z_len, ind.shape[0], 
@@ -442,7 +433,6 @@ class Extract:
             for vn in range(self.nvar):
                 # Extract sub-region of data
                 self.logger.info('var_nam = %s',self.var_nam[vn])
-#                varid = nc.variables[self.var_nam[vn]]
                 varid = sc_time[f][self.var_nam[vn]]
                 # If extracting vector quantities open second var
                 if self.key_vec:
@@ -644,10 +634,6 @@ class Extract:
                     entry['data'] = np.concatenate((entry['data'],
                                                    np.array([data_out])))
                 entry['date'] = sc_time[f] #count skipped
-
-#            nc.close()
-#            if self.key_vec:
-#                nc_2.close()
         
         # Need stats on fill pts in z and horiz + missing pts...
     # end month

@@ -22,7 +22,7 @@ from calendar import monthrange
 import numpy as np
 from scipy.interpolate import interp1d
 import logging
-from netCDF4 import Dataset
+from nemo_bdy_src_local import GetFile
 from netcdftime import datetime
 import copy
 
@@ -164,8 +164,8 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     logger.info('gather grid info')
     start = clock()
     # how grid broken up, long/lats
-    nc = Dataset(settings['src_zgr'], 'r')
-    SourceCoord.zt = nc.variables['gdept_0'][:]
+    nc = GetFile(settings['src_zgr'])
+    SourceCoord.zt = nc['gdept_0'][:]
     nc.close()
 
     logger.info(clock() - start)
@@ -196,22 +196,22 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     logger.info('horizontal grid info')
     start = clock()
     # Horizontal grid info
-    nc = Dataset(settings['src_hgr'], 'r')
-    SourceCoord.lon = nc.variables['glamt'][:, :]
-    SourceCoord.lat = nc.variables['gphit'][:, :]
+    nc = GetFile(settings['src_hgr'])
+    SourceCoord.lon = nc['glamt'][:,:]
+    SourceCoord.lat = nc['gphit'][:,:]
     nc.close()
 
     logger.info(clock() - start)
     DstCoord.lonlat = {'t': {}, 'u': {}, 'v': {}}
 
     start = clock()
-    nc = Dataset(settings['dst_hgr'], 'r')
+    nc = GetFile(settings['dst_hgr'])
 
     logger.info('read and assign netcdf data, lon lat')
     # Read and assign netcdf data
     for g in 't', 'u', 'v':
-        DstCoord.lonlat[g]['lon'] = nc.variables['glam' + g][0, :, :]
-        DstCoord.lonlat[g]['lat'] = nc.variables['gphi' + g][0, :, :]
+        DstCoord.lonlat[g]['lon'] = nc['glam' + g][0, :, :]
+        DstCoord.lonlat[g]['lat'] = nc['gphi' + g][0, :, :]
     nc.close()
 
     logger.info(clock() - start)

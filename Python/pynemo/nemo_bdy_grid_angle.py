@@ -13,8 +13,9 @@
 # cd_type: define the nature of pt2d grid points
 
 import numpy as np
-from netCDF4 import Dataset
+from nemo_bdy_src_local import GetFile 
 import logging
+#     pylint: disable=E1101
 
 class GridAngle:
     
@@ -34,12 +35,12 @@ class GridAngle:
         self.logger.debug( 'Grid Angle: ', self.CD_T)
 
         # open coord file 
-        self.nc = Dataset(coord_fname, 'r')
+        self.nc = GetFile(coord_fname)#Dataset(coord_fname, 'r')
         
         # set constants
         self.IMIN, self.IMAX = imin, imax
         self.JMIN, self.JMAX = jmin, jmax
-        ndim = len(self.nc.variables['glamt'].dimensions)
+        ndim = len(self.nc['glamt'].dimensions)
         if ndim == 4:
             self.DIM_STR = 0, 0
         elif ndim == 3:
@@ -126,10 +127,10 @@ class GridAngle:
             case = self.M_T
         else:
             case = self.CD_T
-        zlam = np.float64(self.nc.variables['glam' + case][d, j:jj, i:ii])
+        zlam = np.float64(self.nc['glam' + case][d, j:jj, i:ii]) #.variables['glam' + case][d, j:jj, i:ii])
         if single:
             return zlam
-        zphi = np.float64(self.nc.variables['gphi' + case][d, j:jj, i:ii])
+        zphi = np.float64(self.nc['gphi' + case][d, j:jj, i:ii])#.variables['gphi' + case][d, j:jj, i:ii])
        
         return zlam, zphi 
 
@@ -146,6 +147,3 @@ class GridAngle:
         z_two = np.tan(np.pi / 4 - np.radians(z_two) / 2)
         
         return x * z_one * z_two
-
-
-

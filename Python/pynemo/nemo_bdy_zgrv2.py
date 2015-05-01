@@ -14,12 +14,12 @@ Initialise with bdy t, u and v grid attributes (Grid.bdy_i)
 and settings dictionary 
 """
 
-from netCDF4 import Dataset
+from nemo_bdy_src_local import GetFile
 import numpy as np
 import logging
 
 from utils.nemo_bdy_lib import sub2ind
-
+#     pylint: disable=E1101
 # Query name
 class Depth:
 
@@ -27,12 +27,12 @@ class Depth:
         self.logger = logging.getLogger(__name__) 
         self.logger.debug( 'init Depth' )
         hc = settings['hc'] 
-        nc = Dataset(settings['dst_zgr'], 'r')
-        mbathy = nc.variables['mbathy'][:,:,:].squeeze()
+        nc = GetFile(settings['dst_zgr'])#Dataset(settings['dst_zgr'], 'r')
+        mbathy = nc['mbathy'][:,:,:].squeeze() #nc.variables['mbathy'][:,:,:].squeeze()
         # numpy requires float dtype to use NaNs
         mbathy = np.float16(mbathy)
         mbathy[mbathy == 0] = np.NaN 
-        nz = len(nc.variables['nav_lev'][:])
+        nz = len(nc['nav_lev'][:])#.variables['nav_lev'][:])
 
         # Set up arrays
         t_nbdy = len(bdy_t[:,0])
@@ -54,7 +54,7 @@ class Depth:
         if settings['sco']:
             # hc = ... FIX ME??
             # Depth of water column at t-point
-            hbatt = nc.variables['hbatt'][:,:,:]
+            hbatt = nc['hbatt'][:,:,:]#nc.variables['hbatt'][:,:,:]
             # Replace land with NaN   
             hbatt[mbathy == 0] = np.NaN
 
@@ -72,17 +72,17 @@ class Depth:
         for k in range(nz):
             if settings['sco']:
                 # sigma coeffs at t-point (1->0 indexed)
-                gsigt = nc.variables['gsigt'][0,k,:,:]
+                gsigt = nc['gsigt'][0,k,:,:]#nc.variables['gsigt'][0,k,:,:]
                 # sigma coeffs at w-point
-                gsigw = nc.variables['gsigw'][0,k,:,:]
+                gsigw = nc['gsigw'][0,k,:,:]#nc.variables['gsigw'][0,k,:,:]
 
                 # NOTE:  check size of gsigt SKIPPED
 
                 wrk1 = (hbatt - hc) * gsigt[:,:] + (hc * (k + 0.5) / (nz - 1))
                 wrk2 = (hbatt - hc) * gsigw[:,:] + (hc * (k + 0.5) / (nz - 1))
             else:
-                wrk1 = nc.variables['gdept'][0,k,:,:]
-                wrk2 = nc.variables['gdepw'][0,k,:,:]
+                wrk1 = nc['gdept'][0,k,:,:]#nc.variables['gdept'][0,k,:,:]
+                wrk2 = nc['gdepw'][0,k,:,:]#nc.variables['gdepw'][0,k,:,:]
 
             # Replace deep levels that are not used with NaN
             wrk2[mbathy + 1 < k + 1] = np.NaN

@@ -17,7 +17,7 @@ class Data(object):
     def __init__(self, filename, variable):
         self.variable = variable
         self.file_name = filename
-    
+        self.dimensions = self._get_dimensions()
     def __str__(self):
         return "PyNEMO Data Object from file: %s and variable %s" % self.file_name, self.variable
     
@@ -49,6 +49,17 @@ class Data(object):
             self.logger.error('Cannot open the file '+self.file_name)
         return None
          
+    def _get_dimensions(self):
+        """ Returns the dimensions of the variables """
+        try:
+            dataset = Dataset(self.file_name, 'r')
+            dvar = dataset.variables[self.variable]
+            return dvar.dimensions
+        except KeyError:
+            self.logger.error('Cannot find the requested variable '+self.variable)
+        except (IOError, RuntimeError):
+            self.logger.error('Cannot open the file '+self.file_name)
+        return None
 class SourceData(object):
     logger = logging.getLogger(__name__)
     def __init__(self):
@@ -106,7 +117,11 @@ class SourceData(object):
             self.logger.error('Cannot open the file '+self.file_name)
         return None        
             
-           
+    def close(self):
+        """ This is not yet implemented. TODO: keep the netcdf file open until its expicitly 
+        closed """
+        pass
+       
 class LocalRepository(object):
     '''
     This manages the files in the local directory
@@ -218,7 +233,20 @@ def GetRepository(src_dir, grid, t_adjust):
         print 'Invalid Data Location'
         return None
         
-        
+      
+def GetFile(file_path):
+    """ This method looks at the file_path and decides on appropriate file reader """
+    if os.path.isfile(file_path) and file_path.endswith(".nc"):
+        data = SourceData()
+        data.file_name = file_path
+        return data
+    elif url_exists(file_path) and file_path.endswith(".nc"):
+        data = SourceData()
+        data.file_name = file_path
+        return data
+    else:
+        raise NotImplementedError, "The file reader for the requested file is not supported"
+     
 import urllib2
 def url_exists(location):
     request = urllib2.Request(location)
