@@ -16,6 +16,8 @@ import numpy as np
 import scipy.spatial as sp
 from netcdftime import utime
 from utils.nemo_bdy_lib import rot_rep
+#This is to test ncml working
+#from nemo_bdy_src_ncml import GetFile
 from nemo_bdy_src_local import GetFile
 import copy # DEBUG ONLY- allows multiple runs without corruption
 import logging
