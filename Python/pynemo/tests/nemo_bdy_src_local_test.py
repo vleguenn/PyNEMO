@@ -28,7 +28,8 @@ class Test(unittest.TestCase):
     
     def testGetMetaData(self):
         repo = LocalRepository('data/srcdata_low_res_C/',['t'],0)
-        self.assertGreater(repo.grid_source_data['t'][0].get_meta_data('votemper')['fv'], 9.969201E36, 'Fill Value is not read properly')
+        source_dic = {}
+        self.assertGreater(repo.grid_source_data['t'][0].get_meta_data('votemper',source_dic)['fv'], 9.96901E36,  'Fill Value is not read properly')
     
     def testGetDataVariable(self):
         repo = LocalRepository('data/srcdata_low_res_C/',['t'],0)
