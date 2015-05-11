@@ -25,15 +25,19 @@ except:
 NetcdfDataset = None
 NcMLReader = None
 Section = None
-from jnius import autoclass
-def init_jnius():
-    global NetcdfDataset
-    global NcMLReader
-    global Section
-    NetcdfDataset = autoclass('ucar.nc2.dataset.NetcdfDataset')
-    NcMLReader = autoclass('ucar.nc2.ncml.NcMLReader')
-    Section = autoclass('ucar.ma2.Section')
-init_jnius()
+try:
+    from jnius import autoclass
+    def init_jnius():
+        global NetcdfDataset
+        global NcMLReader
+        global Section
+        NetcdfDataset = autoclass('ucar.nc2.dataset.NetcdfDataset')
+        NcMLReader = autoclass('ucar.nc2.ncml.NcMLReader')
+        Section = autoclass('ucar.ma2.Section')
+    init_jnius()
+except ImportError:
+    print 'Warning: Please make sure pyjnius is installed and jvm.dll/libjvm.so/libjvm.dylib is in the path'
+    
 class Data(object):
 
     def __init__(self, filename, variable):
