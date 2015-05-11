@@ -10,7 +10,7 @@ with open(path.join(here, 'DESCRIPTION.rst'),encoding='utf-8') as f:
 setup(
       name = 'pynemo',
       
-      version='0.1',
+      version='0.2',
       
       description = 'NEMO Regional Configuration Toolbox',
       long_description = long_description,
@@ -44,7 +44,7 @@ setup(
       
       include_package_data=True,
       #The data files that needs to be included in packaging
-      package_data={'': ['gui/*.png'],
+      package_data={'': ['gui/*.png','jars/*.jar'],
                     
                     },
       #If files are needs outside the installed packages
