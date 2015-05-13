@@ -60,6 +60,7 @@ class Data(object):
         except (IOError, RuntimeError):
             self.logger.error('Cannot open the file '+self.file_name)
         return None
+
 class SourceData(object):
     logger = logging.getLogger(__name__)
     def __init__(self):

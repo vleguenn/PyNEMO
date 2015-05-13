@@ -10,7 +10,7 @@ import logging
 
 # Logging set to info
 logging.basicConfig(level=logging.INFO)
-
+import time
 def main():
     """ Main function which checks the command line parameters and
         passes them to the profile module for processing """
@@ -38,8 +38,10 @@ def main():
 
     #Logger
     #logger = logging.getLogger(__name__)
-
+    t0 = time.time()
     profile.process_bdy(setup_file, mask_gui)
-
+    t1 = time.time()
+    print "Execution Time: %s" % (t1-t0)
+    
 if __name__ == "__main__":
     main()

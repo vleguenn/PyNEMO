@@ -22,7 +22,7 @@ from calendar import monthrange
 import numpy as np
 from scipy.interpolate import interp1d
 import logging
-from nemo_bdy_src_local import GetFile
+from pynemo.reader.factory import GetFile
 from netcdftime import datetime
 import copy
 
@@ -32,7 +32,7 @@ from pynemo import nemo_bdy_gen_c as gen_grid
 from pynemo import nemo_coord_gen_pop as coord
 from pynemo import nemo_bdy_zgrv2 as zgrv
 from pynemo import nemo_bdy_src_time as source_time
-from pynemo import nemo_bdy_src_local
+from pynemo.reader import factory
 
 from pynemo import nemo_bdy_source_coord as source_coord
 from pynemo import nemo_bdy_dst_coord as dst_coord
@@ -254,13 +254,13 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 #    grid_t.source_time = SourceTime.get_source_time('t', acc)
 #    grid_u.source_time = SourceTime.get_source_time('u', acc)
 #    grid_v.source_time = SourceTime.get_source_time('v', acc)
-    grid_t.source_time = nemo_bdy_src_local.GetRepository(settings['src_dir'], 't', acc).grid_source_data['t']
-    grid_u.source_time = nemo_bdy_src_local.GetRepository(settings['src_dir'], 'u', acc).grid_source_data['u']
-    grid_v.source_time = nemo_bdy_src_local.GetRepository(settings['src_dir'], 'v', acc).grid_source_data['v']
+    grid_t.source_time = factory.GetRepository(settings['src_dir'], 't', acc).grid_source_data['t']
+    grid_u.source_time = factory.GetRepository(settings['src_dir'], 'u', acc).grid_source_data['u']
+    grid_v.source_time = factory.GetRepository(settings['src_dir'], 'v', acc).grid_source_data['v']
     
     if ice:
 #        grid_ice.source_time = SourceTime.get_source_time('i', acc)
-        grid_ice.source_time = nemo_bdy_src_local.GetRepository(settings['src_dir'], 'i', acc).grid_source_data['i']
+        grid_ice.source_time = factory.GetRepository(settings['src_dir'], 'i', acc).grid_source_data['i']
 
     logger.debug(clock() - start)
     """

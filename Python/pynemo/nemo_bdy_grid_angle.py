@@ -13,7 +13,7 @@
 # cd_type: define the nature of pt2d grid points
 
 import numpy as np
-from nemo_bdy_src_local import GetFile 
+from reader.factory import GetFile 
 import logging
 #     pylint: disable=E1101
 
@@ -35,7 +35,7 @@ class GridAngle:
         self.logger.debug( 'Grid Angle: ', self.CD_T)
 
         # open coord file 
-        self.nc = GetFile(coord_fname)#Dataset(coord_fname, 'r')
+        self.nc = GetFile(coord_fname)
         
         # set constants
         self.IMIN, self.IMAX = imin, imax

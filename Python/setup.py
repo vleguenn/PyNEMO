@@ -44,7 +44,7 @@ setup(
       
       include_package_data=True,
       #The data files that needs to be included in packaging
-      package_data={'': ['gui/*.png','jars/*.jar'],
+      package_data={'': ['gui/*.png','reader/jars/*.jar'],
                     
                     },
       #If files are needs outside the installed packages

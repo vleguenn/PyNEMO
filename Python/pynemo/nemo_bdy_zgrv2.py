@@ -14,7 +14,7 @@ Initialise with bdy t, u and v grid attributes (Grid.bdy_i)
 and settings dictionary 
 """
 
-from nemo_bdy_src_local import GetFile
+from reader.factory import GetFile
 import numpy as np
 import logging
 
