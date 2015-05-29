@@ -74,20 +74,13 @@ class MatplotlibWidget(QtGui.QWidget):
         """ Draws the basemap and contour with mask information"""
         if self.mask == None:
             return
-        #give some extra space for the mask to be shown on map
-        minlon = self.mask.lon.min()-1
-        maxlon = self.mask.lon.max()+1
-        minlat = self.mask.lat.min()-1
-        maxlat = self.mask.lat.max()+1
 
-        clevs = [-1, 0, 1]
-        bathy_clevs = np.arange(-1, 5300, 100)
         x = np.arange(0, self.mask.lon.shape[0])
         y = np.arange(0, self.mask.lon.shape[1])
         x_vals, y_vals = np.meshgrid(y, x)
         Z = self.mask.bathy_data[...].astype(np.float64)
         self.axes.contourf(x_vals, y_vals, Z, 10, cmap=plt.get_cmap('GnBu'))#cmap=cm.s3pcpn)
-        self.axes.contourf(x_vals, y_vals, self.mask.data, 5, cmap=plt.get_cmap('autumn'),\
+        self.axes.contourf(x_vals, y_vals, self.mask.data*-1, 5, cmap=plt.get_cmap('autumn'),\
                            alpha=mask_alpha)
         self.canvas.draw()
 

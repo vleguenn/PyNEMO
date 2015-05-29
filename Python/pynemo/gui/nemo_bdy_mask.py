@@ -101,8 +101,12 @@ class Mask(object):
     def apply_border_mask(self, pixels):
         """ pixels is number of pixels in the border that need applying mask"""
         if self.data is not None and pixels < self.data.shape[0] and pixels < self.data.shape[1]:
-            tmp = np.ones(self.data.shape, dtype=bool)
-            tmp[pixels:-pixels, pixels:-pixels] = False
+            if pixels != 0:
+                tmp = np.ones(self.data.shape, dtype=bool)
+                tmp[pixels:-pixels, pixels:-pixels] = False
+            else:
+                tmp = np.zeros(self.data.shape, dtype=bool)
+            self.reset_mask()
             self.data[tmp] = -1
 
     def add_mask(self, index):
@@ -122,7 +126,7 @@ class Mask(object):
         #if index is not empty
         if out_index is not None:            
             tmp = self.data[out_index]
-            tmp[tmp == 1] = -1
+            tmp[tmp == -1] = 1
             self.data[out_index] = tmp            
         
     def _get_bathy_depth_index(self, index, depth):
@@ -135,15 +139,18 @@ class Mask(object):
     def remove_mask(self,index):
         """ Removes the mask for the given index values depending on the type of mask selected """
         out_index = None
-        if self.mask_type == None:
+        if self.mask_type == None or self.mask_type == 0:
             out_index = index
         elif self.mask_type == 1: #minimum depth
             out_index = self._get_bathy_depth_index(index,self.min_depth)
+            out_index = self.remove_small_regions(out_index)
+            out_index = self.fill_small_regions(out_index)            
         elif self.mask_type == 2: # shelf break
             dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
             out_index = self._get_bathy_depth_index(index, shelf_break)
+            out_index = self.remove_small_regions(out_index)            
         tmp = self.data[out_index]
-        tmp[tmp == -1] = 1
+        tmp[tmp == 1] = -1
         self.data[out_index] = tmp   
     
     def set_minimum_depth_mask(self, depth):
@@ -176,6 +183,10 @@ class Mask(object):
         #remove the small unmask holes
         mask_withoutholes = ndimage.binary_fill_holes(mask_data)
         return np.where(mask_withoutholes==1)
+        
+    def reset_mask(self):
+        """ This method resets the data back to no mask with land fill """
+        self.data = np.around((self.bathy_data + .5).clip(0, 1))
         
     def apply_mediterrian_mask(self):
         """ This is mediterrian mask specific for the test bathymetry file """
