@@ -122,12 +122,14 @@ class Mask(object):
             dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
             out_index = self._get_bathy_depth_index(index, shelf_break)
             out_index = self.remove_small_regions(out_index)
-        
         #if index is not empty
         if out_index is not None:            
             tmp = self.data[out_index]
             tmp[tmp == -1] = 1
-            self.data[out_index] = tmp            
+            self.data[out_index] = tmp  
+        self.select_the_largest_region()  
+        
+                
         
     def _get_bathy_depth_index(self, index, depth):
         """ returns the indexes in the input index which have bathymetry depth greather than the 
@@ -151,7 +153,8 @@ class Mask(object):
             out_index = self.remove_small_regions(out_index)            
         tmp = self.data[out_index]
         tmp[tmp == 1] = -1
-        self.data[out_index] = tmp   
+        self.data[out_index] = tmp
+        self.select_the_largest_region()
     
     def set_minimum_depth_mask(self, depth):
         self.min_depth = depth
@@ -188,6 +191,24 @@ class Mask(object):
         """ This method resets the data back to no mask with land fill """
         self.data = np.around((self.bathy_data + .5).clip(0, 1))
         
+    def select_the_largest_region(self):
+        """ This method tidies up the mask by selecting the largest masked region. this is to avoid two disconnected masked regions """
+        mask_data = np.zeros(self.data.shape)
+        mask_data[:,:] = self.data[:,:]
+        mask_data[mask_data == -1] = 0
+        #connected components
+        label_mask, num_labels = ndimage.label(mask_data)
+        if num_labels == 0: #if mask is empty/clear
+            return
+        mean_values = ndimage.sum(np.ones(self.data.shape),label_mask,range(1, num_labels+1))
+        max_area_mask = None
+        if mean_values.size != 0:
+            max_area_index = np.argmax(mean_values)+1
+            max_area_mask = label_mask == max_area_index
+        self.data = np.around((self.bathy_data + .5).clip(0, 1))
+        self.data[self.data == 1] = -1
+        self.data[max_area_mask] = self.data[max_area_mask] * -1
+    
     def apply_mediterrian_mask(self):
         """ This is mediterrian mask specific for the test bathymetry file """
         tmp = self.data[0:59, 280:350]
