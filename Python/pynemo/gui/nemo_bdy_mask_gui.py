@@ -138,9 +138,12 @@ class MatplotlibWidget(QtGui.QWidget):
     @pyqtSlot(str, str)
     def set_bathymetry_file(self, bathymetry_filename, mask_file):
         """ Set the bathymetry file """
-        self.mask = Mask(bathymetry_filename, mask_file, self.min_depth, self.shelfbreak_dist)
-        self.mask.mask_type = self.mask_type
-        self.create_basemap()
+        try:
+            self.mask = Mask(bathymetry_filename, mask_file, self.min_depth, self.shelfbreak_dist)
+            self.mask.mask_type = self.mask_type
+            self.create_basemap()
+        except RuntimeError:
+            pass # couldn't set the new file name
         
     @pyqtSlot(str)
     def save_mask_file(self, mask_file):

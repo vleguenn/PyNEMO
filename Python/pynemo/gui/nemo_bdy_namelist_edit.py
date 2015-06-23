@@ -140,7 +140,8 @@ class NameListEditor(QtGui.QWidget):
         except KeyError:
             print 'Set the mask setting mask_max_depth and mask_shelfbreak_dist'
             
-        self.bathymetry_update.emit(self.settings['bathy'],self.settings['mask_file'])
+        if self.bool_settings['mask_file']:
+            self.bathymetry_update.emit(self.settings['bathy'],self.settings['mask_file'])
 
     def _btn_cancel_callback(self):
         """ callback when cancel button is clicked """
