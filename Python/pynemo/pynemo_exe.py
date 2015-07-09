@@ -26,6 +26,8 @@ def main():
     for opt, arg in opts:
         if opt == "-h":
             print "usage: pynemo [-g] -s <namelist.bdy> "
+            print "       -g (optional) will open settings editor before extracting the data"
+            print "       -s <bdy filename> file to use"
             sys.exit()
         elif opt in ("-s", "--setup"):
             setup_file = arg

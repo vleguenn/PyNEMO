@@ -9,6 +9,7 @@ Contents:
    intro
    installation
    usage
+   troubleshooting
 
 
 

@@ -1,13 +1,62 @@
 Usage
 =====
-This page is Usage to pyNEMO
+There are two tools available in pyNEMO. They are described in detail below. 
 
 pynemo
 ^^^^^^
 
-pynemo -g -n namelist.bdy
+This command line tool takes in a bdy file and performs the extraction of boundary data and prepares the data for NEMO simulation.
+bdy file is a plain text file containing key value pairs. Please look at the sample namelist.bdy file at 
+http://ccpforge.cse.rl.ac.uk/gf/project/pynemo/scmsvn/?action=browse&path=%2Ftrunk%2FPython%2Fdata%2Fnamelist.bdy&view=markup 
+namelist.bdy file is similar to NEMO simulation input file. 
+
+.. note:: Directory paths in bdy file can be relative or absolute. Application picks the relative path from the current working directory.
+
+Syntax for pynemo command is
+
+::
+
+   > pynemo [-g] -s <bdy file>
+
+For help
+
+::
+
+   > pynemo -h 
+   > usage: pynemo [-g] -s <namelist.bdy>
+   >        -g (optional) will open settings editor before extracting the data
+   >        -s <bdy filename> file to use
+
+Example comamnd
+
+::
+
+   > pynemo -g -s namelist.bdy
+
 
 pynemo_settings_editor
 ^^^^^^^^^^^^^^^^^^^^^^
 
-pynemo_settings_editor namelist.bdy
+This tool will open a window where you can edit the mask and change the values of bdy parameters.
+
+Syntax for pynemo_settings_editor command is
+
+::
+
+   > pynemo_settings_editor [-s <bdy filename>]
+   
+.. note:: If no file name is specified then a file dialog box will open to select a file.
+
+For help
+
+::
+
+   > pynemo_settings_editor -h
+   > usage: pynemo_settings_editor -s <namelist.bdy>
+   
+Example:
+
+::
+   
+   pynemo_settings_editor -s namelist.bdy
+

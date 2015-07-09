@@ -17,11 +17,11 @@ Dependencies
 Anaconda
 ^^^^^^^^
 
-Using conda.
+Using conda. pyNEMO supports Win64, OSX and Linux. for other operating systems please build from source.
 
 ::
 
-   conda install -c https://conda.binstar.org/srikanthnagella pynemo
+   conda install -c https://conda.anaconda.org/srikanthnagella pynemo
 
 This will install the pynemo and its dependencies. 
 
