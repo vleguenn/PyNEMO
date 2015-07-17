@@ -8,11 +8,11 @@ Rewritting the break depth implementation from matlab version
 import numpy as np
 import math
 import copy
-import pyproj
+#import pyproj
 
 #import matplotlib.pyplot as plt
 import scipy.ndimage as ndimage
-from seawater.extras import dist
+import seawater
 def gcoms_break_depth(bathy):
     """ This creates a mask for the break depth using histograms """
     ocean_depth = bathy[...]
@@ -67,6 +67,18 @@ def gcoms_break_depth(bathy):
     h_max = math.floor(depth_break/100)*100
     return depth_shelf, h_max
     
+""" 
+    :param bathy: This is the input bathymetry data
+    :param ov: Latittude array
+    :param lv: Longitude array  
+    :type bathy: numpy array
+    :type ov: numpy array
+    :type lv: numpy array
+    :return: returns the ob, lb
+    :rtype: numpy arrays
+    
+    :Example:
+"""    
 def gcoms_boundary_masks(bathy,ov,lv):
     tmp = np.pad(bathy, (1, 1), 'constant', constant_values=(np.NaN, np.NaN))
     tmp[tmp==ov] = np.NaN
@@ -138,16 +150,16 @@ def polcoms_select_domain(bathy, lat, lon, roi):
         lon_pts = np.ravel(lon_pts)
         # NOTE: seawater package calculates the distance from point to the next point in the array
         # that is the reason to insert reference point before every point
-        #lat_pts = np.insert(lat_pts,range(0,len(lat_pts)), lat_ob[idx])
-        #lon_pts = np.insert(lon_pts,range(0,len(lon_pts)), lon_ob[idx])
-        #distance_pts = seawater.dist(lat_pts, lon_pts)
+        lat_pts = np.insert(lat_pts,range(0,len(lat_pts)), lat_ob[idx])
+        lon_pts = np.insert(lon_pts,range(0,len(lon_pts)), lon_ob[idx])
+        distance_pts = seawater.dist(lat_pts, lon_pts)
         #distances repeat themselves so only pick every alternative distance
-        #distance_pts = distance_pts[0][::2]
+        distance_pts = distance_pts[0][::2]
         
         #Using pyproj
-        geod = pyproj.Geod(ellps='WGS84')
-        dummy,dummy, distance_pts = geod.inv(len(lon_pts)*[lon_ob[idx]],len(lat_pts)*[lat_ob[idx]], lon_pts, lat_pts)
-        distance_pts=distance_pts/1000.0
+        #geod = pyproj.Geod(ellps='WGS84')
+        #dummy,dummy, distance_pts = geod.inv(len(lon_pts)*[lon_ob[idx]],len(lat_pts)*[lat_ob[idx]], lon_pts, lat_pts)
+        #distance_pts=distance_pts/1000.0
                          
         distance_pts = np.reshape(distance_pts, lat_pts_shape)
         distance_pts[distance_pts>dr] = np.NaN
@@ -170,16 +182,16 @@ def polcoms_select_domain(bathy, lat, lon, roi):
         lon_pts = np.ravel(lon_pts)
         # NOTE: seawater package calculates the distance from point to the next point in the array
         # that is the reason to insert reference point before every point
-        #lat_pts = np.insert(lat_pts,range(0,len(lat_pts)), lat_lb[idx])
-        #lon_pts = np.insert(lon_pts,range(0,len(lon_pts)), lon_lb[idx])
-        #distance_pts = seawater.dist(lat_pts, lon_pts)
+        lat_pts = np.insert(lat_pts,range(0,len(lat_pts)), lat_lb[idx])
+        lon_pts = np.insert(lon_pts,range(0,len(lon_pts)), lon_lb[idx])
+        distance_pts = seawater.dist(lat_pts, lon_pts)
         #distances repeat themselves so only pick every alternative distance
-        #distance_pts = distance_pts[0][::2]
+        distance_pts = distance_pts[0][::2]
         
         #Using pyproj
-        geod = pyproj.Geod(ellps='WGS84')
-        dummy,dummy, distance_pts = geod.inv(len(lon_pts)*[lon_lb[idx]],len(lat_pts)*[lat_lb[idx]], lon_pts, lat_pts) 
-        distance_pts=distance_pts/1000.0
+        #geod = pyproj.Geod(ellps='WGS84')
+        #dummy,dummy, distance_pts = geod.inv(len(lon_pts)*[lon_lb[idx]],len(lat_pts)*[lat_lb[idx]], lon_pts, lat_pts) 
+        #distance_pts=distance_pts/1000.0
         
         distance_pts = np.reshape(distance_pts, lat_pts_shape)
         distance_pts[distance_pts>dr] = np.NaN
