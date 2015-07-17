@@ -40,7 +40,7 @@ setup(
       
       packages=['pynemo','pynemo.tests','pynemo.gui','pynemo.utils','pynemo.tide','pynemo.reader'],
       
-      install_requires=['netCDF4','scipy','numpy','matplotlib', 'basemap', 'thredds_crawler'],
+      install_requires=['netCDF4','scipy','numpy','matplotlib', 'basemap', 'thredds_crawler', 'pyproj'],
       
       include_package_data=True,
       #The data files that needs to be included in packaging

@@ -5,9 +5,9 @@ Testing the nemo_bdy_src_local
 '''
 import unittest
 
-from pynemo.nemo_bdy_src_local import LocalRepository
-from pynemo.nemo_bdy_src_local import OpenDAPRepository
-from pynemo.nemo_bdy_src_local import Data
+from pynemo.reader.netcdf import LocalRepository
+from pynemo.reader.netcdf import OpenDAPRepository
+from pynemo.reader.netcdf import Data
 
 from netcdftime import utime
 class Test(unittest.TestCase):

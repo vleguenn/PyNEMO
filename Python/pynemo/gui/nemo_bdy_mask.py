@@ -10,7 +10,7 @@ import numpy as np
 from netCDF4 import Dataset
 import logging
 from scipy import ndimage
-
+import matplotlib.pyplot as plt
 from pynemo.utils import gcoms_break_depth
 
 class Mask(object):
@@ -109,26 +109,28 @@ class Mask(object):
             self.reset_mask()
             self.data[tmp] = -1
 
-    def add_mask(self, index):
+    def add_mask(self, index, roi):
         """ Adds the masks for the given index values depending on the type of mask selected"""
         out_index = None
         if self.mask_type == None or self.mask_type == 0:
             out_index = index
         elif self.mask_type == 1: #maximum depth
-            out_index = self._get_bathy_depth_index(index,self.min_depth)
+            out_index = self._get_bathy_depth_index(index,self.min_depth)            
             out_index = self.remove_small_regions(out_index)
             out_index = self.fill_small_regions(out_index)
         elif self.mask_type == 2: # shelf break
-            dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
-            out_index = self._get_bathy_depth_index(index, shelf_break)
-            out_index = self.remove_small_regions(out_index)
-        #if index is not empty
-        if out_index is not None:            
+            #dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
+            #out_index = self._get_bathy_depth_index(index, shelf_break)
+            out_index = gcoms_break_depth.polcoms_select_domain(self.bathy_data, self.lat, self.lon, roi)
+            out_index = np.logical_and(index, out_index)
+            out_index = self.remove_small_regions(out_index)   
+            #out_index = self.fill_small_regions(out_index)                    
+        #if index is not empty        
+        if out_index is not None:                       
             tmp = self.data[out_index]
             tmp[tmp == -1] = 1
             self.data[out_index] = tmp  
-        self.select_the_largest_region()  
-        
+        self.select_the_largest_region()         
                 
         
     def _get_bathy_depth_index(self, index, depth):
@@ -138,7 +140,7 @@ class Mask(object):
         output_index = np.logical_and(index,output_index)
         return output_index
     
-    def remove_mask(self,index):
+    def remove_mask(self,index,roi):
         """ Removes the mask for the given index values depending on the type of mask selected """
         out_index = None
         if self.mask_type == None or self.mask_type == 0:
@@ -148,9 +150,11 @@ class Mask(object):
             out_index = self.remove_small_regions(out_index)
             out_index = self.fill_small_regions(out_index)            
         elif self.mask_type == 2: # shelf break
-            dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
-            out_index = self._get_bathy_depth_index(index, shelf_break)
-            out_index = self.remove_small_regions(out_index)            
+#            dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
+#            out_index = self._get_bathy_depth_index(index, shelf_break)
+            out_index = gcoms_break_depth.polcoms_select_domain(self.bathy_data, self.lat, self.lon, roi)
+            out_index = np.logical_and(index, out_index)
+            out_index = self.remove_small_regions(out_index)   
         tmp = self.data[out_index]
         tmp[tmp == 1] = -1
         self.data[out_index] = tmp

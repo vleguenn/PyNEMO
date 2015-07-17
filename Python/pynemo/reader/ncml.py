@@ -128,8 +128,8 @@ class Data(object):
                         retval = retval[ret_dim_list2]  
                     ret_dim_list = ret_dim_list+(slice(None,None,None),)
                 self.logger.info(ret_dim_list)                        
-            self.logger.info(retval.shape)
-            self.logger.info(ret_dim_list)
+                self.logger.info(retval.shape)
+                self.logger.info(ret_dim_list)
             # reshape to reflect the request
             retval = np.reshape(retval, new_dims)
             dataset.close()

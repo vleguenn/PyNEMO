@@ -199,6 +199,15 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     nc = GetFile(settings['src_hgr'])
     SourceCoord.lon = nc['glamt'][:,:]
     SourceCoord.lat = nc['gphit'][:,:]
+    try: # if they are masked array convert them to normal arrays
+        SourceCoord.lon = SourceCoord.lon.filled()
+    except:
+        pass
+    try:
+        SourceCoord.lat = SourceCoord.lat.filled()
+    except:
+        pass
+        
     nc.close()
 
     logger.info(clock() - start)
@@ -292,13 +301,13 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     source_time = {}
     source_time['t'] = nemo_bdy_src_time
     """
-
-    cosz, sinz, cosu, sinu, cosv, sinv = nemo_bdy_tide3.nemo_bdy_tpx7p2_rot(Setup, DstCoord,
-                                                                            grid_t, grid_u, grid_v,
-                                                                            settings["clname"])
-    write_tidal_data(Setup, DstCoord, grid_t, num_bdy, settings["clname"], cosz, sinz)
-    write_tidal_data(Setup, DstCoord, grid_u, num_bdy, settings["clname"], cosu, sinu)
-    write_tidal_data(Setup, DstCoord, grid_v, num_bdy, settings["clname"], cosv, sinv)
+    if settings['tide']:
+        cosz, sinz, cosu, sinu, cosv, sinv = nemo_bdy_tide3.nemo_bdy_tpx7p2_rot(Setup, DstCoord,
+                                                                                grid_t, grid_u, grid_v,
+                                                                                settings["clname"])
+        write_tidal_data(Setup, DstCoord, grid_t, num_bdy, settings["clname"], cosz, sinz)
+        write_tidal_data(Setup, DstCoord, grid_u, num_bdy, settings["clname"], cosu, sinu)
+        write_tidal_data(Setup, DstCoord, grid_v, num_bdy, settings["clname"], cosv, sinv)
 
     # Enter Years Loop
     years = [1979]
@@ -385,10 +394,10 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 
                 if Setup.settings['ice']:
                     extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month,
-                                           ft, num_bdy, time_counter, unit_origin, logger)
+                                           ft, num_bdy, time_counter, unit_origin)
                 #-------------------------bt------------------------------------------------------
                 extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
-                                      ft, num_bdy, time_counter, unit_origin, logger)
+                                      ft, num_bdy, time_counter, unit_origin)
             #Eco
 
             #U, V
@@ -401,7 +410,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 grid_u2.max_j = DstCoord.lonlat['t']['lon'].shape[0]
                 grid_u2.fname_2 = grid_v.source_time
                 extract_write_u_data(Setup, SourceCoord, DstCoord, grid_u, grid_u2, year, month,
-                                     ft, num_bdy, time_counter, unit_origin, logger)
+                                     ft, num_bdy, time_counter, unit_origin)
                 #----------------------------------------------V----------------------------------
                 grid_v2 = Grid()
                 grid_v2.grid_type = 'v'
@@ -415,7 +424,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 grid_uv.bdy_r = grid_v.bdy_r
                 grid_uv.source_time = grid_u.source_time
                 extract_write_v_data(Setup, SourceCoord, DstCoord, grid_uv, grid_v2, year, month,
-                                     ft, num_bdy, time_counter, unit_origin, logger)
+                                     ft, num_bdy, time_counter, unit_origin)
 
 
 def _get_mask(Setup, mask_gui):
@@ -451,7 +460,7 @@ def _get_mask(Setup, mask_gui):
     return bdy_msk
     
 def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, ft, num_bdy,
-                           time_counter, unit_origin, logger):
+                           time_counter, unit_origin):
     """ writes the ice data to file"""
     source_coord_var_copy = copy.deepcopy(SourceCoord)
     source_coord_var_copy.zt = np.zeros([1, 1])
@@ -475,7 +484,7 @@ def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, 
                                       extract_ice.d_bdy['isnowthi'][year]['data'])
 
 def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
-                          ft, num_bdy, time_counter, unit_origin, logger):
+                          ft, num_bdy, time_counter, unit_origin):
     """Writes BT data file"""
     SourceCoordLatLon = copy.deepcopy(SourceCoord)
     SourceCoordLatLon.zt = np.zeros([1, 1])
@@ -515,7 +524,7 @@ def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'time_counter', time_counter)
 
 def extract_write_u_data(setup_var, source_coord_var, dst_coord_var, grid_u, grid_u2, year,
-                         month, ft, num_bdy, time_counter, unit_origin, logger):
+                         month, ft, num_bdy, time_counter, unit_origin):
     """ Extracts the U component of velocity data, interpolates the data for a month and writes
       data to netCDF file"""
     extract_u = nemo_bdy_extr_tm3.Extract(setup_var.settings, source_coord_var, dst_coord_var,
@@ -561,7 +570,7 @@ def extract_write_u_data(setup_var, source_coord_var, dst_coord_var, grid_u, gri
     #-------------------------------------------End U-------------------------------
 
 def extract_write_v_data(setup_var, source_coord_var, dst_coord_var, grid_v, grid_v2, year, month,
-                         ft, num_bdy, time_counter, unit_origin, logger):
+                         ft, num_bdy, time_counter, unit_origin):
     """ Extracts the V component of velocity data, interpolates the data for a month and writes
       data to netCDF file"""
     extract_v = nemo_bdy_extr_tm3.Extract(setup_var.settings, source_coord_var, dst_coord_var,
@@ -681,6 +690,7 @@ def write_tidal_data(setup_var, dst_coord_var, grid, num_bdy, tide_cons, cos_g, 
                                               np.ones([1, num_bdy['v']]))
         indx = indx+1
 
+        
 def interpolate_data(extract, year, month, time_indexes):
     """This method does a 1D interpolation of daily mean data of a month"""
 

@@ -20,6 +20,7 @@ from PyQt4 import QtGui
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.path import Path
+from matplotlib.transforms import Bbox
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 # pylint: disable=E1002
@@ -97,7 +98,9 @@ class MatplotlibWidget(QtGui.QWidget):
                 p_path = Path(self._drawing_tool.polygon.xy)
                 index = p_path.contains_points(grid)
                 index = index.reshape(self.mask.lon.shape)
-                self.mask.add_mask(index)
+                xmin, ymin = np.min(self._drawing_tool.polygon.xy, axis=0)
+                xmax, ymax = np.max(self._drawing_tool.polygon.xy, axis=0)
+                self.mask.add_mask(index,[xmin,xmax,ymin,ymax])
                 self._drawing_tool.reset()
                 self.axes.clear()
                 self.create_basemap()
@@ -115,7 +118,9 @@ class MatplotlibWidget(QtGui.QWidget):
                 p_path = Path(self._drawing_tool.polygon.xy)
                 index = p_path.contains_points(grid)
                 index = index.reshape(self.mask.lon.shape)
-                self.mask.remove_mask(index)
+                xmin, ymin = np.min(self._drawing_tool.polygon.xy, axis=0)
+                xmax, ymax = np.max(self._drawing_tool.polygon.xy, axis=0)                
+                self.mask.remove_mask(index,[xmin,xmax,ymin,ymax])
                 self._drawing_tool.reset()
                 self.axes.clear()
                 self.create_basemap()

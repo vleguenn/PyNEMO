@@ -5,13 +5,13 @@ Unit tests for Ncml data reading module using pyjnius
 '''
 import unittest
 
-from pynemo.nemo_bdy_src_ncml import init_jnius
-from pynemo.nemo_bdy_src_ncml import Data
+from pynemo.reader.ncml import init_jnius
+from pynemo.reader.ncml import Data
 
 import os
 class Test(unittest.TestCase):
 
-
+    @unittest.skip("Remote testing skipping")
     def testDataInit(self):
         init_jnius()
         testpath, file_name = os.path.split(__file__)
