@@ -12,7 +12,8 @@ Dependencies
 5. matplotlib
 6. basemap
 7. thredds_crawler
-8. pyjnius (optional)
+8. seawater
+9. pyjnius (optional)
 
 Anaconda
 ^^^^^^^^

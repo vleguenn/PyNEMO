@@ -19,6 +19,8 @@ requirements:
     - matplotlib
     - basemap
     - thredds_crawler
+    - seawater
+    - pyncml
 
   run:
     - python
@@ -28,6 +30,8 @@ requirements:
     - matplotlib
     - basemap
     - thredds_crawler
+    - seawater
+    - pyncml
 
 #test:
 #  files:
@@ -39,3 +43,4 @@ requirements:
 about:
   home: http://ccpforge.cse.rl.ac.uk/gf/project/pynemo/
   license:  CeCILL license
+  summary: 'NEMO Regional Configuration Toolbox'
