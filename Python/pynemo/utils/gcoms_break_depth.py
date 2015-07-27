@@ -8,6 +8,7 @@ Rewritting the break depth implementation from matlab version
 import numpy as np
 import math
 import copy
+import logging
 #import pyproj
 
 #import matplotlib.pyplot as plt
@@ -96,20 +97,24 @@ def gcoms_boundary_masks(bathy,ov,lv):
     return ob, lb
 
 
-def polcoms_select_domain(bathy, lat, lon, roi):
+def polcoms_select_domain(bathy, lat, lon, roi, dr):
     """ This calculates the shelf break
     :param bathy: This is the input bathymetry data
     :param lat: Latittude array
-    :param lon: Longitude array  
+    :param lon: Longitude array
+    :param roi: region of interest array [4]
+    :param dr: shelf break distance
     :type bathy: numpy array
     :type lat: numpy array
     :type lon: numpy array
+    :type roi: python array
+    :type dr: float
     :return: returns the depth_shelf, h_max
     :rtype: numpy arrays
     
     :Example:
     """
-    dr = 200
+    logger = logging.getLogger(__name__)
     dy = 0.1
     dx = 0.1
     
@@ -119,7 +124,12 @@ def polcoms_select_domain(bathy, lat, lon, roi):
 #    bathy = bathy*-1
     global_ind = bathy_copy*np.NaN
     r = np.ceil(dr/(np.pi/180*6400)/dy)
-    
+    if r > np.max(bathy_copy.shape):
+        logger.error("Shelf break is larger than the grid")
+        d1 = bathy_copy.shape[0]-(roi[3]-roi[2])/2.0
+        d2 = bathy_copy.shape[1]-(roi[1]-roi[0])/2.0
+        r = np.ceil(min(d1,d2))
+        
     tmp = bathy_copy[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
     lat = lat[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
     lon = lon[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]

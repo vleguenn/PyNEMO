@@ -121,7 +121,8 @@ class Mask(object):
         elif self.mask_type == 2: # shelf break
             #dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
             #out_index = self._get_bathy_depth_index(index, shelf_break)
-            out_index = gcoms_break_depth.polcoms_select_domain(self.bathy_data, self.lat, self.lon, roi)
+            out_index = gcoms_break_depth.polcoms_select_domain(self.bathy_data, self.lat,
+                                                                self.lon, roi, self.shelfbreak_dist)
             out_index = np.logical_and(index, out_index)
             out_index = self.remove_small_regions(out_index)   
             #out_index = self.fill_small_regions(out_index)                    
@@ -152,9 +153,11 @@ class Mask(object):
         elif self.mask_type == 2: # shelf break
 #            dummy, shelf_break = gcoms_break_depth.gcoms_break_depth(self.bathy_data[index])
 #            out_index = self._get_bathy_depth_index(index, shelf_break)
-            out_index = gcoms_break_depth.polcoms_select_domain(self.bathy_data, self.lat, self.lon, roi)
+            out_index = gcoms_break_depth.polcoms_select_domain(self.bathy_data, self.lat,
+                                                                self.lon, roi, self.shelfbreak_dist)
             out_index = np.logical_and(index, out_index)
-            out_index = self.remove_small_regions(out_index)   
+            out_index = self.remove_small_regions(out_index)  
+            #out_index = self.fill_small_regions(out_index)  
         tmp = self.data[out_index]
         tmp[tmp == 1] = -1
         self.data[out_index] = tmp
