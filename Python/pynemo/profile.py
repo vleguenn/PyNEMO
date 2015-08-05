@@ -309,10 +309,26 @@ def process_bdy(setup_filepath=0, mask_gui=False):
         write_tidal_data(Setup, DstCoord, grid_u, num_bdy, settings["clname"], cosu, sinu)
         write_tidal_data(Setup, DstCoord, grid_v, num_bdy, settings["clname"], cosv, sinv)
 
-    # Enter Years Loop
-    years = [1979]
-    months = [11]
-
+    # Set the Year and month range
+    start_year = settings["year_000"]
+    end_year = settings["year_end"]
+    if start_year > end_year:
+        logging.error("Please check the nn_year_000 and nn_year_end values in input bdy file")
+        return
+    
+    years = range(start_year, end_year+1)
+    months = []
+    if end_year - start_year >= 1:
+        months = range(1,13)
+    else:
+        start_month = settings["month_000"]
+        end_month = settings["month_end"]
+        if end_month > 12 or start_month < 1:
+            logging.error("Please check the nn_month_000 and nn_month_end values in input bdy file")
+            return
+        months = range(start_month, end_month+1)
+        
+    #enter the loop for each year and month extraction
     for year in years:
         for month in months:
 
