@@ -23,6 +23,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 import logging
 from pynemo.reader.factory import GetFile
+from pynemo.reader.factory import GetReader
 from netcdftime import datetime
 import copy
 
@@ -263,13 +264,18 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 #    grid_t.source_time = SourceTime.get_source_time('t', acc)
 #    grid_u.source_time = SourceTime.get_source_time('u', acc)
 #    grid_v.source_time = SourceTime.get_source_time('v', acc)
-    grid_t.source_time = factory.GetRepository(settings['src_dir'], 't', acc).grid_source_data['t']
-    grid_u.source_time = factory.GetRepository(settings['src_dir'], 'u', acc).grid_source_data['u']
-    grid_v.source_time = factory.GetRepository(settings['src_dir'], 'v', acc).grid_source_data['v']
+#    grid_t.source_time = factory.GetRepository(settings['src_dir'], 't', acc).grid_source_data['t']
+#    grid_u.source_time = factory.GetRepository(settings['src_dir'], 'u', acc).grid_source_data['u']
+#    grid_v.source_time = factory.GetRepository(settings['src_dir'], 'v', acc).grid_source_data['v']
+    reader = factory.GetReader(settings['src_dir'],acc)
+    grid_t.source_time = reader['t']
+    grid_u.source_time = reader['u']
+    grid_v.source_time = reader['v']
     
     if ice:
 #        grid_ice.source_time = SourceTime.get_source_time('i', acc)
-        grid_ice.source_time = factory.GetRepository(settings['src_dir'], 'i', acc).grid_source_data['i']
+#        grid_ice.source_time = factory.GetRepository(settings['src_dir'], 'i', acc).grid_source_data['i']
+        grid_ice.source_time = reader['i']
 
     logger.debug(clock() - start)
     """
@@ -327,7 +333,6 @@ def process_bdy(setup_filepath=0, mask_gui=False):
             logging.error("Please check the nn_month_000 and nn_month_end values in input bdy file")
             return
         months = range(start_month, end_month+1)
-        
     #enter the loop for each year and month extraction
     for year in years:
         for month in months:
@@ -338,9 +343,9 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                                                       years=year, months=month)
                 extract_t.extract_month(year, month)
                 #Get Date as a Number used in interpolation
-                time_counter = np.zeros([len(extract_t.sc_time)])
-                for i in range(0, len(extract_t.sc_time)):
-                    time_counter[i] = extract_t.convert_date_to_destination_num(extract_t.sc_time[i].date)
+                time_counter = np.zeros([len(extract_t.sc_time.time_counter)])
+                for i in range(0, len(extract_t.sc_time.time_counter)):
+                    time_counter[i] = extract_t.convert_date_to_destination_num(extract_t.sc_time.date_counter[i])
 
                 date_start = datetime(year, month, 1, 0, 0, 0)
                 date_end = datetime(year, month, monthrange(year, month)[1], 24, 60, 60)
@@ -348,18 +353,18 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 time_num_end = extract_t.convert_date_to_destination_num(date_end)
 
                 if monthrange(year, month)[1] == 29:
-                    interp1fn = interp1d(np.arange(0, len(extract_t.sc_time), 1), time_counter)
+                    interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
                     time_counter = interp1fn(np.append(np.arange(0,
-                                                                 len(extract_t.sc_time)-2+0.2,
+                                                                 len(extract_t.sc_time.time_counter)-2+0.2,
                                                                  0.2),
-                                                       np.arange(len(extract_t.sc_time)-2+1/6.0,
-                                                                 len(extract_t.sc_time)-1+1/6.0,
+                                                       np.arange(len(extract_t.sc_time.time_counter)-2+1/6.0,
+                                                                 len(extract_t.sc_time.time_counter)-1+1/6.0,
                                                                  1/6.0)))
                                             #added 0.2 to include boundary
                 else:
-                    interp1fn = interp1d(np.arange(0, len(extract_t.sc_time), 1), time_counter)
+                    interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
                     #added 0.2 to include boundary
-                    time_counter = interp1fn(np.arange(0, len(extract_t.sc_time)-1+0.2, 0.2))
+                    time_counter = interp1fn(np.arange(0, len(extract_t.sc_time.time_counter)-1+0.2, 0.2))
 
                 ft = np.where(((time_counter >= time_num_start) & (time_counter <= time_num_end)))
                 time_counter = time_counter[ft]

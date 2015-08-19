@@ -18,6 +18,7 @@ from netcdftime import utime
 from utils.nemo_bdy_lib import rot_rep
 #This is to test ncml working
 from pynemo.reader.factory import GetFile
+from pynemo.reader.factory import GetReader
 #from nemo_bdy_src_local import GetFile
 import copy # DEBUG ONLY- allows multiple runs without corruption
 import logging
@@ -360,32 +361,34 @@ class Extract:
         sc_z_len = self.sc_z_len
  
         # define src/dst cals
-        sf, ed = self.cal_trans(sc_time[0].calendar, 
+        sf, ed = self.cal_trans(sc_time.calendar, #sc_time[0].calendar 
                                 self.settings['dst_calendar'], year, month)
         DstCal = utime('seconds since %d-1-1' %year, 
                        self.settings['dst_calendar'])
         dst_start = DstCal.date2num(datetime(year, month, 1))
         dst_end = DstCal.date2num(datetime(year, month, ed, 23, 59, 59))
 
-        self.S_cal = utime(sc_time[0].units, sc_time[0].calendar)
+        self.S_cal = utime(sc_time.units, sc_time.calendar)#sc_time[0].units,sc_time[0].calendar)
 
         self.D_cal = utime('seconds since %d-1-1' %self.settings['base_year'], 
                            self.settings['dst_calendar'])
 
-        for date in sc_time:
-            date.seconds = DstCal.date2num(date.date) * sf
+        src_date_seconds = np.zeros(len(sc_time.time_counter))
+        for index in range(len(sc_time.time_counter)):
+            tmp_date = self.S_cal.num2date(sc_time.time_counter[index])
+            src_date_seconds[index] = DstCal.date2num(tmp_date) * sf
 
         # Get first and last date within range, init to cover entire range
         first_date = 0
-        last_date = len(sc_time) - 1 
-        rev_seq = range(len(sc_time))
+        last_date = len(sc_time.time_counter) - 1 
+        rev_seq = range(len(sc_time.time_counter))
         rev_seq.reverse()
         for date in rev_seq:
-            if sc_time[date].seconds < dst_start:
+            if src_date_seconds[date] < dst_start:
                 first_date = date
                 break
-        for date in range(len(sc_time)):
-            if sc_time[date].seconds > dst_end:
+        for date in range(len(sc_time.time_counter)):
+            if src_date_seconds[date] > dst_end:
                 last_date = date
                 break
 
@@ -415,17 +418,19 @@ class Extract:
         for v in range(self.nvar):
 #            meta_data[v] = self._get_meta_data(sc_time[first_date].file_name, 
 #                                               self.var_nam[v], meta_data[v])
-            meta_data[v] = sc_time[first_date].get_meta_data(self.var_nam[v], meta_data[v])
+            meta_data[v] = sc_time.get_meta_data(self.var_nam[v], meta_data[v])
+
 
         if self.key_vec:
             n = self.nvar
-            meta_data[n] = self.fnames_2[first_date].get_meta_data(self.var_nam[n], meta_data[n])
+#            meta_data[n] = self.fnames_2[first_date].get_meta_data(self.var_nam[n], meta_data[n])
+            meta_data[n] = self.fnames_2.get_meta_data(self.var_nam[n], meta_data[n])
 
         # Loop over identified files
         for f in range(first_date, last_date + 1):
             sc_array = [None, None]
             sc_alt_arr = [None, None]
-            self.logger.info('opening nc file: %s', sc_time[f].file_name)            
+            #self.logger.info('opening nc file: %s', sc_time[f].file_name)            
             # Counters not implemented
 
             sc_bdy = np.zeros((len(self.var_nam), sc_z_len, ind.shape[0], 
@@ -435,25 +440,25 @@ class Extract:
             for vn in range(self.nvar):
                 # Extract sub-region of data
                 self.logger.info('var_nam = %s',self.var_nam[vn])
-                varid = sc_time[f][self.var_nam[vn]]
+                varid = sc_time[self.var_nam[vn]]
                 # If extracting vector quantities open second var
                 if self.key_vec:
-                    varid_2 = self.fnames_2[f][self.var_nam[vn+1]]#nc_2.variables[self.var_nam[vn + 1]]
+                    varid_2 = self.fnames_2[self.var_nam[vn+1]]#nc_2.variables[self.var_nam[vn + 1]]
 
                 # Extract 3D scalar variables
                 if not self.isslab and not self.key_vec:
                     self.logger.info(' 3D source array ')
-                    sc_array[0] = varid[:1 , :sc_z_len, j_run, i_run]
+                    sc_array[0] = varid[f:f+1 , :sc_z_len, j_run, i_run]
                 # Extract 3D vector variables
                 elif self.key_vec:
                     # For u vels take i-1
-                    sc_alt_arr[0] = varid[:1, :sc_z_len, j_run, extended_i]
+                    sc_alt_arr[0] = varid[f:f+1, :sc_z_len, j_run, extended_i]
                     # For v vels take j-1
-                    sc_alt_arr[1] = varid_2[:1, :sc_z_len, extended_j, i_run]
+                    sc_alt_arr[1] = varid_2[f:f+1, :sc_z_len, extended_j, i_run]
                 # Extract 2D scalar vars
                 else:
                     self.logger.info(' 2D source array ')
-                    sc_array[0] = varid[:1, j_run, i_run].reshape([1,1,j_run.size,i_run.size])
+                    sc_array[0] = varid[f:f+1, j_run, i_run].reshape([1,1,j_run.size,i_run.size])
 
                 # Average vector vars onto T-grid
                 if self.key_vec:
@@ -635,7 +640,7 @@ class Extract:
                 else:
                     entry['data'] = np.concatenate((entry['data'],
                                                    np.array([data_out])))
-                entry['date'] = sc_time[f] #count skipped
+                entry['date'] = sc_time.time_counter[f] #count skipped
         
         # Need stats on fill pts in z and horiz + missing pts...
     # end month
