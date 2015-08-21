@@ -30,20 +30,20 @@
 !-----------------------------------------------------------------------
 !  grid information 
 !-----------------------------------------------------------------------
-   sn_src_hgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_low_res_C/mesh_hgr.nc'   !  /grid/
-   sn_src_zgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_low_res_C/mesh_zgr.nc'
-   sn_dst_hgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_C/mesh_hgr_zps.nc'
-   sn_dst_zgr = 'F:/NEMO_bdy_tools/bdy_matlab/grid_C/mesh_zgr_zps.nc'
-   sn_src_msk = 'F:/NEMO_bdy_tools/bdy_matlab/grid_low_res_C/mask.nc'
-   sn_bathy   = 'F:/NEMO_bdy_tools/bdy_matlab/grid_C/NNA_R12_bathy_meter_bench.nc'
+   sn_src_hgr = 'http://esurgeod.noc.soton.ac.uk:8080/thredds/dodsC/PyNEMO/grid_low_res_C/mesh_hgr.nc'   !  /grid/
+   sn_src_zgr = 'http://esurgeod.noc.soton.ac.uk:8080/thredds/dodsC/PyNEMO/grid_low_res_C/mesh_zgr.nc'
+   sn_dst_hgr = 'http://esurgeod.noc.soton.ac.uk:8080/thredds/dodsC/PyNEMO/grid_C/mesh_hgr_zps.nc'
+   sn_dst_zgr = 'http://esurgeod.noc.soton.ac.uk:8080/thredds/dodsC/PyNEMO/grid_C/mesh_zgr_zps.nc'
+   sn_src_msk = 'http://esurgeod.noc.soton.ac.uk:8080/thredds/dodsC/PyNEMO/grid_low_res_C/mask.nc'
+   sn_bathy   = 'http://esurgeod.noc.soton.ac.uk:8080/thredds/dodsC/PyNEMO/grid_C/NNA_R12_bathy_meter_bench.nc'
 
 !-----------------------------------------------------------------------
 !  I/O 
 !-----------------------------------------------------------------------
 !   sn_src_dir = 'F:/NEMO_bdy_tools/bdy_matlab/srcdata_low_res_C/'       ! src_files/'
 !   sn_src_dir = 'http://esurgeod.noc.soton.ac.uk:8080/thredds/catalog/PyNEMO/data/catalog.xml'
-   sn_src_dir = 'C:/Users/sn65/workspace/pyNEMO/data/test2.ncml'       ! src_files/'
-   sn_dst_dir = 'F:/NEMO_bdy_tools/scratch/jofa/'
+   sn_src_dir = '/Users/srikanthnagella/Development/Python/pynemo/pynemo/trunk/Python/data/test2.ncml'       ! src_files/'
+   sn_dst_dir = 'scratch/jofa/'
    sn_fn      = 'NNA_R12'                 ! prefix for output files
    nn_fv      = -1e20                     !  set fill value for output files
    nn_src_time_adj = 0					  ! src time adjustment
@@ -54,7 +54,7 @@
 !-----------------------------------------------------------------------
     ln_coords_file = .true.               !  =T : produce bdy coordinates files
     cn_coords_file = 'coordinates.bdy.nc' !  name of bdy coordinates files (if ln_coords_file=.TRUE.)
-    ln_mask_file   = .true.              !  =T : read mask from file
+    ln_mask_file   = .false.              !  =T : read mask from file
     cn_mask_file   = 'F:/NEMO_bdy_tools/scratch/testmask.nc'                   !  name of mask file (if ln_mask_file=.TRUE.)
     ln_dyn2d       = .true.               !  boundary conditions for barotropic fields
     ln_dyn3d       = .true.               !  boundary conditions for baroclinic velocities
