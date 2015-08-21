@@ -40,7 +40,9 @@
 !-----------------------------------------------------------------------
 !  I/O 
 !-----------------------------------------------------------------------
-   sn_src_dir = 'F:/NEMO_bdy_tools/bdy_matlab/srcdata_low_res_C/'       ! src_files/'
+!   sn_src_dir = 'F:/NEMO_bdy_tools/bdy_matlab/srcdata_low_res_C/'       ! src_files/'
+!   sn_src_dir = 'http://esurgeod.noc.soton.ac.uk:8080/thredds/catalog/PyNEMO/data/catalog.xml'
+   sn_src_dir = 'C:/Users/sn65/workspace/pyNEMO/data/test2.ncml'       ! src_files/'
    sn_dst_dir = 'F:/NEMO_bdy_tools/scratch/jofa/'
    sn_fn      = 'NNA_R12'                 ! prefix for output files
    nn_fv      = -1e20                     !  set fill value for output files
@@ -53,7 +55,7 @@
     ln_coords_file = .true.               !  =T : produce bdy coordinates files
     cn_coords_file = 'coordinates.bdy.nc' !  name of bdy coordinates files (if ln_coords_file=.TRUE.)
     ln_mask_file   = .true.              !  =T : read mask from file
-    cn_mask_file   = 'F:/NEMO_bdy_tools/mask_file1.nc'                   !  name of mask file (if ln_mask_file=.TRUE.)
+    cn_mask_file   = 'F:/NEMO_bdy_tools/scratch/testmask.nc'                   !  name of mask file (if ln_mask_file=.TRUE.)
     ln_dyn2d       = .true.               !  boundary conditions for barotropic fields
     ln_dyn3d       = .true.               !  boundary conditions for baroclinic velocities
     ln_tra         = .true.               !  boundary conditions for T and S
@@ -63,7 +65,7 @@
 !-----------------------------------------------------------------------
 !  unstructured open boundaries tidal parameters                        
 !-----------------------------------------------------------------------
-    ln_tide        = .true.               !  =T : produce bdy tidal conditions
+    ln_tide        = .false.               !  =T : produce bdy tidal conditions
     clname(1)      = 'M2'                 ! constituent name
     clname(2)      = 'S2'         
     clname(3)      = 'K2'        
@@ -72,10 +74,10 @@
 !-----------------------------------------------------------------------
 !  Time information
 !-----------------------------------------------------------------------
-    nn_year_000     = 1982        !  year start
-    nn_year_end     = 1982        !  year end
-    nn_month_000    = 1           !  month start (default = 1 is years>1)
-    nn_month_end    = 12          !  month end (default = 12 is years>1)
+    nn_year_000     = 1979        !  year start
+    nn_year_end     = 1979        !  year end
+    nn_month_000    = 11           !  month start (default = 1 is years>1)
+    nn_month_end    = 11          !  month end (default = 12 is years>1)
     sn_dst_calendar = 'gregorian' !  output calendar format
     nn_base_year    = 1960        !  base year for time counter
 	sn_tide_grid   = 'F:/NEMO_bdy_tools/bdy_matlab/bdy_matlab/tmd/DATA/grid_tpxo7.2.nc'
@@ -96,4 +98,4 @@
     nn_beta     = 0               !  Euler rotation angle
     nn_gamma    = 0               !  Euler rotation angle
 	rn_mask_max_depth = 100.0	  !  Maximum depth to be ignored for the mask
-	rn_mask_shelfbreak_dist = 200.0    !  Distance from the shelf break
+	rn_mask_shelfbreak_dist = 20000.0    !  Distance from the shelf break

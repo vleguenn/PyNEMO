@@ -77,9 +77,9 @@ class Reader(object):
         timevar = grid[self.time_counter]    
         grid.time_counter = timevar[:]+t_adjust
         grid.date_counter = []
-        for index in range(0,len(grid.time_counter)):
-            grid.date_counter.append(netcdftime.num2date(grid.time_counter[index]+t_adjust,
-                                                               grid.units, grid.calendar)) 
+        for index in range(0,len(grid.time_counter)):            
+            grid.date_counter.append(netcdftime.utime(grid.units,
+                                                      grid.calendar).num2date(grid.time_counter[index]+t_adjust)) 
 
     def close(self):
         """ This is not yet implemented. TODO: keep the netcdf file open until its expicitly 

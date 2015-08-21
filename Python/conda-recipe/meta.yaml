@@ -15,7 +15,7 @@ requirements:
     - numpy
     - setuptools
     - scipy
-    - netcdf4
+    - netcdf4 >=1.1.9
     - matplotlib
     - basemap
     - thredds_crawler
@@ -26,13 +26,13 @@ requirements:
     - python
     - numpy
     - scipy
-    - netcdf4
+    - netcdf4 >=1.1.9
     - matplotlib
     - basemap
     - thredds_crawler
     - seawater
     - pyncml
-
+	
 #test:
 #  files:
 #    - ../data/grid_C/NNA_R12_bathy_meter_bench.nc

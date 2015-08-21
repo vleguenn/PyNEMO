@@ -74,8 +74,8 @@ class Reader(object):
                 x = [filename, index]
                 group.data_list.append(x)
                 group.time_counter.append(varid[index]+t_adjust)
-                group.date_counter.append(netcdftime.num2date(varid[index]+t_adjust,
-                                                               varid.units, varid.calendar))
+                group.date_counter.append(netcdftime.utime(varid.units,
+                                                           varid.calendar).num2date(varid[index]+t_adjust))
             group.units = varid.units
             group.calendar = varid.calendar
             nc.close()
