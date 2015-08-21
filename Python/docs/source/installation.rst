@@ -20,7 +20,8 @@ Anaconda
 
 Using conda. pyNEMO supports Win64, OSX and Linux. for other operating systems please build from source.
 
-::
+.. note:: It is recommended to create a seperate environment for pyNEMO. Please follow the instruction on doing this at http://www.continuum.io/blog/conda
+
 
    conda install -c https://conda.anaconda.org/srikanthnagella pynemo
 
