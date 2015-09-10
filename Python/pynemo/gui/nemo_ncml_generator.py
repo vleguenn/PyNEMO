@@ -232,6 +232,7 @@ class Ncml_generator(QtGui.QDialog):
                    
         #write ncml to file
         try:
+            self.indent(self.root, 0)   #24Aug15 format the xml for pretty printing
             self.tree.write(self.filename, encoding='utf-8')
         except IOError as (errno, strerror):
             self.logger.error("I/O error({0}): {1}".format(errno, strerror))
@@ -250,6 +251,22 @@ class Ncml_generator(QtGui.QDialog):
         except ET.ParseError, v:
                 row, column = v.position
                 print "error on row", row, "column", column, ":", v
-
-         
+                
+    '''
+    Function to format xml.  Based on code provided by http://effbot.org/zone/element-lib
+    '''
+    def indent(self, elem, level=0):
+        i = "\n" + level*"  "
+        if len(elem):
+            if not elem.text or not elem.text.strip():
+                elem.text = i + "  "
+            if not elem.tail or not elem.tail.strip():
+                elem.tail = i
+            for elem in elem:
+                self.indent(elem, level+1)
+            if not elem.tail or not elem.tail.strip():
+                elem.tail = i
+        else:
+            if level and (not elem.tail or not elem.tail.strip()):
+                elem.tail = i     
     

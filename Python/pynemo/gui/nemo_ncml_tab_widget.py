@@ -345,8 +345,9 @@ class Ncml_tab(QtGui.QWidget):
     convert the target folder into NcMl required format
     '''
     def _convertSrc(self, thepath):
-        
-        fpath = str(thepath) #cast the QString to string
+        #print 'thepath before trimming ', thepath
+        fpath = str(thepath.trimmed()) #24Aug15 trimmed whitespaces at both end of QString and then cast to string
+        #print 'thepath after trimming and casting ', fpath
         #make sure thatit is an absolute path and prefixed with file:/ and uses / file separator
         if fpath.startswith('http:/'):
             target = fpath # do nothing 
