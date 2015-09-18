@@ -47,6 +47,7 @@ from pynemo.utils import Constants
 from pynemo import nemo_bdy_ncgen
 from pynemo import nemo_bdy_ncpop
 from pynemo.gui.nemo_bdy_mask import Mask as Mask_File
+from PyQt4.QtGui import QMessageBox
 #import pickle
 
 class Grid(object):
@@ -478,6 +479,15 @@ def _get_mask(Setup, mask_gui):
                 bdy_msk = mask.data
         except:
             return
+    if np.amin(bdy_msk) == 0:
+        # Mask is not set throw a warning message and set border to 1px.
+        logger.warning("Setting the mask to 1px border")
+        QMessageBox.warning(None,"pyNEMO", "Mask is not set, setting a 1 pixel border mask")
+        if bdy_msk is not None and 1 < bdy_msk.shape[0] and 1 < bdy_msk.shape[1]:
+            tmp = np.ones(bdy_msk.shape, dtype=bool)
+            tmp[1:-1, 1:-1] = False
+            bdy_msk[tmp] = -1
+            
     return bdy_msk
     
 def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, ft, num_bdy,
