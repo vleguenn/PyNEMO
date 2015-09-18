@@ -10,6 +10,7 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal
 
 import ast
+from PyQt4.QtGui import QMessageBox
 
 class NameListEditor(QtGui.QWidget):
     '''
@@ -126,14 +127,18 @@ class NameListEditor(QtGui.QWidget):
             self.settings[setting] = self.new_settings[setting]
 
         self.setup.settings = self.settings
-        self.setup.write() #write settings back to file
+        try:
+            self.setup.write() #write settings back to file
+            QMessageBox.information(self,"pyNEMO","Setting saved to file")
+        except:
+            QMessageBox.information(self,"pyNEMO", "Error while saving the settings file, please check the permissions")
        
         try:
         #only emit the saving of mask file if the mask file name is set and boolean value is set 
             if self.settings['mask_file'] is not None and self.bool_settings['mask_file']:
                 self.mask_update.emit(self.settings['mask_file'])
         except KeyError:
-            print 'Set mask_file key in the setting .bdy file'
+            QMessageBox.information(self,"pyNEMO","Set mask_file key in the setting .bdy file")            
             
         try:
             self.mask_settings_update.emit(float(self.settings['mask_max_depth']), float(self.settings['mask_shelfbreak_dist']))

@@ -12,6 +12,8 @@ import logging
 from scipy import ndimage
 import matplotlib.pyplot as plt
 from pynemo.utils import gcoms_break_depth
+from PyQt4.QtGui import QMessageBox
+from PyQt4 import QtCore
 
 class Mask(object):
     """This is a Mask holder. which reads from a netCDF bathemetry file and
@@ -84,7 +86,12 @@ class Mask(object):
             mask_file = self.mask_file
 
         try:
-            self.logger.info('Writing mask data to %s' % mask_file)
+            self.logger.info('Writing mask data to %s' % mask_file)            
+            msgbox = QMessageBox()
+            msgbox.setWindowTitle("Saving....")
+            msgbox.setText("Writing mask data to file, please wait...")
+            msgbox.setWindowModality(QtCore.Qt.NonModal)
+            msgbox.show()           
             mask_nc = Dataset(str(mask_file), mode="w")
             mask_nc.createDimension('y', size=len(self.bathy_nc.dimensions['y']))
             mask_nc.createDimension('x', size=len(self.bathy_nc.dimensions['x']))
@@ -94,7 +101,9 @@ class Mask(object):
             mask_var[...] = self.data
             nav_lat[...] = self.lat
             nav_lon[...] = self.lon
-        except IOError:
+            msgbox.close()
+        except (IOError, RuntimeError):
+            QMessageBox.information(None,"pyNEMO","Failed to write the mask file, please check the permissions")            
             self.logger.info('Cannot open mask file for writing '+mask_file)
             raise
 
