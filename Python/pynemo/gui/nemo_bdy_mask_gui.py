@@ -10,9 +10,10 @@ from mpl_toolkits.basemap import Basemap, cm
 import numpy as np
 from .selection_editor import PolygonEditor, BoxEditor
 import os.path
-from PyQt4.QtCore import pyqtSignal, pyqtSlot
+from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from nemo_bdy_mask import Mask
 import logging
+from PyQt4.QtGui import QSizePolicy
 
 mask_alpha = 0.3
 
@@ -42,6 +43,10 @@ class MatplotlibWidget(QtGui.QWidget):
             self.mask.min_depth = min_depth
             self.mask.shelfbreak_dist = shelfbreak_dist
         self.toolbar = NemoNavigationToolbar(self.canvas, self)
+        self.toolbar.locLabel.setMinimumWidth(100)
+        self.toolbar.locLabel.setMaximumWidth(170)
+        self.toolbar.locLabel.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
+        self.toolbar.locLabel.setAlignment(Qt.AlignLeft|Qt.AlignTop)
         self.toolbar.drawing_tool.connect(self.drawing_tool_callback)
         self.axes = self.figure.add_subplot(111)
         layout = QtGui.QVBoxLayout()
@@ -81,7 +86,7 @@ class MatplotlibWidget(QtGui.QWidget):
         x_vals, y_vals = np.meshgrid(y, x)
         Z = self.mask.bathy_data[...].astype(np.float64)
         self.axes.contourf(x_vals, y_vals, Z, 10, cmap=plt.get_cmap('GnBu'))#cmap=cm.s3pcpn)
-        self.axes.contourf(x_vals, y_vals, self.mask.data*-1, 5, cmap=plt.get_cmap('autumn'),\
+        self.axes.contourf(x_vals, y_vals, self.mask.data*-1, [-2, -1, 0, 1, 2], cmap=plt.get_cmap('autumn'),\
                            alpha=mask_alpha)
         self.canvas.draw()
 

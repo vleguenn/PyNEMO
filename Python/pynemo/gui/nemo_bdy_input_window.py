@@ -9,6 +9,7 @@ Created on 21 Jan 2015
 from PyQt4 import QtGui
 from .nemo_bdy_namelist_edit import NameListEditor
 from .nemo_bdy_mask_gui import MatplotlibWidget
+from PyQt4.QtGui import QSizePolicy
 
 class InputWindow(QtGui.QDialog):
     '''
@@ -44,6 +45,7 @@ class InputWindow(QtGui.QDialog):
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(self.nl_editor)
         hbox.addWidget(self.mpl_widget)
+        self.nl_editor.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Expanding)
 
         self.setLayout(hbox)
         #set the Dialog title

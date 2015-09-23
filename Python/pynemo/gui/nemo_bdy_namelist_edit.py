@@ -7,7 +7,7 @@ Editor for namelist.bdy file
 # pylint: disable=no-name-in-module
 # pylint: disable=E1002
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import pyqtSignal
+from PyQt4.QtCore import pyqtSignal, Qt
 
 import ast
 from PyQt4.QtGui import QMessageBox
@@ -76,6 +76,7 @@ class NameListEditor(QtGui.QWidget):
         client.setLayout(grid)
         #scrollbars
         scroll_area = QtGui.QScrollArea(self)
+        #scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll_area.setWidget(client)
 
         #save cancel buttons
@@ -92,7 +93,8 @@ class NameListEditor(QtGui.QWidget):
         box_layout = QtGui.QVBoxLayout(self)
         box_layout.addWidget(scroll_area)
         box_layout.addWidget(btn_widget)
-
+        btn_widget.setMaximumWidth(400)
+        scroll_area.setMaximumWidth(400)
         self.setLayout(box_layout)
         #show the window
         self.show()
