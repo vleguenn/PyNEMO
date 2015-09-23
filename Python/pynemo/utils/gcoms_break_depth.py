@@ -126,9 +126,13 @@ def polcoms_select_domain(bathy, lat, lon, roi, dr):
     r = np.ceil(dr/(np.pi/180*6400)/dy)
     if r > np.max(bathy_copy.shape):
         logger.error("Shelf break is larger than the grid")
-        d1 = bathy_copy.shape[0]-(roi[3]-roi[2])/2.0
-        d2 = bathy_copy.shape[1]-(roi[1]-roi[0])/2.0
-        r = np.ceil(min(d1,d2))
+#        d1 = bathy_copy.shape[0]-(roi[3]-roi[2])/2.0
+#        d2 = bathy_copy.shape[1]-(roi[1]-roi[0])/2.0
+#        r = np.ceil(min(d1,d2))
+        #just select the box roi
+        ret_val = np.ones(bathy.shape)
+        ret_val[roi[2]:roi[3],roi[0]:roi[1]] = -1
+        return ret_val == -1
         
     tmp = bathy_copy[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
     lat = lat[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
@@ -138,7 +142,7 @@ def polcoms_select_domain(bathy, lat, lon, roi, dr):
     tmp[nanind] = -1
     dummy, lb = gcoms_boundary_masks(tmp, -1,0)
     Zshelf, Hmax = gcoms_break_depth(tmp)
-    tmp[tmp>Zshelf] = -1
+    tmp[tmp>Hmax] = -1
     tmp[np.logical_and(np.logical_and(tmp!=0, np.logical_not(np.isnan(tmp))), tmp!=-1)] = 1
     
     ob, dummy = gcoms_boundary_masks(tmp, -1, 0)
