@@ -49,6 +49,7 @@ class MatplotlibWidget(QtGui.QWidget):
         self.toolbar.locLabel.setAlignment(Qt.AlignLeft|Qt.AlignTop)
         self.toolbar.drawing_tool.connect(self.drawing_tool_callback)
         self.axes = self.figure.add_subplot(111)
+        self.cbar = None
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
@@ -85,9 +86,25 @@ class MatplotlibWidget(QtGui.QWidget):
         y = np.arange(0, self.mask.lon.shape[1])
         x_vals, y_vals = np.meshgrid(y, x)
         Z = self.mask.bathy_data[...].astype(np.float64)
-        self.axes.contourf(x_vals, y_vals, Z, 10, cmap=plt.get_cmap('GnBu'))#cmap=cm.s3pcpn)
-        self.axes.contourf(x_vals, y_vals, self.mask.data*-1, [-2, -1, 0, 1, 2], cmap=plt.get_cmap('autumn'),\
+        #Z[Z==0] = np.nan
+        Z = np.ma.masked_where(Z==0, Z)
+        cmap = plt.get_cmap('GnBu')
+        cmap.set_bad('0.0')
+        cmap.set_under('black',1.0)
+        cmap.set_over('black',1.0)
+        transcmap = plt.get_cmap('autumn')
+        transcmap.set_bad(alpha=0.5)
+        masklayer = np.ma.masked_where(self.mask.data==-1,self.mask.data)
+        cax = self.axes.pcolormesh(x_vals, y_vals, Z, cmap=cmap)#, extend='min')#cmap=plt.get_cmap('GnBu'))#cmap=cm.s3pcpn)
+        self.axes.contourf(x_vals, y_vals, masklayer, [-2, -1, 0, 1, 2], cmap=transcmap,\
                            alpha=mask_alpha)
+
+        zmin = np.amin(Z)
+        zmax = np.amax(Z)
+        if self.cbar is not None:
+            self.cbar.remove()
+        self.cbar = self.figure.colorbar(cax,ticks=np.linspace(zmin,zmax,10),orientation='horizontal')
+        self.cbar.set_label("Bathymetry (units=%s)"%self.mask.data_units)
         self.canvas.draw()
 
     def add_mask(self):

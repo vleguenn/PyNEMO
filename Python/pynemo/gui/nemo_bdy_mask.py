@@ -72,6 +72,7 @@ class Mask(object):
                 self.data = np.asarray(self.data[:, :])
                 self.data = np.around((self.data + .5).clip(0, 1))
             self.bathy_data = self.bathy_nc.variables['Bathymetry'][:,:]
+            self.data_units = self.bathy_nc.variables['Bathymetry'].units
         except KeyError:
             self.logger.error('Bathymetry file doesnot have Bathyemetry variable')
             raise
