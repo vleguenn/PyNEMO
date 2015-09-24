@@ -3,6 +3,7 @@
 #######                                          #######
 ## Written by John Farey, August 2012                 ##
 ########################################################
+from collections import OrderedDict
 
 '''
 Invoke with a text file location, class init reads and deciphers variables.
@@ -215,8 +216,8 @@ def _get_var_name(line):
     # Returns tidy dictionary of var names and values
 def _assign(data):
     """ return a dictionary of variables and also special dictionary for boolean variable """
-    vars_dictionary = {}
-    bool_vars_dictionary = {}
+    vars_dictionary = OrderedDict({})
+    bool_vars_dictionary = OrderedDict({})
     for line in data:
         keyvalue = line.split('=', 2)
         _get_val(vars_dictionary, bool_vars_dictionary, keyvalue)
