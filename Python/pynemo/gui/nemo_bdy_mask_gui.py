@@ -107,6 +107,14 @@ class MatplotlibWidget(QtGui.QWidget):
         self.cbar.set_label("Bathymetry (units=%s)"%self.mask.data_units)
         self.canvas.draw()
 
+    
+    def reset_mask(self):
+        if self.mask == None:
+            return             
+        self.mask.reset_mask()
+        self.axes.clear()
+        self.create_basemap()
+        
     def add_mask(self):
         """ adds the selected region in the drawing tool to the mask """
         if self._drawing_tool_name != "" and self.mask != None:
@@ -200,6 +208,7 @@ class NemoNavigationToolbar(NavigationToolbar):
                           (None, None, None, None),\
                           ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),\
                           ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),\
+                          ('Reset', 'Reset the mask', 'reset','reset'),\
                           (None, None, None, None),\
                           ('Freehand', 'Freehand drawing', 'freehand', 'freehand'),\
                           ('Rectangle', 'Rectangle drawing', 'rectangle', 'rectangle'),\
@@ -213,6 +222,7 @@ class NemoNavigationToolbar(NavigationToolbar):
                           (None, None, None, None)\
                           )
         NavigationToolbar.__init__(self, canvas, parent)
+        self._actions['reset'].setIcon(set_icon('reset.jpg'))
         self._actions['freehand'].setCheckable(True)
         self._actions['freehand'].setIcon(set_icon('freehand.png'))
         self._actions['rectangle'].setCheckable(True)
@@ -227,6 +237,10 @@ class NemoNavigationToolbar(NavigationToolbar):
         self._actions['shelf_break_mask'].setIcon((set_icon('shelf_break.png')))
         self._actions['shelf_break_mask'].setCheckable(True)
         self.update_height_mask(0)
+        
+    def reset(self, *dummy):
+        """ Callback for reset button clicked"""
+        self.parent.reset_mask()
 
     def freehand(self, *dummy):
         """ callback for freehand button clicked """

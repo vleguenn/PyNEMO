@@ -206,7 +206,7 @@ class Mask(object):
         
     def reset_mask(self):
         """ This method resets the data back to no mask with land fill """
-        self.data = np.around((self.bathy_data + .5).clip(0, 1))
+        self.data = np.around((self.bathy_data + .5).clip(0, 1))*-1
         
     def select_the_largest_region(self):
         """ This method tidies up the mask by selecting the largest masked region. this is to avoid two disconnected masked regions """
