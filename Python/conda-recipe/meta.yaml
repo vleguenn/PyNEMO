@@ -14,24 +14,23 @@ requirements:
     - python
     - numpy
     - setuptools
-    - scipy =0.15
+    - scipy
     - netcdf4 >=1.1.9
     - matplotlib
     - basemap
     - thredds_crawler
     - seawater
-    - pyncml
 
   run:
     - python
     - numpy
-    - scipy =0.15
+    - scipy
     - netcdf4 >=1.1.9
     - matplotlib
     - basemap
     - thredds_crawler
     - seawater
-    - pyncml
+
 	
 #test:
 #  files:
