@@ -10,6 +10,7 @@ from PyQt4 import QtGui
 from .nemo_bdy_namelist_edit import NameListEditor
 from .nemo_bdy_mask_gui import MatplotlibWidget
 from PyQt4.QtGui import QSizePolicy
+from PyQt4.Qt import Qt
 
 class InputWindow(QtGui.QDialog):
     '''
@@ -42,13 +43,15 @@ class InputWindow(QtGui.QDialog):
 
         self.mpl_widget.set_mask_settings(float(setup.settings['mask_max_depth']), float(setup.settings['mask_shelfbreak_dist']))
 
-        hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(self.nl_editor)
-        hbox.addWidget(self.mpl_widget)
-        self.nl_editor.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Expanding)
+        splitter = QtGui.QSplitter(Qt.Horizontal)
+        splitter.addWidget(self.nl_editor)
+        splitter.addWidget(self.mpl_widget)
 
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(splitter)
         self.setLayout(hbox)
         #set the Dialog title
         self.setWindowTitle("PyNEMO Settings Editor")
+        QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))        
         #show the window
         self.show()
