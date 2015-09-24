@@ -4,6 +4,7 @@
 ## Written by John Farey, August 2012                 ##
 ########################################################
 from collections import OrderedDict
+import os
 
 '''
 Invoke with a text file location, class init reads and deciphers variables.
@@ -24,6 +25,7 @@ class Setup(object):
         if not setfile: # debug
             self.filename = '../data/namelist.bdy'
         self._load_settings()
+        self.variable_info = self.variable_info_reader(self.filename+'.info')
 
     def refresh(self):
         """ Re loads the settings from file """
@@ -130,6 +132,30 @@ class Setup(object):
         namelist.writelines(data)
         namelist.close()
 
+    def variable_info_reader(self, filename):
+        """ This method reads the variable description data from 'variable.info' file in the pynemo installation path
+        if it can't find the file with the same name as input bdy file with extension .info
+        Keyword arguments:
+        filename -- filename of the variables information
+        returns a dictionary with variable name and its description
+        """
+        variable_info = {}               
+        if filename is None or not os.path.exists(filename):
+            #Read the default file
+            file_path, dummy = os.path.split(__file__)
+            filename = os.path.join(file_path,'variable.info')
+        try:
+            namelist = open(filename, 'r')
+            data = namelist.readlines()
+            for line in data:
+                name = _get_var_name(line)
+                value = line.split("=", 1)[1]
+                variable_info[name[0]] = value.strip()                           
+        except:
+            self.logger.error("Cannot open the  variable file:"+filename)
+        return variable_info
+        
+            
 def _trim(data):
     """ Trims the sets of lines removing empty lines/whitespaces and removing comments
     which start with ! """
@@ -203,7 +229,7 @@ def _get_var_name(line):
     """ parses the line to find the name and if it is part of the array '()'
     then returns name of variable and index of the array. if variable is not
     array then only variable name and -1 in index"""
-    name_value = line.split("=", 2)
+    name_value = line.split("=", 1)
     name_prefix = name_value[0][0:2].lower()
     name = name_value[0][3:].lower().strip() # 3 -> 0 to keep type info
     if name_prefix in ['ln', 'rn', 'nn', 'cn', 'sn']:
@@ -219,7 +245,7 @@ def _assign(data):
     vars_dictionary = OrderedDict({})
     bool_vars_dictionary = OrderedDict({})
     for line in data:
-        keyvalue = line.split('=', 2)
+        keyvalue = line.split('=', 1)
         _get_val(vars_dictionary, bool_vars_dictionary, keyvalue)
     return vars_dictionary, bool_vars_dictionary
 

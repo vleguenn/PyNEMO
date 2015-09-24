@@ -71,6 +71,8 @@ class NameListEditor(QtGui.QWidget):
 
             grid.addWidget(label, index, 1)
             grid.addWidget(text, index, 2)
+            if setting in self.setup.variable_info:
+                text.setToolTip(self.setup.variable_info[setting])
             index = index+1
 
         client.setLayout(grid)
