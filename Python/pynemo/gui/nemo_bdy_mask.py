@@ -67,12 +67,14 @@ class Mask(object):
             self.bathy_nc = Dataset(self.bathymetry_file)
             self.lon = np.asarray(self.bathy_nc.variables['nav_lon'])
             self.lat = np.asarray(self.bathy_nc.variables['nav_lat'])
+            self.bathy_data = self.bathy_nc.variables['Bathymetry'][:,:]
+            self.data_units = self.bathy_nc.variables['Bathymetry'].units
             if self.data is None:
                 self.data = self.bathy_nc.variables['Bathymetry']
                 self.data = np.asarray(self.data[:, :])
                 self.data = np.around((self.data + .5).clip(0, 1))
-            self.bathy_data = self.bathy_nc.variables['Bathymetry'][:,:]
-            self.data_units = self.bathy_nc.variables['Bathymetry'].units
+                #apply default 1px border
+                self.apply_border_mask(1)            
         except KeyError:
             self.logger.error('Bathymetry file doesnot have Bathyemetry variable')
             raise
@@ -117,6 +119,7 @@ class Mask(object):
             else:
                 tmp = np.zeros(self.data.shape, dtype=bool)
             self.reset_mask()
+            self.data = self.data * -1
             self.data[tmp] = -1
 
     def add_mask(self, index, roi):
