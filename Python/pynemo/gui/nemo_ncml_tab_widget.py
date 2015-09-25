@@ -39,7 +39,7 @@ class Ncml_tab(QtGui.QWidget):
             self.varStackedWidget.addWidget(self._addStackWidget())
             self.varStackedWidget.addWidget(self._addStackWidget())
             #debug
-            print 'Tracer has ' + str(self.varStackedWidget.count())
+#            print 'Tracer has ' + str(self.varStackedWidget.count())
         elif(self.var == unicode("Ice").encode('utf-8')):
             combo_vars = [unicode('ice thickness').encode('utf-8'),unicode('leads fraction').encode('utf-8'),unicode('snow thickness').encode('utf-8')] #'iicethic,ileadfra,isnowthi
             self.iicethic = ncml_variable(unicode('ice_thickness').encode('utf-8'))
@@ -48,7 +48,7 @@ class Ncml_tab(QtGui.QWidget):
             self.varStackedWidget.addWidget(self._addStackWidget())
             self.varStackedWidget.addWidget(self._addStackWidget())
             self.varStackedWidget.addWidget(self._addStackWidget())
-            print 'Ice has ' + str(self.varStackedWidget.count())
+#            print 'Ice has ' + str(self.varStackedWidget.count())
         elif(self.var == unicode("Dynamics").encode('utf-8')):
             combo_vars = [unicode('zonal velocity').encode('utf-8'), unicode('meridian velocity').encode('utf-8'), unicode('sea surface height').encode('utf-8')] #vozocrtx, vomecrty, sossheig
             self.vozocrtx = ncml_variable(unicode('zonal_velocity').encode('utf-8'))
@@ -57,7 +57,7 @@ class Ncml_tab(QtGui.QWidget):
             self.varStackedWidget.addWidget(self._addStackWidget())
             self.varStackedWidget.addWidget(self._addStackWidget())
             self.varStackedWidget.addWidget(self._addStackWidget())
-            print 'Dynamics has ' + str(self.varStackedWidget.count())
+#            print 'Dynamics has ' + str(self.varStackedWidget.count())
         self.varStackedWidget.setCurrentIndex(0)  #we rely on the stacked tab index to be the same as the combo box 
         '''
         these two tabs are disabled
@@ -173,13 +173,14 @@ class Ncml_tab(QtGui.QWidget):
     @pyqtSlot()
     def src_combo_changed(self, var_name):  
         #not sure why the current text is prefixed by the index : eg 0temperature      
-        print 'src_combo_value_changed to : ' + str(var_name) +  unicode(str(self.var_combo.currentText())).encode('utf_8')
+#        print 'src_combo_value_changed to : ' + str(var_name) +  unicode(str(self.var_combo.currentText())).encode('utf_8')
+        pass
         
         
     @pyqtSlot()
     def src_tedit_edited(self):
         src_tedit_input = self.varStackedWidget.currentWidget().src_tedit.text()
-        print 'src_edit text edited : ', src_tedit_input
+#        print 'src_edit text edited : ', src_tedit_input
         #validate the input now
         if not str(src_tedit_input).startswith('http'): 
             if not os.path.isabs(src_tedit_input): #assumes local file
@@ -196,7 +197,7 @@ class Ncml_tab(QtGui.QWidget):
         #current screen value is not saved until the add button is pressed
         #reset only reset the screen values, not the cached values        
         if self.var_combo.currentText() == unicode("temperature").encode('utf-8'):
-            print 'reset button is pushed, temperature ....'
+#            print 'reset button is pushed, temperature ....'
             self.resetValues(self.votemper)
         elif self.var_combo.currentText() == unicode("salinity").encode('utf-8'):
             self.resetValues(self.vosaline)
@@ -217,7 +218,7 @@ class Ncml_tab(QtGui.QWidget):
     reset the stacked widget values
     '''    
     def resetValues(self, currentValues = None):
-        #print 'in resetValues ....'
+        # 'in resetValues ....'
         if currentValues is None:
             #self.var_combo.setCurrentIndex(0)    #we don't reset this, as this is the key
             self.varStackedWidget.currentWidget().src_tedit.clear()
@@ -353,10 +354,10 @@ class Ncml_tab(QtGui.QWidget):
             target = fpath # do nothing 
         elif fpath.startswith('file:/'):
             temp = os.path.normpath(fpath[6:])
-            print 'normal path : ', temp
+#            print 'normal path : ', temp
             target =  unicode('file:/' + str(os.path.abspath(temp)).replace("\\", "/")).encode('utf-8') 
         else: #should be local file but not prefixed by file:/  we still check for absolute path
-            print 'normal path : ', os.path.normpath(fpath)
+#            print 'normal path : ', os.path.normpath(fpath)
             target = unicode('file:/' + str(os.path.abspath(fpath)).replace("\\", "/")).encode('utf-8')
         
         if not str(target).endswith('/'):
@@ -368,7 +369,7 @@ class Ncml_tab(QtGui.QWidget):
     compare the gui cached values with the stored values
     '''   
     def _sameValues(self, ncml_var):
-        print 'before state - variable: ' + ncml_var.name + ', src: ' + ncml_var.src + ', regex: ' +  ncml_var.regex + ', old_name: ' + ncml_var.old_name
+#        print 'before state - variable: ' + ncml_var.name + ', src: ' + ncml_var.src + ', regex: ' +  ncml_var.regex + ', old_name: ' + ncml_var.old_name
         target = self._convertSrc(self.varStackedWidget.currentWidget().src_tedit.text())
         
         if(target == ncml_var.src and \
