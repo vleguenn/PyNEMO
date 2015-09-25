@@ -9,6 +9,7 @@ Contents:
    intro
    installation
    usage
+   ncml_generator_usage
    troubleshooting
 
 
