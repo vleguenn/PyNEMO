@@ -19,7 +19,7 @@ def gcoms_break_depth(bathy):
     ocean_depth = bathy[...]
     ocean_depth = ocean_depth[ocean_depth > 0]
 
-    depth_bin = 10.0
+    depth_bin = 10.0    
     depth_max = np.max(ocean_depth)
     num_bin = int(math.floor(depth_max/depth_bin))
 
@@ -134,9 +134,24 @@ def polcoms_select_domain(bathy, lat, lon, roi, dr):
         ret_val[roi[2]:roi[3],roi[0]:roi[1]] = -1
         return ret_val == -1
         
-    tmp = bathy_copy[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
-    lat = lat[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
-    lon = lon[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
+    x0 = roi[2]-r
+    x1 = roi[3]+r
+    y0 = roi[0]-r
+    y1 = roi[1] +r
+    if x0 < 0:
+        x0 = 0
+    if y0 < 0:
+        y0 = 0
+    if x1 > bathy_copy.shape[0]:
+        x1 = bathy_copy.shape[0]
+    if y1 > bathy_copy.shape[1]:
+        y1 = bathy_copy.shape[1]
+    tmp = bathy_copy[x0:x1, y0:y1]
+    lat = lat[x0:x1, y0:y1]
+    lon = lon[x0:x1, y0:y1] 
+#    tmp = bathy_copy[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
+#    lat = lat[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
+#    lon = lon[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
     
     nanind = np.isnan(tmp) 
     tmp[nanind] = -1
@@ -217,7 +232,7 @@ def polcoms_select_domain(bathy, lat, lon, roi, dr):
     #Only select largest sub region 
     tmp[nanind] = np.NaN
     ret_val = np.ones(bathy.shape)
-    ret_val[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r] = tmp
+    ret_val[x0:x1,y0:y1] = tmp
     return ret_val == 1
     #in
          
