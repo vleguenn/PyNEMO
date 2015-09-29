@@ -10,7 +10,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4.QtCore import pyqtSlot
 import nemo_ncml_tab_widget
-
+from thredds_crawler.crawl import Crawl
 
 class Ncml_generator(QtGui.QDialog):
     '''
@@ -191,14 +191,22 @@ class Ncml_generator(QtGui.QDialog):
         self.root = self.tree.getroot()
         #create a netcdf element for each tab variable
         for tab in tabsList:
-            print 'current tabname: ', str(tab.name)
-            netcdfE = ET.Element(ns+unicode('netcdf').encode('utf-8')) #src directory is converted to the correct format when added/            
-            scanE = ET.Element(ns+unicode('scan').encode('utf-8'), location=unicode(str(tab.src)).encode('utf-8'), regExp=unicode(str(tab.regex)).encode('utf-8'))
-            if tab.subdirs == True:
-                scanE.set(unicode('subdirs').encode('utf-8'), unicode('true').encode('utf-8'))         
-            aggE = ET.Element(ns+unicode('aggregation').encode('utf-8'), name=unicode(str(tab.name)).encode('utf-8'), type=unicode('joinExisting').encode('utf-8'), dimName=unicode('time_counter').encode('utf-8')) #tab.name already encoded
-            aggE.append(scanE)
-            netcdfE.append(aggE)
+            netcdfE = ET.Element(ns+unicode('netcdf').encode('utf-8')) #src directory is converted to the correct format when added/
+            if str(tab.src).startswith("http:") or str(tab.src).startswith("https:"):
+                #Its url so use thredds crawler to get the urls
+                urls = self.url_trawler(tab.src,str(tab.regex))
+                aggE = ET.Element(ns+unicode('aggregation').encode('utf-8'), name=unicode(str(tab.name)).encode('utf-8'), type=unicode('joinExisting').encode('utf-8'), dimName=unicode('time_counter').encode('utf-8')) #tab.name already encoded                
+                for nc_url in urls:
+                    tcNetcdf = ET.Element(ns+unicode('netcdf').encode('utf-8'), location=unicode(str(nc_url)).encode('utf-8'))
+                    aggE.append(tcNetcdf)
+                netcdfE.append(aggE)
+            else:
+                scanE = ET.Element(ns+unicode('scan').encode('utf-8'), location=unicode(str(tab.src)).encode('utf-8'), regExp=unicode(str(tab.regex)).encode('utf-8'))
+                if tab.subdirs == True:
+                    scanE.set(unicode('subdirs').encode('utf-8'), unicode('true').encode('utf-8'))         
+                aggE = ET.Element(ns+unicode('aggregation').encode('utf-8'), name=unicode(str(tab.name)).encode('utf-8'), type=unicode('joinExisting').encode('utf-8'), dimName=unicode('time_counter').encode('utf-8')) #tab.name already encoded
+                aggE.append(scanE)
+                netcdfE.append(aggE)
             self.root[0].append(netcdfE)    #add the new netcdf element to the top aggregation 
             
             #deal with variable name change
@@ -270,3 +278,11 @@ class Ncml_generator(QtGui.QDialog):
             if level and (not elem.tail or not elem.tail.strip()):
                 elem.tail = i     
     
+    """
+        This method trawls throught the url with a given expression and returns the
+        list of urls that match the expression 
+    """
+    def url_trawler(self, url, expr):
+        c = Crawl(url, select=[expr])
+        urls = [s.get("url") for d in c.datasets for s in d.services if s.get("service").lower()=="opendap"]
+        return urls

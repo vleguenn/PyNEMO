@@ -34,29 +34,29 @@ class Ncml_tab(QtGui.QWidget):
         combo_vars = []
         if(self.var == unicode("Tracer").encode('utf-8')):
             combo_vars = [unicode('temperature').encode('utf-8'),unicode('salinity').encode('utf-8')] #votemper, vosaline
-            self.votemper = ncml_variable(unicode('temperature').encode('utf-8'))
-            self.vosaline = ncml_variable(unicode('salinity').encode('utf-8'))
-            self.varStackedWidget.addWidget(self._addStackWidget())
-            self.varStackedWidget.addWidget(self._addStackWidget())
+            self.votemper = ncml_variable(unicode('temperature').encode('utf-8'),'votemper')
+            self.vosaline = ncml_variable(unicode('salinity').encode('utf-8'),'vosaline')
+            self.varStackedWidget.addWidget(self._addStackWidget("votemper"))
+            self.varStackedWidget.addWidget(self._addStackWidget("vosaline"))
             #debug
 #            print 'Tracer has ' + str(self.varStackedWidget.count())
         elif(self.var == unicode("Ice").encode('utf-8')):
             combo_vars = [unicode('ice thickness').encode('utf-8'),unicode('leads fraction').encode('utf-8'),unicode('snow thickness').encode('utf-8')] #'iicethic,ileadfra,isnowthi
-            self.iicethic = ncml_variable(unicode('ice_thickness').encode('utf-8'))
-            self.ileadfra = ncml_variable(unicode('leads_fraction').encode('utf-8'))
-            self.isnowthi = ncml_variable(unicode('snow_thickness').encode('utf-8'))
-            self.varStackedWidget.addWidget(self._addStackWidget())
-            self.varStackedWidget.addWidget(self._addStackWidget())
-            self.varStackedWidget.addWidget(self._addStackWidget())
+            self.iicethic = ncml_variable(unicode('ice_thickness').encode('utf-8'),'iicethic')
+            self.ileadfra = ncml_variable(unicode('leads_fraction').encode('utf-8'),'ileadfra')
+            self.isnowthi = ncml_variable(unicode('snow_thickness').encode('utf-8'),'isnowthi')
+            self.varStackedWidget.addWidget(self._addStackWidget("iicethic"))
+            self.varStackedWidget.addWidget(self._addStackWidget("ileadfra"))
+            self.varStackedWidget.addWidget(self._addStackWidget("isnowthi"))
 #            print 'Ice has ' + str(self.varStackedWidget.count())
         elif(self.var == unicode("Dynamics").encode('utf-8')):
             combo_vars = [unicode('zonal velocity').encode('utf-8'), unicode('meridian velocity').encode('utf-8'), unicode('sea surface height').encode('utf-8')] #vozocrtx, vomecrty, sossheig
-            self.vozocrtx = ncml_variable(unicode('zonal_velocity').encode('utf-8'))
-            self.vomecrty = ncml_variable(unicode('meridian_velocity').encode('utf-8'))
-            self.sossheig = ncml_variable(unicode('sea_surface_height').encode('utf-8'))
-            self.varStackedWidget.addWidget(self._addStackWidget())
-            self.varStackedWidget.addWidget(self._addStackWidget())
-            self.varStackedWidget.addWidget(self._addStackWidget())
+            self.vozocrtx = ncml_variable(unicode('zonal_velocity').encode('utf-8'),'vozocrtx')
+            self.vomecrty = ncml_variable(unicode('meridian_velocity').encode('utf-8'),'vomecrty')
+            self.sossheig = ncml_variable(unicode('sea_surface_height').encode('utf-8'),'sossheig')
+            self.varStackedWidget.addWidget(self._addStackWidget("vozocrtx"))
+            self.varStackedWidget.addWidget(self._addStackWidget("vomecrty"))
+            self.varStackedWidget.addWidget(self._addStackWidget("sossheig"))
 #            print 'Dynamics has ' + str(self.varStackedWidget.count())
         self.varStackedWidget.setCurrentIndex(0)  #we rely on the stacked tab index to be the same as the combo box 
         '''
@@ -124,7 +124,7 @@ class Ncml_tab(QtGui.QWidget):
     '''
     create the stacked widget for each nemo variable
     '''    
-    def _addStackWidget(self):
+    def _addStackWidget(self, old_name=""):
         self.varWidget = QtGui.QWidget()
         #self.varWidget.setObjectName(objName)
         varLayout = QtGui.QGridLayout()
@@ -149,6 +149,7 @@ class Ncml_tab(QtGui.QWidget):
         self.varWidget.regex_tedit.setToolTip(unicode('see http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/ncml/AnnotatedSchema4.html#regexp').encode('utf-8'))                
         self.varWidget.old_name_tedit = QtGui.QLineEdit()
         self.varWidget.old_name_tedit.setToolTip(unicode('variable name in data file').encode('utf-8'))
+        self.varWidget.old_name_tedit.setText(old_name)
         
         varLayout.addWidget(src_label, 1, 0, 1, 1)
         varLayout.addWidget(self.varWidget.src_tedit, 1, 1, 1, 3)
@@ -360,8 +361,8 @@ class Ncml_tab(QtGui.QWidget):
 #            print 'normal path : ', os.path.normpath(fpath)
             target = unicode('file:/' + str(os.path.abspath(fpath)).replace("\\", "/")).encode('utf-8')
         
-        if not str(target).endswith('/'):
-            target = target + '/'
+ #       if not str(target).endswith('/'):
+ #           target = target + '/'
             
         return target    
     
@@ -386,12 +387,12 @@ class ncml_variable(object):
     '''
     convenient class to hold the values for a ncml variable
     '''
-    def __init__(self, varName):
+    def __init__(self, varName, old_name=''):
         #print 'created ncml_variable object : ' + varName
         self.name = varName
         self.src = ''
         self.regex = ''
-        self.old_name = ''
+        self.old_name = old_name
         self.subdirs = False
         
         
