@@ -26,7 +26,8 @@ class Ncml_generator(QtGui.QDialog):
         self.logger = logging.getLogger(__name__)   #logger config'ed in pynemo_exe.py
         
         if not basefile:
-            self.baseFile = './base.ncml'   #currently hardcoded
+            testpath, file_name = os.path.split(__file__)
+            self.baseFile = os.path.join(testpath,'base.ncml')
         else:
             self.baseFile = basefile
             print 'ncml baseFile : ', str(self.baseFile)
@@ -130,14 +131,14 @@ class Ncml_generator(QtGui.QDialog):
         if fname:
             self.filename = fname #returns a QString
             self.top_outfile_name.setText(str(fname))
-            print 'the output file is set to : ' + self.filename
+            #print 'the output file is set to : ' + self.filename
     '''
     output file text box call back handler
     '''
     @pyqtSlot()
     def get_fname_input(self):
         self.filename = self.top_outfile_name.text()
-        print 'the output file is manually set to : ' + self.filename
+        #print 'the output file is manually set to : ' + self.filename
     '''
     call back to handle the generate button pressed
     '''
