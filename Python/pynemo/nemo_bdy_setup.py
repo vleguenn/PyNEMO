@@ -151,7 +151,7 @@ class Setup(object):
                 name = _get_var_name(line)
                 value = line.split("=", 1)[1]
                 variable_info[name[0]] = value.strip()                           
-        except:
+        except IOError:
             self.logger.error("Cannot open the  variable file:"+filename)
         return variable_info
         
@@ -235,9 +235,9 @@ def _get_var_name(line):
     if name_prefix in ['ln', 'rn', 'nn', 'cn', 'sn']:
         return name, -1
     elif name_prefix == 'cl':
-        name = name_prefix[0].split('(')
+        name = name_value[0].split('(')
         index = name[1].split(')')
-        return name, index
+        return name[0], index[0]
 
     # Returns tidy dictionary of var names and values
 def _assign(data):
