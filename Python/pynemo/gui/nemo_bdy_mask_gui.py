@@ -222,7 +222,7 @@ class NemoNavigationToolbar(NavigationToolbar):
                           (None, None, None, None)\
                           )
         NavigationToolbar.__init__(self, canvas, parent)
-        self._actions['reset'].setIcon(set_icon('reset.jpg'))
+        self._actions['reset'].setIcon(set_icon('reset.png'))
         self._actions['freehand'].setCheckable(True)
         self._actions['freehand'].setIcon(set_icon('freehand.png'))
         self._actions['rectangle'].setCheckable(True)
