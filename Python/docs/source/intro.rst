@@ -17,5 +17,5 @@ for data extraction. This is done using a kdtree approximate nearest neighbour
 algorithm. The idea behind this targetted method is that it provides a generic
 method of interpolation for any flavour of ocean model in order to set up a
 regional NEMO model configuration.  At present (alpha release) the tools do not
-contain many options, but those that exist at accessed either through a NEMO style
+contain many options, but those that exist are accessed either through a NEMO style
 namelist or a convient GUI. 

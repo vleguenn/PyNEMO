@@ -3,12 +3,12 @@ Usage
 There are two tools available in pyNEMO. They are described in detail below. 
 
 pynemo
-^^^^^^
+------
 
 This command line tool takes in a bdy file and performs the extraction of boundary data and prepares the data for NEMO simulation.
-bdy file is a plain text file containing key value pairs. Please look at the sample namelist.bdy file at 
-http://ccpforge.cse.rl.ac.uk/gf/project/pynemo/scmsvn/?action=browse&path=%2Ftrunk%2FPython%2Fdata%2Fnamelist.bdy&view=markup 
-namelist.bdy file is similar to NEMO simulation input file. 
+bdy file is a plain text file containing key value pairs. Please look at the sample `namelist.bdy 
+<http://ccpforge.cse.rl.ac.uk/gf/project/pynemo/scmsvn/?action=browse&path=%2Ftrunk%2FPython%2Fdata%2Fnamelist.bdy&view=markup>`_ 
+file, which shares common syntax with the NEMO simulation namelist input file. 
 
 .. note:: Directory paths in bdy file can be relative or absolute. Application picks the relative path from the current working directory.
 
@@ -35,7 +35,7 @@ Example comamnd
 
 
 pynemo_settings_editor
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 This tool will open a window where you can edit the mask and change the values of bdy parameters.
 
@@ -59,4 +59,3 @@ Example:
 ::
    
    pynemo_settings_editor -s namelist.bdy
-
