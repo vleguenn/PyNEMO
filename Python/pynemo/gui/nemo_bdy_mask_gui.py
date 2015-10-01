@@ -14,6 +14,7 @@ from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from nemo_bdy_mask import Mask
 import logging
 from PyQt4.QtGui import QSizePolicy
+from matplotlib.colors import Normalize
 
 mask_alpha = 0.3
 
@@ -95,9 +96,12 @@ class MatplotlibWidget(QtGui.QWidget):
         transcmap = plt.get_cmap('autumn')
         transcmap.set_bad(alpha=0.5)
         masklayer = np.ma.masked_where(self.mask.data==-1,self.mask.data)
-        cax = self.axes.pcolormesh(x_vals, y_vals, Z, cmap=cmap)#, extend='min')#cmap=plt.get_cmap('GnBu'))#cmap=cm.s3pcpn)
-        self.axes.contourf(x_vals, y_vals, masklayer, [-2, -1, 0, 1, 2], cmap=transcmap,\
-                           alpha=mask_alpha)
+        extent = (0, self.mask.lon.shape[0],0, self.mask.lon.shape[1])
+        #cax = self.axes.pcolormesh(x_vals, y_vals, Z, cmap=cmap)#, extend='min')#cmap=plt.get_cmap('GnBu'))#cmap=cm.s3pcpn)
+        cax = self.axes.imshow(Z, cmap = cmap, origin="lower",extent=extent,aspect='auto')
+        #self.axes.contourf(x_vals, y_vals, masklayer, [-2, -1, 0, 1, 2], cmap=transcmap,\
+        #                   alpha=mask_alpha)
+        self.axes.imshow(masklayer, cmap=transcmap,alpha=0.3,origin="lower",extent=extent,aspect='auto')
 
         zmin = np.amin(Z)
         zmax = np.amax(Z)

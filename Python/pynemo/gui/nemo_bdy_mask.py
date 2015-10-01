@@ -121,6 +121,7 @@ class Mask(object):
             self.reset_mask()
             self.data = self.data * -1
             self.data[tmp] = -1
+            self.select_the_largest_region()
 
     def add_mask(self, index, roi):
         """ Adds the masks for the given index values depending on the type of mask selected"""
