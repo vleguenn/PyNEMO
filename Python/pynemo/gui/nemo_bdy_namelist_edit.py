@@ -7,10 +7,10 @@ Editor for namelist.bdy file
 # pylint: disable=no-name-in-module
 # pylint: disable=E1002
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import pyqtSignal, Qt
+from PyQt4.QtCore import pyqtSignal, Qt, QRect, QPoint
 
 import ast
-from PyQt4.QtGui import QMessageBox
+from PyQt4.QtGui import QMessageBox, QRegion, QIcon, QToolTip, QCursor
 
 class NameListEditor(QtGui.QWidget):
     '''
@@ -43,6 +43,8 @@ class NameListEditor(QtGui.QWidget):
         for setting in self.settings:
             # initialises setting Widget
             label = QtGui.QLabel(setting)
+            qlabel = QtGui.QPushButton("")
+            qlabel.setIcon(self.style().standardIcon(QtGui.QStyle.SP_MessageBoxQuestion))
             if type(self.settings[setting]).__name__ in ['str', 'float', 'double',
                                                          'int', 'time', 'dict']:
                 text = QtGui.QLineEdit(self)
@@ -71,8 +73,12 @@ class NameListEditor(QtGui.QWidget):
 
             grid.addWidget(label, index, 1)
             grid.addWidget(text, index, 2)
+            qlabel.clicked.connect(lambda widget=qlabel,\
+                                   str_val=self.setup.variable_info[setting]:\
+                                   QToolTip.showText(QCursor.pos(),str_val))            
+            grid.addWidget(qlabel,index, 3)
             if setting in self.setup.variable_info:
-                text.setToolTip(self.setup.variable_info[setting])
+                qlabel.setToolTip(self.setup.variable_info[setting])
             index = index+1
 
         client.setLayout(grid)
