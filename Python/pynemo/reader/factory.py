@@ -8,7 +8,9 @@ This is generic file loader factory.
 import os
 #Local Imports
 from pynemo.reader.ncml import Reader as NcMLReader
+from pynemo.reader.ncml import NcMLFile
 from pynemo.reader.directory import Reader as DirectoryReader
+
 from netCDF4 import Dataset
 
 def GetReader(uri, t_adjust, reader_type=None):
@@ -37,8 +39,12 @@ class NetCDFFile(object):
     def close(self):
         self.nc.close()
 
+
 def GetFile(uri):
-    return NetCDFFile(uri)
+    if uri.endswith(".ncml"):
+        return NcMLFile(uri)
+    else:
+        return NetCDFFile(uri)
 # from netcdf import GetFile as netcdf_get_file
 # from netcdf import GetRepository as netcdf_repository
 # from ncml import GetFile as ncml_get_file 

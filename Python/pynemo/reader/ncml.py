@@ -273,3 +273,18 @@ class Variable(object):
         except KeyError:
             self.logger.error('Cannot find the requested variable '+self.variable)
         return None  
+    
+    
+class NcMLFile(object):
+    def ___init__(self,filename):
+        self.dataset = None
+        try:
+            self.dataset = NetcdfDataset.openFile(self.uri, None)
+        except (IOError, RuntimeError):
+            self.logger.error('Cannot open the file '+self.uri)
+    
+    def __getitem__(self,val):
+        return Variable(self.dataset,val)
+    
+    def close(self):
+        self.nc.close()    
