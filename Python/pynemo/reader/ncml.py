@@ -276,12 +276,12 @@ class Variable(object):
     
     
 class NcMLFile(object):
-    def ___init__(self,filename):
+    def __init__(self,filename):
         self.dataset = None
         try:
-            self.dataset = NetcdfDataset.openFile(self.uri, None)
+            self.dataset = NetcdfDataset.openFile(filename, None)
         except (IOError, RuntimeError):
-            self.logger.error('Cannot open the file '+self.uri)
+            self.logger.error('Cannot open the file '+filename)
     
     def __getitem__(self,val):
         return Variable(self.dataset,val)

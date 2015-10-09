@@ -11,6 +11,7 @@ from pynemo.reader.ncml import init_jnius
 from pynemo.reader.ncml import Variable as Data2
 from pynemo.reader.ncml import GridGroup
 from pynemo.reader.ncml import Reader
+from pynemo.reader.ncml import NcMLFile
 
 import os
 class Test(unittest.TestCase):
@@ -45,6 +46,15 @@ class Test(unittest.TestCase):
         val2 = dataset[2,10,0,0]
         self.assertAlmostEqual(dataset[0,0,0,0], 18.945175, 6,"First value should be 18.9")
         self.assertAlmostEqual(dataset[2,10,0,0], 20.314891, 5,"2, 10, 0,0  value should be 18.9")
+        
+    def testNcMLFile(self):
+        init_jnius()
+        testpath, file_name = os.path.split(__file__)
+        testfile = os.path.join(testpath, "testremote.ncml")
+        sd = NcMLFile(testfile)
+        val = sd['votemper'][0,0,0,0]
+        self.assertAlmostEqual(val, 18.945175, 6,"First value should be 18.9")
+
         
     def testSrcDataVariable(self):
         init_jnius()
