@@ -287,4 +287,5 @@ class NcMLFile(object):
         return Variable(self.dataset,val)
     
     def close(self):
-        self.nc.close()    
+        if self.dataset is not None:
+            self.dataset.close()
