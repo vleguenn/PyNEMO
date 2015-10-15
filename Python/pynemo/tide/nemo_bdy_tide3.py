@@ -107,12 +107,13 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T, Grid_U, Grid_V, comp):
     dst_lon[dst_lon > 180.0] = dst_lon[dst_lon > 180.0]-360.0
 
     #extract the depths along the U-point open boundary
-    zgr = Dataset(setup.settings['dst_zgr'])
-    mbathy = zgr.variables['mbathy']
+    zgr = GetFile(settings['dst_zgr'])#Dataset(settings['dst_zgr'], 'r')
+    mbathy = zgr['mbathy'][:,:,:].squeeze() #zgr.variables['mbathy'][:,:,:]
 
     #summing over scale factors as zps doesn't have hbat variable
-    e3X = zgr.variables['e3u']
-    e3X = np.squeeze(e3X)
+    #e3X = zgr.variables['e3u']
+    #e3X = np.squeeze(e3X)
+    e3X = zgr['e3u'][:,:,:].squeeze()
 
     heightrange = np.arange(1, e3X.shape[0]+1)
     regular_heightprofile = np.tile(heightrange,
@@ -133,8 +134,9 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T, Grid_U, Grid_V, comp):
 
     #extract the depths along the V-point open boundary
     #summing over scale factors as zps doesn't have hbat variable
-    e3X = zgr.variables['e3v']
-    e3X = np.squeeze(e3X)
+    #e3X = zgr.variables['e3v']
+    #e3X = np.squeeze(e3X)
+    e3X = zgr['e3v'][:,:,:].squeeze()
 
     heightrange = np.arange(1, e3X.shape[0]+1)
     regular_heightprofile = np.tile(heightrange,
