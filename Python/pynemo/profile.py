@@ -129,7 +129,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
         logger.info('bdy_ind %s %s %s', k, bdy_ind[k].bdy_i.shape, bdy_ind[k].bdy_r.shape)
 
     start = clock()
-    co_set = coord.Coord(settings['dst_dir']+'/toreador.nc', bdy_ind)
+    co_set = coord.Coord(settings['dst_dir']+'/coordinates.bdy.nc', bdy_ind)
     logger.info('done coord gen')
     logger.info(clock() - start)
     start = clock()

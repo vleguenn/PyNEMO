@@ -28,7 +28,7 @@ class Coord:
         self.logger = logging.getLogger(__name__)
         self.logger.debug( fname )
         if not fname:
-            fname = '/Users/jdha/Projects/pynemo_data/toreador.nc'
+            print 'need some error handling in here or is this redundant?' # TODO
          
         # Enter define mode
         self.ncid = Dataset(fname, 'w', clobber=True, format='NETCDF4')
