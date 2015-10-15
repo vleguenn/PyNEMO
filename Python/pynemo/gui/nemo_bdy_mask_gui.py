@@ -96,7 +96,7 @@ class MatplotlibWidget(QtGui.QWidget):
         transcmap = plt.get_cmap('autumn')
         transcmap.set_bad(alpha=0.5)
         masklayer = np.ma.masked_where(self.mask.data==-1,self.mask.data)
-        extent = (0, self.mask.lon.shape[0],0, self.mask.lon.shape[1])
+        extent = (0, self.mask.lon.shape[1],0, self.mask.lon.shape[0])
         #cax = self.axes.pcolormesh(x_vals, y_vals, Z, cmap=cmap)#, extend='min')#cmap=plt.get_cmap('GnBu'))#cmap=cm.s3pcpn)
         cax = self.axes.imshow(Z, cmap = cmap, origin="lower",extent=extent,aspect='auto')
         #self.axes.contourf(x_vals, y_vals, masklayer, [-2, -1, 0, 1, 2], cmap=transcmap,\
@@ -127,7 +127,7 @@ class MatplotlibWidget(QtGui.QWidget):
                 y = np.arange(0, self.mask.lon.shape[1])
                 x_vals, y_vals = np.meshgrid(y, x)
                 grid = zip(x_vals.ravel(), y_vals.ravel())
-
+                
                 self._drawing_tool.polygon.set_linewidth(1.0)
                 p_path = Path(self._drawing_tool.polygon.xy)
                 index = p_path.contains_points(grid)
