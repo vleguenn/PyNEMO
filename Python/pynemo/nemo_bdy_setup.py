@@ -209,7 +209,7 @@ def _get_val(vars_dictionary, bool_vars_dictionary, line):
         index = name[1].split(')')
         if name[0].strip() not in vars_dictionary.keys():
             vars_dictionary[name[0].strip()] = {}
-            vars_dictionary[name[0].strip()][index[0].strip()] = value.strip()
+        vars_dictionary[name[0].strip()][index[0].strip()] = value.strip()
     else:
         raise ValueError('%s data type is ambiguous' %line)
 
