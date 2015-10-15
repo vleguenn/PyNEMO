@@ -115,43 +115,29 @@ def polcoms_select_domain(bathy, lat, lon, roi, dr):
     :Example:
     """
     logger = logging.getLogger(__name__)
-    dy = 0.1
-    dx = 0.1
+#   dy = 0.1
+#   dx = 0.1
     
     #create a copy of bathy
     bathy_copy = bathy.copy()
 #    bathy[bathy>=0] = 0;
 #    bathy = bathy*-1
     global_ind = bathy_copy*np.NaN
-    r = np.ceil(dr/(np.pi/180*6400)/dy)
-    if r > np.max(bathy_copy.shape):
-        logger.error("Shelf break is larger than the grid")
+#   r = np.ceil(dr/(np.pi/180*6400)/dy)
+#   r = np.ceil(dr/(np.cos(np.radians(lat_ob[idx]))*np.pi*6400*2/360*dy))
+#   if r > np.max(bathy_copy.shape):
+#       logger.error("Shelf break is larger than the grid")
 #        d1 = bathy_copy.shape[0]-(roi[3]-roi[2])/2.0
 #        d2 = bathy_copy.shape[1]-(roi[1]-roi[0])/2.0
 #        r = np.ceil(min(d1,d2))
         #just select the box roi
-        ret_val = np.ones(bathy.shape)
-        ret_val[roi[2]:roi[3],roi[0]:roi[1]] = -1
-        return ret_val == -1
+#       ret_val = np.ones(bathy.shape)
+#       ret_val[roi[2]:roi[3],roi[0]:roi[1]] = -1
+#       return ret_val == -1
         
-    x0 = roi[2]-r
-    x1 = roi[3]+r
-    y0 = roi[0]-r
-    y1 = roi[1] +r
-    if x0 < 0:
-        x0 = 0
-    if y0 < 0:
-        y0 = 0
-    if x1 > bathy_copy.shape[0]:
-        x1 = bathy_copy.shape[0]
-    if y1 > bathy_copy.shape[1]:
-        y1 = bathy_copy.shape[1]
-    tmp = bathy_copy[x0:x1, y0:y1]
-    lat = lat[x0:x1, y0:y1]
-    lon = lon[x0:x1, y0:y1] 
-#    tmp = bathy_copy[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
-#    lat = lat[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
-#    lon = lon[roi[2]-r:roi[3]+r,roi[0]-r:roi[1]+r]
+    tmp = bathy_copy[roi[2]:roi[3],roi[0]:roi[1]]
+    lat = lat[roi[2]:roi[3],roi[0]:roi[1]]
+    lon = lon[roi[2]:roi[3],roi[0]:roi[1]]
     
     nanind = np.isnan(tmp) 
     tmp[nanind] = -1
@@ -165,11 +151,39 @@ def polcoms_select_domain(bathy, lat, lon, roi, dr):
     lat_ob = np.ravel(lat,order='F')[np.ravel(ob,order='F')]
     lon_ob = np.ravel(lon,order='F')[np.ravel(ob,order='F')]
     
-    len_lat = len(lat)
+    
+    print lat_ob, lon_ob
+    len_lat = len(lat[:,0])
     len_lon = len(lon[0,:])
     lat_lon_index = np.nonzero( np.logical_and(lat == lat_ob[0], lon == lon_ob[0]))    
     for idx in range(0, len(lat_ob)):        
         lat_lon_index = np.nonzero( np.logical_and(lat == lat_ob[idx], lon == lon_ob[idx]))
+        # messy fudge to determine local dx,dy TODO tidy and formalise
+        j_0 = max(lat_lon_index[0],0)
+        j_e = min(lat_lon_index[0]+1+1,len_lat)
+        i_0 = max(lat_lon_index[1],0)
+        i_e = min(lat_lon_index[1]+1+1,len_lon)
+        if j_e>len_lat-2:
+           j_0 = j_0 - 3
+           j_e = j_0 + 2
+        if i_e>len_lon-2:
+           i_0 = i_0 - 3
+           i_e = i_0 + 2
+        lat_slice = slice(max(lat_lon_index[0],0),min(lat_lon_index[0]+1+1,len_lat))
+        lon_slice = slice(max(lat_lon_index[1],0),min(lat_lon_index[1]+1+1,len_lon))   
+        print 'method2', lon_slice, lat_slice
+        lat_slice = slice(j_0,j_e)
+        lon_slice = slice(i_0,i_e)
+        print 'method1', lon_slice, lat_slice
+        lat_pts = lat[lat_slice, lon_slice]
+        lon_pts = lon[lat_slice, lon_slice]
+        print lat_pts, lon_pts
+        print lat_lon_index[0], lat_lon_index[1] 
+        print len_lon, len_lat, lat_lon_index[0], lat_lon_index[1]
+        dy,py=seawater.dist(lat_pts[:,0], lon_pts[:,0])
+        dx,px=seawater.dist(lat_pts[0,:], lon_pts[0,:])
+        r = np.rint(np.ceil(dr/np.amax([dx,dy])))
+        print dx, dy, r
         lat_slice = slice(max(lat_lon_index[0]-r,0),min(lat_lon_index[0]+r+1,len_lat))
         lon_slice = slice(max(lat_lon_index[1]-r,0),min(lat_lon_index[1]+r+1,len_lon))   
         lat_pts = lat[lat_slice, lon_slice]
@@ -202,11 +216,37 @@ def polcoms_select_domain(bathy, lat, lon, roi, dr):
     
     for idx in range(0, len(lat_lb)):
         lat_lon_index = np.nonzero( np.logical_and(lat == lat_lb[idx], lon == lon_lb[idx]))
-        lat_slice = slice(max(lat_lon_index[0]-r,0),min(lat_lon_index[0]+r,len_lat))
-        lon_slice = slice(max(lat_lon_index[1]-r,0),min(lat_lon_index[1]+r,len_lon))   
+        # messy fudge to determine local dx,dy TODO tidy and formalise
+        j_0 = max(lat_lon_index[0],0)
+        j_e = min(lat_lon_index[0]+1+1,len_lat)
+        i_0 = max(lat_lon_index[1],0)
+        i_e = min(lat_lon_index[1]+1+1,len_lon)
+        if j_e>len_lat-2:
+           j_0 = j_0 - 3
+           j_e = j_0 + 2
+        if i_e>len_lon-2:
+           i_0 = i_0 - 3
+           i_e = i_0 + 2
+        lat_slice = slice(max(lat_lon_index[0],0),min(lat_lon_index[0]+1+1,len_lat))
+        lon_slice = slice(max(lat_lon_index[1],0),min(lat_lon_index[1]+1+1,len_lon))   
+        print 'method2', lon_slice, lat_slice
+        lat_slice = slice(j_0,j_e)
+        lon_slice = slice(i_0,i_e)
+        print 'method1', lon_slice, lat_slice
         lat_pts = lat[lat_slice, lon_slice]
         lon_pts = lon[lat_slice, lon_slice]
-        lat_pts_shape = lat_pts.shape        
+        print lat_pts, lon_pts
+        print lat_lon_index[0], lat_lon_index[1] 
+        print len_lon, len_lat, lat_lon_index[0], lat_lon_index[1]
+        dy,py=seawater.dist(lat_pts[:,0], lon_pts[:,0])
+        dx,px=seawater.dist(lat_pts[0,:], lon_pts[0,:])
+        r = np.rint(np.ceil(dr/np.amax([dx,dy])))
+        print dx, dy, r
+        lat_slice = slice(max(lat_lon_index[0]-r,0),min(lat_lon_index[0]+r+1,len_lat))
+        lon_slice = slice(max(lat_lon_index[1]-r,0),min(lat_lon_index[1]+r+1,len_lon))   
+        lat_pts = lat[lat_slice, lon_slice]
+        lon_pts = lon[lat_slice, lon_slice]
+        lat_pts_shape = lat_pts.shape
         lat_pts = np.ravel(lat_pts)
         lon_pts = np.ravel(lon_pts)
         # NOTE: seawater package calculates the distance from point to the next point in the array
@@ -232,7 +272,7 @@ def polcoms_select_domain(bathy, lat, lon, roi, dr):
     #Only select largest sub region 
     tmp[nanind] = np.NaN
     ret_val = np.ones(bathy.shape)
-    ret_val[x0:x1,y0:y1] = tmp
+    ret_val[roi[2]:roi[3],roi[0]:roi[1]] = tmp
     return ret_val == 1
     #in
          
