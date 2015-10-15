@@ -79,7 +79,7 @@ class Reader(object):
         grid.date_counter = []
         for index in range(0,len(grid.time_counter)):            
             grid.date_counter.append(netcdftime.utime(grid.units,
-                                                      grid.calendar).num2date(grid.time_counter[index]+t_adjust)) 
+                                                      grid.calendar).num2date(grid.time_counter[index])) 
 
     def close(self):
         """ This is not yet implemented. TODO: keep the netcdf file open until its expicitly 
