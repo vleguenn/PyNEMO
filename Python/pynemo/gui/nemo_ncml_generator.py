@@ -75,7 +75,7 @@ class Ncml_generator(QtGui.QDialog):
         self.ecosys_tab = nemo_ncml_tab_widget.Ncml_tab(unicode("Ecosystem").encode('utf-8'))
         self.ecosys_tab.setEnabled(False)
         self.grid_tab = nemo_ncml_tab_widget.Ncml_tab(unicode("Grid").encode('utf-8'))
-        self.grid_tab.setEnabled(False);
+        #self.grid_tab.setEnabled(False);
                 
         self.tabWidget.addTab(self.tracer_tab, unicode("Tracer").encode('utf-8'))        
         self.tabWidget.addTab(self.dynamic_tab, unicode("Dynamics").encode('utf-8'))
@@ -167,9 +167,16 @@ class Ncml_generator(QtGui.QDialog):
             self.ice_tab.isnowthi.src != "" and \
             self.dynamic_tab.vozocrtx.src != "" and \
             self.dynamic_tab.vomecrty.src != "" and \
-            self.dynamic_tab.sossheig.src != "":
+            self.dynamic_tab.sossheig.src != "" and \
+            self.grid_tab.gdept.src != "" and \
+            self.grid_tab.gdepw.src != "" and \
+            self.grid_tab.mbathy.src != "" and \
+            self.grid_tab.e3t.src != "" and \
+            self.grid_tab.e3u.src != "" and \
+            self.grid_tab.e3v.src != "" :
                 tabsList = [self.tracer_tab.votemper, self.tracer_tab.vosaline, self.ice_tab.iicethic, self.ice_tab.ileadfra, self.ice_tab.isnowthi, \
-                            self.dynamic_tab.vozocrtx, self.dynamic_tab.vomecrty, self.dynamic_tab.sossheig ]
+                            self.dynamic_tab.vozocrtx, self.dynamic_tab.vomecrty, self.dynamic_tab.sossheig, self.grid_tab.gdept, \
+                            self.grid_tab.gdepw, self.grid_tab.mbathy, self.grid_tab.e3t, self.grid_tab.e3u, self.grid_tab.e3v ]
                 try:
                     self.generateNcML(tabsList) #go ahead and do it
                 except:
@@ -237,6 +244,24 @@ class Ncml_generator(QtGui.QDialog):
                     self.root.append(v)
                 elif tab.name == unicode('sea_surface_height').encode('utf-8') and tab.old_name != unicode('sossheig').encode('utf-8'):
                     v = ET.Element(ns+vname, name='sossheig', orgName =  str(tab.old_name))
+                    self.root.append(v)
+                elif tab.name == unicode('depth_at_t_points').encode('utf-8') and tab.old_name != unicode('gdept').encode('utf-8'):
+                    v = ET.Element(ns+vname, name='gdept', orgName =  str(tab.old_name))
+                    self.root.append(v)
+                elif tab.name == unicode('depth_at_w_points').encode('utf-8') and tab.old_name != unicode('gdepw').encode('utf-8'):
+                    v = ET.Element(ns+vname, name='gdepw', orgName =  str(tab.old_name))
+                    self.root.append(v)
+                elif tab.name == unicode('number_of_wet_levels').encode('utf-8') and tab.old_name != unicode('mbathy').encode('utf-8'):
+                    v = ET.Element(ns+vname, name='mbathy', orgName =  str(tab.old_name))
+                    self.root.append(v)
+                elif tab.name == unicode('vertical_scale_factors_at_t_points').encode('utf-8') and tab.old_name != unicode('e3t').encode('utf-8'):
+                    v = ET.Element(ns+vname, name='e3t', orgName =  str(tab.old_name))
+                    self.root.append(v)
+                elif tab.name == unicode('vertical_scale_factors_at_u_points').encode('utf-8') and tab.old_name != unicode('e3u').encode('utf-8'):
+                    v = ET.Element(ns+vname, name='e3u', orgName =  str(tab.old_name))
+                    self.root.append(v)
+                elif tab.name == unicode('vertical_scale_factors_at_v_points').encode('utf-8') and tab.old_name != unicode('e3v').encode('utf-8'):
+                    v = ET.Element(ns+vname, name='e3v', orgName =  str(tab.old_name))
                     self.root.append(v)
                    
         #write ncml to file
