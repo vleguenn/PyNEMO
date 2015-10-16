@@ -181,7 +181,7 @@ class Extract:
         # Find nearest neighbour on the source grid to each dst bdy point
         # Ann Query substitute
         source_tree = sp.cKDTree(zip(SC.lon.ravel(order='F'),
-                                     SC.lat.ravel(order='F')))
+                                     SC.lat.ravel(order='F')), balanced_tree=False,compact_nodes=False)
         dst_pts = zip(dst_lon[:].ravel(order='F'), dst_lat[:].ravel(order='F'))
         nn_dist, nn_id = source_tree.query(dst_pts, k=1)
 
@@ -244,7 +244,7 @@ class Extract:
             tmp_lat = dst_lat.copy()
             tmp_lat[r_id] = -9999
             source_tree = sp.cKDTree(zip(tmp_lon.ravel(order='F'),
-                                         tmp_lat.ravel(order='F')))
+                                         tmp_lat.ravel(order='F')), balanced_tree=False,compact_nodes=False)
             dst_pts = zip(dst_lon[rr_id].ravel(order='F'),
                           dst_lat[rr_id].ravel(order='F'))
             junk, an_id = source_tree.query(dst_pts, k=3,
@@ -282,13 +282,14 @@ class Extract:
             # Allocate vertical index array
             dst_dep_rv = dst_dep.ravel(order='F')
             z_ind = np.zeros((num_bdy * dst_len_z, 2), dtype=np.int64)
-            source_tree = sp.cKDTree(zip(sc_z.ravel(order='F')))
+            source_tree = sp.cKDTree(zip(sc_z.ravel(order='F')), balanced_tree=False,compact_nodes=False)
             junk, nn_id = source_tree.query(zip(dst_dep_rv), k=1)
 
             # WORKAROUND: the tree query returns out of range val when
             # dst_dep point is NaN, causing ref problems later.
             nn_id[nn_id == sc_z_len] = sc_z_len-1
             sc_z[nn_id]
+            
             # Find next adjacent point in the vertical
             z_ind[:, 0] = nn_id
             z_ind[sc_z[nn_id] > dst_dep_rv[:], 1] = nn_id[sc_z[nn_id] >
