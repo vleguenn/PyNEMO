@@ -12,6 +12,7 @@ import numpy as np
 from netCDF4 import Dataset
 from pynemo import nemo_bdy_grid_angle
 from pynemo.utils.nemo_bdy_lib import rot_rep
+from pynemo.reader.factory import GetFile
 
 import logging
 
@@ -107,7 +108,7 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T, Grid_U, Grid_V, comp):
     dst_lon[dst_lon > 180.0] = dst_lon[dst_lon > 180.0]-360.0
 
     #extract the depths along the U-point open boundary
-    zgr = GetFile(settings['dst_zgr'])#Dataset(settings['dst_zgr'], 'r')
+    zgr = GetFile(setup.settings['dst_zgr'])#Dataset(settings['dst_zgr'], 'r')
     mbathy = zgr['mbathy'][:,:,:].squeeze() #zgr.variables['mbathy'][:,:,:]
 
     #summing over scale factors as zps doesn't have hbat variable
