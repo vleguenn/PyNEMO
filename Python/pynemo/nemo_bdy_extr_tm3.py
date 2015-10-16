@@ -180,8 +180,13 @@ class Extract:
 
         # Find nearest neighbour on the source grid to each dst bdy point
         # Ann Query substitute
-        source_tree = sp.cKDTree(zip(SC.lon.ravel(order='F'),
+        source_tree = None
+        try:
+            source_tree = sp.cKDTree(zip(SC.lon.ravel(order='F'),
                                      SC.lat.ravel(order='F')), balanced_tree=False,compact_nodes=False)
+        except TypeError: #added this fix to make it compatible with scipy 0.16.0
+            source_tree = sp.cKDTree(zip(SC.lon.ravel(order='F'),
+                                     SC.lat.ravel(order='F')))            
         dst_pts = zip(dst_lon[:].ravel(order='F'), dst_lat[:].ravel(order='F'))
         nn_dist, nn_id = source_tree.query(dst_pts, k=1)
 
@@ -243,8 +248,14 @@ class Extract:
             tmp_lon[r_id] = -9999
             tmp_lat = dst_lat.copy()
             tmp_lat[r_id] = -9999
-            source_tree = sp.cKDTree(zip(tmp_lon.ravel(order='F'),
+            source_tree = None
+            try:
+                source_tree = sp.cKDTree(zip(tmp_lon.ravel(order='F'),
                                          tmp_lat.ravel(order='F')), balanced_tree=False,compact_nodes=False)
+            except TypeError: #fix for scipy 0.16.0
+                source_tree = sp.cKDTree(zip(tmp_lon.ravel(order='F'),
+                                         tmp_lat.ravel(order='F')))
+                
             dst_pts = zip(dst_lon[rr_id].ravel(order='F'),
                           dst_lat[rr_id].ravel(order='F'))
             junk, an_id = source_tree.query(dst_pts, k=3,
@@ -282,7 +293,12 @@ class Extract:
             # Allocate vertical index array
             dst_dep_rv = dst_dep.ravel(order='F')
             z_ind = np.zeros((num_bdy * dst_len_z, 2), dtype=np.int64)
-            source_tree = sp.cKDTree(zip(sc_z.ravel(order='F')), balanced_tree=False,compact_nodes=False)
+            source_tree = None
+            try:
+                source_tree = sp.cKDTree(zip(sc_z.ravel(order='F')), balanced_tree=False,compact_nodes=False)
+            except TypeError: #fix for scipy 0.16.0
+                source_tree = sp.cKDTree(zip(sc_z.ravel(order='F')))
+
             junk, nn_id = source_tree.query(zip(dst_dep_rv), k=1)
 
             # WORKAROUND: the tree query returns out of range val when
