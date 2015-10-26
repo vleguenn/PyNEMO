@@ -68,7 +68,10 @@ class Mask(object):
             self.lon = np.asarray(self.bathy_nc.variables['nav_lon'])
             self.lat = np.asarray(self.bathy_nc.variables['nav_lat'])
             self.bathy_data = self.bathy_nc.variables['Bathymetry'][:,:]
-            self.data_units = self.bathy_nc.variables['Bathymetry'].units
+            try: #check if units exists otherwise unknown.
+                self.data_units = self.bathy_nc.variables['Bathymetry'].units
+            except AttributeError:
+                self.data_units = "unknown"
             if self.data is None:
                 self.data = self.bathy_nc.variables['Bathymetry']
                 self.data = np.asarray(self.data[:, :])
