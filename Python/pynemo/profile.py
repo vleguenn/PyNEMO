@@ -373,7 +373,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 interpolate_data(extract_t, year, month, ft)
 
                 output_filename_t = Setup.settings['dst_dir']+Setup.settings['fn']+ \
-                                    '_bdyT_y'+str(year)+'m'+str(month)+'.nc'
+                                    '_bdyT_y'+str(year)+'m'+"%02d" % month+'.nc'
                 logger.info('Outputing T file:%s', output_filename_t)
                 grid_id = 'T'
                 if Setup.settings['ice']:
@@ -505,7 +505,7 @@ def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, 
     interpolate_data(extract_ice, year, month, ft) #interpolate the data to daily period in a month
 
     output_filename_t = Setup.settings['dst_dir']+Setup.settings['fn']+'_bdyT_y'+str(year)+ \
-                        'm'+str(month)+'.nc'
+                        'm'+"%02d" % month+'.nc'
     logger.info('Outputing ICE values to T file:%s', output_filename_t)
     nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'iicethic',
                                       extract_ice.d_bdy['iicethic'][year]['data'])
@@ -533,7 +533,7 @@ def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
     interpolate_data(extract_t, year, month, ft) #interpolate the data to daily period in a month
     output_filename_bt = Setup.settings['dst_dir']+ \
                          Setup.settings['fn']+ \
-                         '_bt_bdyT_y'+str(year)+'m'+str(month)+'.nc'
+                         '_bt_bdyT_y'+str(year)+'m'+"%02d" % month+'.nc'
     logger.info('Outputting bt_T file: %s', output_filename_bt)
     nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_bt, num_bdy['z'],
                                        DstCoord.lonlat['t']['lon'].shape[1],
@@ -567,7 +567,7 @@ def extract_write_u_data(setup_var, source_coord_var, dst_coord_var, grid_u, gri
     tmp_vozocrtx = extract_u.d_bdy['vozocrtx'][year]['data']
     tmp_vozocrtx[nanindex] = setup_var.settings['fv']
     output_filename_u = setup_var.settings['dst_dir'] + setup_var.settings['fn'] + '_bdyU_y' + \
-                        str(year) + 'm' + str(month) + '.nc'
+                        str(year) + 'm' + "%02d" % month + '.nc'
     logger.info('Outputting U file: %s', output_filename_u)
     nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_u, num_bdy['u'],
                                        dst_coord_var.lonlat['u']['lon'].shape[1],
@@ -614,7 +614,7 @@ def extract_write_v_data(setup_var, source_coord_var, dst_coord_var, grid_v, gri
     tmp_vozocrty[nanindex] = setup_var.settings['fv']
 
     output_filename_v = setup_var.settings['dst_dir']+setup_var.settings['fn']+ \
-                        '_bdyV_y'+str(year)+ 'm'+str(month)+'.nc'
+                        '_bdyV_y'+str(year)+ 'm'+"%02d" % month+'.nc'
     logger.info('Outputting V file: %s', output_filename_v)
     nemo_bdy_ncgen.CreateBDYNetcdfFile(output_filename_v, num_bdy['v'],
                                        dst_coord_var.lonlat['v']['lon'].shape[1],
