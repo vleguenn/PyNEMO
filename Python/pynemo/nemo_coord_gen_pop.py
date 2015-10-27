@@ -143,10 +143,10 @@ class Coord:
                 # a Fortran environment
                 # This is commented because data generated doesn't match
                 # with output generated from matlab
-                #data = data + 1
+                data = data + 1
                 
 
-                vardic[ind][dim][:] = data 
+                vardic[ind][dim][:] = data
  
 
 
