@@ -10,6 +10,7 @@ Contents:
    installation
    usage
    ncml_generator_usage
+   examples
    troubleshooting
 
 
