@@ -9,37 +9,62 @@ Example 1: Northwest European Shelf
 Example 2: Lighthouse Reef
 --------------------------
 
+.. figure:: _static/eg2.png 
+   :align:   center
+
+   Regional Mask / SSH after 1 day / SST after 1 day
+   
+
 This example has been tested on the ARCHER HPC facillity.
+
 First, create a working directory into which the NEMO 
 source code can be checked out. Create an inputs directory
 to unpack the forcing tar ball.
+
+.. note:: make sure cray-netcdf-hdf5parallel cray-hdf5-parallel are loaded.
+          This example has been consructed under PrgEnv-intel.
 
 ::
 
    cd $WDIR
    mkdir INPUTS
    cd INPUTS
-   wget INPUTS.tar.gz
-   tar xvfz INPUTS.tar.gz
-   rm INPUTS.tar.gz
+   wget ftp.nerc-liv.ac.uk:/pub/general/jdha/inputs.tar.gz
+   tar xvfz inputs.tar.gz
+   rm inputs.tar.gz
    cd ../
-   svn co http://forge.ipsl.jussieu.fr/nemo/svn/branches/2014/dev_r4621_NOC4_BDY_VERT_INTERP
+   svn co http://forge.ipsl.jussieu.fr/nemo/svn/branches/2014/dev_r4621_NOC4_BDY_VERT_INTERP@5709
+   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-1.0@629
+   cd xios-1.0
+   cp $WDIR/INPUTS/arch-XC30_ARCHER.* ./arch
+   ./make_xios --full --prod --arch XC30_ARCHER --netcdf_lib netcdf4_par
 
+Next we setup our experiment directory and drop an updated 
+dtatsd.F90 into MY_SRC to allow the vertical interpolation 
+of initial conditions on to the new verictal coordinates. 
+We also apply several patches for bugs in the code. 
 
-Next we setup our experiment directory (we are only using 
-OPA_SRC) and drop an updated dtatsd.F90 into MY_SRC to 
-allow the vertical interpolation of initial conditions on 
-to the new verictal coordinates. We also apply a patch to 
-fldread.F90 for missing variables.
+.. note:: when executing ./makenemo for the first time only choose OPA_SRC.
+          *** For some reason even though LIM_2 is not chosen key_lim2 is
+          in the cpp keys. This means the first call to ./makenemo will fail.
+          Just vi LH_REEF/cpp_LH_REEF.fcm and remove key_lim2 and re-issue
+          the make command.
 
 ::
 
    export CDIR=$WDIR/dev_r4621_NOC4_BDY_VERT_INTERP/NEMOGCM/CONFIG
    export TDIR=$WDIR/dev_r4621_NOC4_BDY_VERT_INTERP/NEMOGCM/TOOLS
    cd $CDIR/../NEMO/OPA_SRC/SBC
-   patch -b < $WDIR/fldread.patch
+   patch -b < $WDIR/INPUTS/fldread.patch
+   cd ../DOM 
+   patch -b < $WDIR/INPUTS/dommsk.patch
+   cd ../BDY
+   patch -b < $WDIR/INPUTS/bdyini.patch
    cd $CDIR
-   ./makenemo -n LH_REEF -m XC_ARCHER_INTEL
+   rm $CDIR/../NEMO/OPA_SRC/TRD/trdmod.F90
+   cp $WDIR/INPUTS/arch-* ../ARCH
+   ./makenemo -n LH_REEF -m XC_ARCHER_INTEL -j 10
+   cp $WDIR/INPUTS/cpp_LH_REEF.fcm ./LH_REEF
    cp $WDIR/INPUTS/dtatsd.F90 LH_REEF/MY_SRC/ 
 
 To generate bathymetry, initial conditions and grid information
@@ -56,7 +81,6 @@ reason GRIDGEN doesn't like INTEL:
    patch -b < $WDIR/INPUTS/scripshape.patch
    patch -b < $WDIR/INPUTS/scripgrid.patch
    cd ../../
-   cp $WDIR/INPUTS/arch-* ../ARCH
    ./maketools -n WEIGHTS -m XC_ARCHER_INTEL
    ./maketools -n REBUILD_NEMO -m XC_ARCHER_INTEL
    module unload cray-netcdf-hdf5parallel cray-hdf5-parallel
@@ -78,9 +102,6 @@ existing global 1/12 mesh and refine to 1/84 degree resolution:
    ln -s namelist_R12 namelist.input
    ./create_coordinates.exe 
    cp 1_coordinates_ORCA_R12.nc $WDIR/INPUTS/coordinates.nc
-   module swap PrgEnv-cray PrgEnv-intel
-   module unload cray-netcdf cray-hdf5
-   module load cray-netcdf-hdf5parallel cray-hdf5-parallel
 
 To create the bathymetry we use the gebco dataset. On ARCHER I
 had to use a non-default nco module for netcdf operations to work.
@@ -91,9 +112,11 @@ for some unknown reason.
 
    cd $WDIR/INPUTS
    module load nco/4.5.0
-   ncap2 -s 'where(topo > 0) topo=0' gebco_1_cd_v2.nc tmp.nc
+   ncap2 -s 'where(topo > 0) topo=0' gebco_1_cutdown.nc tmp.nc
    ncflint --fix_rec_crd -w -1.0,0.0 tmp.nc tmp.nc gebco_in.nc
    rm tmp.nc
+   module unload nco cray-netcdf cray-hdf5
+   module load cray-netcdf-hdf5parallel cray-hdf5-parallel
    $TDIR/WEIGHTS/scripgrid.exe namelist_reshape_bilin_gebco
    $TDIR/WEIGHTS/scrip.exe namelist_reshape_bilin_gebco
    $TDIR/WEIGHTS/scripinterp.exe namelist_reshape_bilin_gebco
@@ -128,6 +151,8 @@ Finally we setup weights files for the atmospheric forcing:
    $TDIR/WEIGHTS/scripgrid.exe namelist_reshape_bilin_atmos
    $TDIR/WEIGHTS/scrip.exe namelist_reshape_bilin_atmos
    $TDIR/WEIGHTS/scripshape.exe namelist_reshape_bilin_atmos
+   $TDIR/WEIGHTS/scrip.exe namelist_reshape_bicubic_atmos
+   $TDIR/WEIGHTS/scripshape.exe namelist_reshape_bicubic_atmos
 
 
 Next step is to create the mesh and mask files that will be used 
@@ -140,14 +165,13 @@ in the generation of the open boundary conditions:
    ln -s $WDIR/INPUTS/bathy_meter.nc $CDIR/LH_REEF/EXP00/bathy_meter.nc 
    ln -s $WDIR/INPUTS/coordinates.nc $CDIR/LH_REEF/EXP00/coordinates.nc 
    cp $WDIR/INPUTS/runscript $CDIR/LH_REEF/EXP00
-   cp $WDIR/INPUTS/namelist_cfg $CDIR/LH_REEF/namelist_cfg
-   cp $WDIR/INPUTS/namelist_ref $CDIR/LH_REEF/namelist_ref
-   ./makenemo -n LH_REEF -m XC_ARCHER_INTEL
+   cp $WDIR/INPUTS/namelist_cfg $CDIR/LH_REEF/EXP00/namelist_cfg
+   cp $WDIR/INPUTS/namelist_ref $CDIR/LH_REEF/EXP00/namelist_ref
+   ./makenemo -n LH_REEF -m XC_ARCHER_INTEL -j 10
    cd LH_REEF/EXP00
-   ln -s /work/n01/n01/jdha/ST/xios-1.0/bin/xios_server.exe xios_server.exe
+   ln -s $WDIR/xios-1.0/bin/xios_server.exe xios_server.exe
    qsub -q short runscript
 
-.. note:: there is an assumption that XIOS is already installed
 
 If that works, we then need to rebuild the mesh and mask files in 
 to single files for the next step:
@@ -158,8 +182,8 @@ to single files for the next step:
    $TDIR/REBUILD_NEMO/rebuild_nemo -t 24 mesh_hgr 96
    $TDIR/REBUILD_NEMO/rebuild_nemo -t 24 mask 96
    mv mesh_zgr.nc mesh_hgr.nc mask.nc $WDIR/INPUTS
-   cd !$
-   rm mesh_* mask_*
+   rm mesh_* mask_* LH_REEF_0000*
+   cd $WDIR/INPUTS
 
 Now we're ready to generate the boundary conditions using pyNEMO. 
 If this is not installed follow the `installation guide` or a quick
@@ -168,36 +192,65 @@ setup could be as follows:
 :: 
 
    cd ~
-   conda create --name pynemo python scipy numpy matplotlib basemap netcdf4   
-   soure activate pynemo
+   module load anaconda
+   conda create --name pynemo_env python scipy numpy matplotlib basemap netcdf4   
+   source activate pynemo_env
    conda install -c https://conda.anaconda.org/srikanthnagella seawater
    conda install -c https://conda.anaconda.org/srikanthnagella thredds_crawler
    conda install -c https://conda.anaconda.org/srikanthnagella pyjnius
    export LD_LIBRARY_PATH=/opt/java/jdk1.7.0_45/jre/lib/amd64/server:$LD_LIBRARY_PATH
-   export PYTHONPATH=/home/n01/n01/jdha/.conda/envs/pynemo/lib/python2.7:$PYTHONPATH
-   export PYTHONPATH=/home/n01/n01/jdha/.conda/envs/pynemo/lib/python2.7/site-packages/:$PYTHONPATH
-   export PYTHONPATH=/home/n01/n01/jdha/.conda/envs/pynemo/lib/python2.7/site-packages/lib/python2.7/site-packages/:$PYTHONPATH
-   export PATH=/home/n01/n01/jdha/.conda/envs/pynemo/lib/python2.7/site-packages/bin/:$PATH
    svn checkout http://ccpforge.cse.rl.ac.uk/svn/pynemo
    cd pynemo/trunk/Python
    python setup.py build
-   python setup.py install --prefix /home/n01/n01/jdha/.conda/envs/pynemo/lib/python2.7/site-packages/
+   python setup.py install --prefix ~/.conda/envs/pynemo
    cd $WDIR/INPUTS
 
 Start up pynemo and generate boundary conditions. First we need to
 create a few ncml files to gather input data and map variable names.
 Then using pynemo we define the area we want to model:
 
+.. note:: pynemo may have to be run on either espp1 or espp2 (e.g. ssh -Y espp1) 
+          as the JVM doesn't have sufficient memory on the login nodes.
+
 ::
 
+   ssh -Y espp1
+   module load anaconda
+   source activate pynemo_env
+   cd $WDIR/INPUTS 
    pynemo_ncml_generator   
+
+*** The ncml files already exist in the INPUTS directory. There is no need
+generate them. It's a little tricky at the momment as the ncml generator
+doesn't have all the functionality required for this example. Next step
+is to fire up pynemo. You can change the mask or accept the default by just
+hitting the close button (that really should say 'build' or 'go' or such like).
+Also I've had to a the conda env path to the $PYTHONPATH as python does
+seem to be able to pick up pyjnius!?
+
+::
+
+   export LD_LIBRARY_PATH=/opt/java/jdk1.7.0_45/jre/lib/amd64/server:$LD_LIBRARY_PATH
+   export PYTHONPATH=~/.conda/envs/pynemo_env/lib/python2.7/site-packages:$PYTHONPATH
    pynemo -g -s namelist.bdy
 
-Let's have a go at running the model:
+Let's have a go at running the model after exiting espp1 (after a few variable
+renamings, due to inconsistencies to be ironed out):
 
 ::
-
+ 
+   exit
+   cd $WDIR/INPUTS
+   module unload cray-netcdf-hdf5parallel cray-hdf5-parallel
+   module load nco/4.5.0
+   ncrename -v deptht,gdept LH_REEF_bdyT_y1980m01.nc
+   ncrename -v depthu,gdepu LH_REEF_bdyU_y1980m01.nc
+   ncrename -v depthv,gdepv LH_REEF_bdyV_y1980m01.nc
+   module unload nco
+   module load cray-netcdf-hdf5parallel cray-hdf5-parallel
    cd $CDIR/LH_REEF/EXP00
+   ln -s $WDIR/INPUTS/coordinates.bdy.nc $CDIR/LH_REEF/EXP00/coordinates.bdy.nc 
    sed -e 's/nn_msh      =    3/nn_msh      =    0/' namelist_cfg > tmp
-   sed -e 's/nn_itend    =       1 /nn_itend    =       120 /' tmp > namelist_cfg
+   sed -e 's/nn_itend    =      1/nn_itend    =       1440 /' tmp > namelist_cfg
+   cp $WDIR/INPUTS/*.xml ./
    qsub -q short runscript
