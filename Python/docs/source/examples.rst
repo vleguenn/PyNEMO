@@ -167,6 +167,7 @@ in the generation of the open boundary conditions:
    cp $WDIR/INPUTS/runscript $CDIR/LH_REEF/EXP00
    cp $WDIR/INPUTS/namelist_cfg $CDIR/LH_REEF/EXP00/namelist_cfg
    cp $WDIR/INPUTS/namelist_ref $CDIR/LH_REEF/EXP00/namelist_ref
+   ./makenemo clean
    ./makenemo -n LH_REEF -m XC_ARCHER_INTEL -j 10
    cd LH_REEF/EXP00
    ln -s $WDIR/xios-1.0/bin/xios_server.exe xios_server.exe
