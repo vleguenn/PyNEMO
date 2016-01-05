@@ -1,13 +1,100 @@
 Examples
 ========
-Here we provide two worked examples using pyNEMO. The first is a setup of the Northwest European Shelf using both local
-and remote dataset. The second is an end-to-end setup of a small regional model in the tropics.
+Here we provide two worked examples using pyNEMO. The first is a setup of the Northwest European Shelf using
+a remote dataset. The second is an end-to-end setup of a small regional model in the tropics.
 
 Example 1: Northwest European Shelf
------------------------------------
+===================================
+
+
+.. figure:: _static/eg1.png 
+   :align:   center
+
+   Northwest European Shelf Bathymetry
+   
+
+This example has been tested on the ARCHER HPC facillity.
+
+First, create a working directory into which the code can
+run. All the data required for this example are held on a
+THREDDS server so no addtional data are required.
+
+.. note:: make sure cray-netcdf-hdf5parallel cray-hdf5-parallel are loaded.
+          This example has been consructed under PrgEnv-intel.
+
+::
+
+   cd $WDIR
+   mkdir OUTPUT
+
+Now we're ready to generate the boundary conditions using pyNEMO. 
+If this is not installed follow the `installation guide` or a quick
+setup could be as follows:
+
+:: 
+
+   cd ~
+   module load anaconda
+   conda create --name pynemo_env python scipy numpy matplotlib basemap netcdf4   
+   source activate pynemo_env
+   conda install -c https://conda.anaconda.org/srikanthnagella seawater
+   conda install -c https://conda.anaconda.org/srikanthnagella thredds_crawler
+   conda install -c https://conda.anaconda.org/srikanthnagella pyjnius
+   export LD_LIBRARY_PATH=/opt/java/jdk1.7.0_45/jre/lib/amd64/server:$LD_LIBRARY_PATH
+   svn checkout http://ccpforge.cse.rl.ac.uk/svn/pynemo
+   cd pynemo/trunk/Python
+   python setup.py build
+   python setup.py install --prefix ~/.conda/envs/pynemo
+   cp data/namelist.bdy $WDIR
+   cd $WDIR
+
+Next we need to modify the namelist.bdy file to point it to the correct
+data sources. First we need to create an ncml file to gather input data 
+and map variable names. First we update *sn_src_dir*, *sn_dst_dir* and
+*cn_mask_file* to reflect the working path (e.g. sn_src_dir = '$WDIR/test.ncml', 
+sn_dst_dir = '$WDIR/OUTPUT' and cn_mask_file = '$WDIR/mask.nc'). 
+Explicitly write out $WDIR. Next we need to generate test.ncml.
+
+.. note:: pynemo may have to be run on either espp1 or espp2 (e.g. ssh -Y espp1) 
+          as the JVM doesn't have sufficient memory on the login nodes.
+
+::
+
+   ssh -Y espp1
+   module load anaconda
+   source activate pynemo_env
+   cd $WDIR 
+   pynemo_ncml_generator   
+
+For each of the tracer and dynamics variables enter the following URL as
+the source directory:
+
+http://esurgeod.noc.soton.ac.uk:8080/thredds/dodsC/PyNEMO/data
+
+Add a regular expression for each (Temperature, Salinity and Sea Surface 
+Height each use: .\*T\\.nc$ and the velocities use .\*V\\.nc$ and .\*V\\.nc$)
+After each entry click the Add button. Finally fill in the output file 
+including directory path (this should match *sn_src_dir*). Once this is complete
+click on the generate button and an ncml file should be written to $WDIR.
+
+Then using pynemo we define the area we want to model and generate some 
+boundary conditions:
+
+.. note:: I've had to add the conda env path to the $PYTHONPATH as python does
+          seem to be able to pick up pyjnius!?
+
+::
+
+   export LD_LIBRARY_PATH=/opt/java/jdk1.7.0_45/jre/lib/amd64/server:$LD_LIBRARY_PATH
+   export PYTHONPATH=~/.conda/envs/pynemo_env/lib/python2.7/site-packages:$PYTHONPATH
+   pynemo -g -s namelist.bdy
+ 
+Once the area of interest is selected and the close button is clicked,
+open boundary data should be generated in $WDIR/OUTPUT.
+
 
 Example 2: Lighthouse Reef
---------------------------
+==========================
 
 .. figure:: _static/eg2.png 
    :align:   center
@@ -45,7 +132,7 @@ of initial conditions on to the new verictal coordinates.
 We also apply several patches for bugs in the code. 
 
 .. note:: when executing ./makenemo for the first time only choose OPA_SRC.
-          *** For some reason even though LIM_2 is not chosen key_lim2 is
+          For some reason even though LIM_2 is not chosen key_lim2 is
           in the cpp keys. This means the first call to ./makenemo will fail.
           Just vi LH_REEF/cpp_LH_REEF.fcm and remove key_lim2 and re-issue
           the make command.
@@ -221,13 +308,13 @@ Then using pynemo we define the area we want to model:
    cd $WDIR/INPUTS 
    pynemo_ncml_generator   
 
-*** The ncml files already exist in the INPUTS directory. There is no need
-generate them. It's a little tricky at the momment as the ncml generator
-doesn't have all the functionality required for this example. Next step
-is to fire up pynemo. You can change the mask or accept the default by just
-hitting the close button (that really should say 'build' or 'go' or such like).
-Also I've had to a the conda env path to the $PYTHONPATH as python does
-seem to be able to pick up pyjnius!?
+.. note:: The ncml files already exist in the INPUTS directory. There is no need
+          generate them. It's a little tricky at the momment as the ncml generator
+          doesn't have all the functionality required for this example. Next step
+          is to fire up pynemo. You can change the mask or accept the default by just
+          hitting the close button (that really should say 'build' or 'go' or such like).
+          Also I've had to add the conda env path to the $PYTHONPATH as python does
+          seem to be able to pick up pyjnius!?
 
 ::
 

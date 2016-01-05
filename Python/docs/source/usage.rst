@@ -5,12 +5,15 @@ There are two tools available in pyNEMO. They are described in detail below.
 pynemo
 ------
 
-This command line tool takes in a bdy file and performs the extraction of boundary data and prepares the data for NEMO simulation.
-bdy file is a plain text file containing key value pairs. Please look at the sample `namelist.bdy 
+This command line tool reads a BDY file, extracts boundary data and prepares
+the data for a NEMO simulation. The bdy file is a plain text file containing 
+key value pairs. Please look at the sample `namelist.bdy 
 <http://ccpforge.cse.rl.ac.uk/gf/project/pynemo/scmsvn/?action=browse&path=%2Ftrunk%2FPython%2Fdata%2Fnamelist.bdy&view=markup>`_ 
 file, which shares common syntax with the NEMO simulation namelist input file. 
 
-.. note:: Directory paths in bdy file can be relative or absolute. Application picks the relative path from the current working directory.
+.. note:: Directory paths in bdy file can be relative or absolute. 
+          The application picks the relative path from the current working 
+          directory.
 
 Syntax for pynemo command is
 
