@@ -35,9 +35,9 @@ setup could be as follows:
 
    cd ~
    module load anaconda
-   conda create --name pynemo_env python scipy numpy matplotlib basemap netcdf4   
+   conda create --name pynemo_env scipy=0.16.0 numpy matplotlib=1.5.1 basemap netcdf4 libgfortran=1.0.0
    source activate pynemo_env
-   conda install -c https://conda.anaconda.org/srikanthnagella seawater
+   conda install -c conda-forge seawater=3.3.4
    conda install -c https://conda.anaconda.org/srikanthnagella thredds_crawler
    conda install -c https://conda.anaconda.org/srikanthnagella pyjnius
    export LD_LIBRARY_PATH=/opt/java/jdk1.7.0_45/jre/lib/amd64/server:$LD_LIBRARY_PATH
