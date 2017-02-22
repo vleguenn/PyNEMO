@@ -13,14 +13,21 @@ Example 1: Northwest European Shelf
    Northwest European Shelf Bathymetry
    
 
-This example has been tested on the ARCHER HPC facillity.
+This example has been tested on the ARCHER HPC facillity *(22 Feb 2017)*.
 
 First, create a working directory into which the code can
 run. All the data required for this example are held on a
 THREDDS server so no addtional data are required.
 
 .. note:: make sure cray-netcdf-hdf5parallel cray-hdf5-parallel are loaded.
-          This example has been consructed under PrgEnv-intel.
+          This example has been consructed under PrgEnv-intel. e.g.
+
+::
+   module swap PrgEnv-cray PrgEnv-intel
+   module load cray-netcdf-hdf5parallel
+   module load cray-hdf5-parallel``
+
+.. note:: Be careful to avoid symbolic links in NEMO control files.
 
 ::
 
@@ -41,9 +48,10 @@ setup could be as follows:
    conda install -c https://conda.anaconda.org/srikanthnagella thredds_crawler
    conda install -c https://conda.anaconda.org/srikanthnagella pyjnius
    export LD_LIBRARY_PATH=/opt/java/jdk1.7.0_45/jre/lib/amd64/server:$LD_LIBRARY_PATH
-   svn checkout http://ccpforge.cse.rl.ac.uk/svn/pynemo
+   svn checkout https://ccpforge.cse.rl.ac.uk/svn/pynemo
    cd pynemo/trunk/Python
    python setup.py build
+   export PYTHONPATH=~/.conda/envs/pynemo/lib/python2.7/site-packages/:$PYTHONPATH
    python setup.py install --prefix ~/.conda/envs/pynemo
    cp data/namelist.bdy $WDIR
    cd $WDIR
@@ -287,9 +295,10 @@ setup could be as follows:
    conda install -c https://conda.anaconda.org/srikanthnagella thredds_crawler
    conda install -c https://conda.anaconda.org/srikanthnagella pyjnius
    export LD_LIBRARY_PATH=/opt/java/jdk1.7.0_45/jre/lib/amd64/server:$LD_LIBRARY_PATH
-   svn checkout http://ccpforge.cse.rl.ac.uk/svn/pynemo
+   svn checkout https://ccpforge.cse.rl.ac.uk/svn/pynemo
    cd pynemo/trunk/Python
    python setup.py build
+   export PYTHONPATH=~/.conda/envs/pynemo/lib/python2.7/site-packages/:$PYTHONPATH
    python setup.py install --prefix ~/.conda/envs/pynemo
    cd $WDIR/INPUTS
 
