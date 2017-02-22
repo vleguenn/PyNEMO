@@ -23,9 +23,10 @@ THREDDS server so no addtional data are required.
           This example has been consructed under PrgEnv-intel. e.g.
 
 ::
+
    module swap PrgEnv-cray PrgEnv-intel
    module load cray-netcdf-hdf5parallel
-   module load cray-hdf5-parallel``
+   module load cray-hdf5-parallel
 
 .. note:: Be careful to avoid symbolic links in NEMO control files.
 
