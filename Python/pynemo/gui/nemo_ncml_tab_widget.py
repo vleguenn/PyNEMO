@@ -78,13 +78,9 @@ class Ncml_tab(QtGui.QWidget):
             self.varStackedWidget.addWidget(self._addStackWidget("e3u"))
             self.varStackedWidget.addWidget(self._addStackWidget("e3v"))
 #            print 'Grid has ' + str(self.varStackedWidget.count())
-        self.varStackedWidget.setCurrentIndex(0)  #we rely on the stacked tab index to be the same as the combo box 
-        '''
-        these two tabs are disabled
         elif(self.var == "Ecosysem"):
             vars = ['nitrate','silicate'] #nitrate, silicate
-        elif(self.var == "Grid"):
-        '''
+        self.varStackedWidget.setCurrentIndex(0)  #we rely on the stacked tab index to be the same as the combo box 
         #combo box     
         self.var_combo = QtGui.QComboBox()
         self.var_combo.addItems(combo_vars)
@@ -347,7 +343,7 @@ class Ncml_tab(QtGui.QWidget):
                         self.isnowthi.subdirs = self.varStackedWidget.currentWidget().cbox.isChecked()
                         self.isnowthi.old_name = self.varStackedWidget.currentWidget().old_name_tedit.text()
                         if(self.varStackedWidget.currentWidget().regex_tedit.text() is not None or self.varStackedWidget.currentWidget().regex_tedit.text() != ''):
-                            self.isnowthi.regex = self.varStackedWidget.currentWidget().regex_tedit.text()                #Dynamics ['zonal velocity', 'meridian velocity', 'sea surface height'] #vozocrtx, vomecrty, sossheig
+                            self.isnowthi.regex = self.varStackedWidget.currentWidget().regex_tedit.text()
                         else:
                             self.isnowthi.regex = ''
                 if self.iicethic.src == '':
@@ -357,7 +353,7 @@ class Ncml_tab(QtGui.QWidget):
                     self.ileadfra.src = self._convertSrc(self.varStackedWidget.currentWidget().src_tedit.text())
                     self.varStackedWidget.widget(1).src_tedit.setText(self.varStackedWidget.currentWidget().src_tedit.text())
                 if self.isnowthi.src == '':
-                    self.isnowthic.src = self._convertSrc(self.varStackedWidget.currentWidget().src_tedit.text())
+                    self.isnowthi.src = self._convertSrc(self.varStackedWidget.currentWidget().src_tedit.text())
                     self.varStackedWidget.widget(2).src_tedit.setText(self.varStackedWidget.currentWidget().src_tedit.text())
             elif(self.var == unicode("Dynamics").encode('utf-8')):
                 if (self.var_combo.currentText() == unicode("zonal velocity").encode('utf-8')):            

@@ -40,7 +40,7 @@ class Ncml_generator(QtGui.QDialog):
         QtGui.QToolTip.setFont(QtGui.QFont('SansSerif', 11))
         '''
         vbox is the top container
-        ''' 
+        '''
         #the 
         vbox = QtGui.QVBoxLayout(self)
         vbox.setSpacing(10)
@@ -60,7 +60,7 @@ class Ncml_generator(QtGui.QDialog):
         top_grpBox = QtGui.QGroupBox(unicode('Define output file').encode('utf-8'), None)
         top_grid = QtGui.QGridLayout(top_grpBox)
         top_grid.setVerticalSpacing(5)
-        top_grid.setHorizontalSpacing(10)        
+        top_grid.setHorizontalSpacing(10)
         top_grid.addWidget(top_outfile_label, 1, 0)
         top_grid.addWidget(self.top_outfile_name, 1, 1)
         top_grid.addWidget(top_outfile_button, 1,2, QtCore.Qt.AlignRight)
@@ -70,36 +70,45 @@ class Ncml_generator(QtGui.QDialog):
         '''
         self.tabWidget = QtGui.QTabWidget()
         self.tracer_tab = nemo_ncml_tab_widget.Ncml_tab(unicode("Tracer").encode('utf-8'))
+        self.tracer_tab.setEnabled(False)
         self.dynamic_tab = nemo_ncml_tab_widget.Ncml_tab(unicode("Dynamics").encode('utf-8'))
+        self.dynamic_tab.setEnabled(False)
         self.ice_tab = nemo_ncml_tab_widget.Ncml_tab(unicode("Ice").encode('utf-8'))
+        self.ice_tab.setEnabled(False)
         self.ecosys_tab = nemo_ncml_tab_widget.Ncml_tab(unicode("Ecosystem").encode('utf-8'))
         self.ecosys_tab.setEnabled(False)
         self.grid_tab = nemo_ncml_tab_widget.Ncml_tab(unicode("Grid").encode('utf-8'))
-        #self.grid_tab.setEnabled(False);
+        self.grid_tab.setEnabled(False)
                 
-        self.tabWidget.addTab(self.tracer_tab, unicode("Tracer").encode('utf-8'))        
+        self.tabWidget.addTab(self.tracer_tab, unicode("Tracer").encode('utf-8'))
         self.tabWidget.addTab(self.dynamic_tab, unicode("Dynamics").encode('utf-8'))
         self.tabWidget.addTab(self.ice_tab, unicode("Ice").encode('utf-8'))
         self.tabWidget.addTab(self.ecosys_tab, unicode("Ecosystem").encode('utf-8')) # should be disabled
         self.tabWidget.addTab(self.grid_tab, unicode("Grid").encode('utf-8')) # should be disabled
         self.tabWidget.setMovable(False)
         
+#       self.connect(self.tabWidget, SIGNAL('currentChanged(int)'),self.enable_btn_update)
+        self.tabWidget.currentChanged.connect(lambda: self.enable_btn_update(enable_btn))
         '''
         button bar
-        '''        
+        '''
         go_btn = QtGui.QPushButton(unicode('Generate').encode('utf-8'))
         go_btn.setToolTip(unicode('Add all variable definitions before generating NcML file.').encode('utf-8'))
-        cancel_btn = QtGui.QPushButton(unicode('Cancel').encode('utf-8'))  
+        cancel_btn = QtGui.QPushButton(unicode('Cancel').encode('utf-8'))
+        enable_btn = QtGui.QPushButton(unicode('Enable Tab').encode('utf-8'))
         #layout button bar        
         btn_hBox = QtGui.QHBoxLayout(None)
         btn_hBox.setMargin(5)
         btn_hBox.setSpacing(10)
         btn_hBox.setAlignment(QtCore.Qt.AlignRight)
+        btn_hBox.addWidget(enable_btn)
         btn_hBox.addWidget(cancel_btn)
         btn_hBox.addWidget(go_btn)
         
         go_btn.clicked.connect(self.generate)
         cancel_btn.clicked.connect(self.close)
+        enable_btn.clicked.connect(lambda: self.enable_tab(enable_btn))
+#       enable_btn.clicked.connect(self.enable_tab)
         
         '''
         Assemble the top layout container
@@ -109,7 +118,7 @@ class Ncml_generator(QtGui.QDialog):
         vbox.addLayout(btn_hBox)
         
         #self.setLayout(grp_box)        
-        self.setWindowIcon(QtGui.QIcon('nemo_icon.png'))    #doesn't work       
+        self.setWindowIcon(QtGui.QIcon('/Users/jdha/anaconda/lib/python2.7/site-packages/pynemo-0.2-py2.7.egg/pynemo/gui/nemo_icon.png'))    #doesn't work       
         self.setWindowTitle(unicode("PyNEMO NcML Generator").encode('utf-8'))
         self.resize(650,300)
         
@@ -121,7 +130,7 @@ class Ncml_generator(QtGui.QDialog):
     
     '''
     file picker call back for output file input field
-    '''       
+    '''
     @pyqtSlot()
     def get_fname(self):
         # When you call getOpenFileName, a file picker dialog is created
@@ -142,7 +151,30 @@ class Ncml_generator(QtGui.QDialog):
     '''
     call back to handle the generate button pressed
     '''
-    @pyqtSlot()    
+    @pyqtSlot()
+    def enable_btn_update(self, enable_btn):
+        if self.tabWidget.widget(self.tabWidget.currentIndex()).isEnabled() is True:
+            enable_btn.setText(unicode('Disable Tab').encode('utf-8'))
+        else:
+            enable_btn.setText(unicode('Enable Tab').encode('utf-8'))
+    '''
+    call back to handle the generate button pressed
+    '''
+    @pyqtSlot()
+    def enable_tab(self,enable_btn):
+#   def enable_tab(self):
+        #validate output file
+        if self.tabWidget.widget(self.tabWidget.currentIndex()).isEnabled() is True:
+            self.tabWidget.widget(self.tabWidget.currentIndex()).setEnabled(False)
+            enable_btn.setText(unicode('Enable Tab').encode('utf-8'))
+        else:
+            self.tabWidget.widget(self.tabWidget.currentIndex()).setEnabled(True)
+            enable_btn.setText(unicode('Disable Tab').encode('utf-8'))
+
+    '''
+    call back to handle the generate button pressed
+    '''
+    @pyqtSlot()
     def generate(self):
         #validate output file
         if self.filename is None or self.filename == "":
@@ -180,10 +212,10 @@ class Ncml_generator(QtGui.QDialog):
                 try:
                     self.generateNcML(tabsList) #go ahead and do it
                 except:
-                    raise                
-                     
+                    raise
+
                 QtGui.QMessageBox.information(self, unicode('Success.').encode('utf-8'), unicode('NcML file generated.').encode('utf-8'), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
-                
+
         else:
             QtGui.QMessageBox.information(self, unicode('Something is wrong').encode('utf-8'), unicode('Not all the variables have been defined!').encode('utf-8'), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
                
@@ -191,11 +223,11 @@ class Ncml_generator(QtGui.QDialog):
         
     '''
     Function to generates the NcML text and write it to the user defined output file
-    '''        
+    '''
     def generateNcML(self, tabsList):
         #first open the default base file
         ns = '{http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2}'
-        self.tree = self._parseNcml()        
+        self.tree = self._parseNcml()
         self.root = self.tree.getroot()
         #create a netcdf element for each tab variable
         for tab in tabsList:
@@ -211,15 +243,15 @@ class Ncml_generator(QtGui.QDialog):
             else:
                 scanE = ET.Element(ns+unicode('scan').encode('utf-8'), location=unicode(str(tab.src)).encode('utf-8'), regExp=unicode(str(tab.regex)).encode('utf-8'))
                 if tab.subdirs == True:
-                    scanE.set(unicode('subdirs').encode('utf-8'), unicode('true').encode('utf-8'))         
+                    scanE.set(unicode('subdirs').encode('utf-8'), unicode('true').encode('utf-8'))
                 aggE = ET.Element(ns+unicode('aggregation').encode('utf-8'), name=unicode(str(tab.name)).encode('utf-8'), type=unicode('joinExisting').encode('utf-8'), dimName=unicode('time_counter').encode('utf-8')) #tab.name already encoded
                 aggE.append(scanE)
                 netcdfE.append(aggE)
             self.root[0].append(netcdfE)    #add the new netcdf element to the top aggregation 
             
-            #deal with variable name change
-            if tab.old_name is not None and tab.old_name != "":    
-                vname = unicode('variable').encode('utf-8')   
+            #deal with variable name change TODO put this into a loop?
+            if tab.old_name is not None and tab.old_name != "":
+                vname = unicode('variable').encode('utf-8')
                 #v is None          
                 if tab.name == unicode('temperature').encode('utf-8') and tab.old_name != unicode('votemper').encode('utf-8'):
                     v = ET.Element(ns+vname, name='votemper', orgName = str(tab.old_name))
@@ -309,6 +341,11 @@ class Ncml_generator(QtGui.QDialog):
         list of urls that match the expression 
     """
     def url_trawler(self, url, expr):
-        c = Crawl(url, select=[expr])
+        if url.endswith(".xml"):
+            c = Crawl(url, select=[expr])
+        elif url.endswith("/"): # we'll try and add catalog.xml as the user may have just provided a directory
+            c = Crawl(url+"catalog.xml", select=[expr])
+        else:                   # we'll try and add catalog.xml as the user may have just provided a directory
+            c = Crawl(url+"/catalog.xml", select=[expr])
         urls = [s.get("url") for d in c.datasets for s in d.services if s.get("service").lower()=="opendap"]
         return urls
