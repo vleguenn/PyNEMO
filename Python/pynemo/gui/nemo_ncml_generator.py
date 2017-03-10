@@ -86,6 +86,7 @@ class Ncml_generator(QtGui.QDialog):
         self.tabWidget.addTab(self.ecosys_tab, unicode("Ecosystem").encode('utf-8')) # should be disabled
         self.tabWidget.addTab(self.grid_tab, unicode("Grid").encode('utf-8')) # should be disabled
         self.tabWidget.setMovable(False)
+#        if self.tabWidget.widget(self.tabWidget.currentIndex()).isEnabled() is True:
         
 #       self.connect(self.tabWidget, SIGNAL('currentChanged(int)'),self.enable_btn_update)
         self.tabWidget.currentChanged.connect(lambda: self.enable_btn_update(enable_btn))
@@ -192,35 +193,51 @@ class Ncml_generator(QtGui.QDialog):
             
                 
         #validate if all the variables are defined, use the mandatory src field as a proxy
-        if self.tracer_tab.votemper.src != "" and \
-            self.tracer_tab.vosaline.src != "" and \
-            self.ice_tab.iicethic.src != "" and \
-            self.ice_tab.ileadfra.src != "" and \
-            self.ice_tab.isnowthi.src != "" and \
-            self.dynamic_tab.vozocrtx.src != "" and \
-            self.dynamic_tab.vomecrty.src != "" and \
-            self.dynamic_tab.sossheig.src != "" and \
-            self.grid_tab.gdept.src != "" and \
-            self.grid_tab.gdepw.src != "" and \
-            self.grid_tab.mbathy.src != "" and \
-            self.grid_tab.e3t.src != "" and \
-            self.grid_tab.e3u.src != "" and \
-            self.grid_tab.e3v.src != "" :
-                tabsList = [self.tracer_tab.votemper, self.tracer_tab.vosaline, self.ice_tab.iicethic, self.ice_tab.ileadfra, self.ice_tab.isnowthi, \
-                            self.dynamic_tab.vozocrtx, self.dynamic_tab.vomecrty, self.dynamic_tab.sossheig, self.grid_tab.gdept, \
-                            self.grid_tab.gdepw, self.grid_tab.mbathy, self.grid_tab.e3t, self.grid_tab.e3u, self.grid_tab.e3v ]
-                try:
-                    self.generateNcML(tabsList) #go ahead and do it
-                except:
-                    raise
+        # also need to check that the tab is active
 
-                QtGui.QMessageBox.information(self, unicode('Success.').encode('utf-8'), unicode('NcML file generated.').encode('utf-8'), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+        tabsList = []
+        if self.tracer_tab.isEnabled() is True:
+            if self.tracer_tab.votemper.src != ""  and \
+               self.tracer_tab.vosaline.src != "" :
+                tabsList.extend([self.tracer_tab.votemper, self.tracer_tab.vosaline])
+            else:
+                QtGui.QMessageBox.information(self, unicode('Something is wrong').encode('utf-8'), unicode('Not all the variables under the tracer tab have been defined!').encode('utf-8'), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
 
-        else:
-            QtGui.QMessageBox.information(self, unicode('Something is wrong').encode('utf-8'), unicode('Not all the variables have been defined!').encode('utf-8'), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
-               
-        
-        
+
+        if self.ice_tab.isEnabled() is True:
+            if self.ice_tab.ileadfra.src != ""  and \
+               self.ice_tab.iicethic.src != ""  and \
+               self.ice_tab.isnowthi.src != "" :
+                tabsList.extend([self.ice_tab.iicethic, self.ice_tab.ileadfra, self.ice_tab.isnowthi])
+            else:
+                QtGui.QMessageBox.information(self, unicode('Something is wrong').encode('utf-8'), unicode('Not all the variables under the ice tab have been defined!').encode('utf-8'), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+
+        if self.dynamic_tab.isEnabled() is True:
+            if self.dynamic_tab.vozocrtx.src != ""  and \
+               self.dynamic_tab.vozocrtx.src != ""  and \
+               self.dynamic_tab.sossheig.src != "" :
+                tabsList.extend([self.dynamic_tab.vozocrtx, self.dynamic_tab.vomecrty, self.dynamic_tab.sossheig])
+            else:
+                QtGui.QMessageBox.information(self, unicode('Something is wrong').encode('utf-8'), unicode('Not all the variables under the dynamics tab have been defined!').encode('utf-8'), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+
+        if self.grid_tab.isEnabled() is True:
+            if self.grid_tab.gdept.src != ""    and \
+               self.grid_tab.gdepw.src != ""    and \
+               self.grid_tab.mbathy.src != ""   and \
+               self.grid_tab.e3t.src != ""      and \
+               self.grid_tab.e3u.src != ""      and \
+               self.grid_tab.e3v.src != "" :
+                tabsList.extend([self.grid_tab.gdept, self.grid_tab.gdepw, self.grid_tab.mbathy, self.grid_tab.e3t, self.grid_tab.e3u, self.grid_tab.e3v])
+            else:
+                QtGui.QMessageBox.information(self, unicode('Something is wrong').encode('utf-8'), unicode('Not all the variables under the grid tab have been defined!').encode('utf-8'), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+
+        try:
+            self.generateNcML(tabsList) #go ahead and do it
+        except:
+            raise
+
+        QtGui.QMessageBox.information(self, unicode('Success.').encode('utf-8'), unicode('NcML file generated.').encode('utf-8'), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+
     '''
     Function to generates the NcML text and write it to the user defined output file
     '''
