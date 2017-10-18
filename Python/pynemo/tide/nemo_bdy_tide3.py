@@ -169,7 +169,7 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T, Grid_U, Grid_V, comp):
 
     compindx = constituents_index(tpxo_z.cons, comp)
     for h in range(0, numharm):
-        c = compindx[h]
+        c = int(compindx[h])
         if c != -1:
             cosz[h, :] = ampz[c, :] * np.cos(np.deg2rad(phaz[c, :]))
             sinz[h, :] = ampz[c, :] * np.sin(np.deg2rad(phaz[c, :]))
