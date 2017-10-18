@@ -624,8 +624,7 @@ class Extract:
                 dst_bdy[nan_ind] = 0
                 self.logger.info(' post dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                 # Remove any data on dst grid that is in land
-                if np.sum(self.bdy_z)>0: # jelt: added the if to the statement since it didn't work for empty self.bdy_z
-                        dst_bdy[:,np.isnan(self.bdy_z)] = 0
+                dst_bdy[:,np.isnan(self.bdy_z)] = 0
                 self.logger.info(' 3 dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
 
                 # If we have depth dimension
