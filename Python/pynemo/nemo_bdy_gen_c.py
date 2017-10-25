@@ -208,7 +208,10 @@ class Boundary:
         """ This returns unique rows in the 2D array. 
         Returns indexes of unique rows in the input 2D array 
         t -- input 2D array
-        """        
+        """ 
+        sh = np.shape(t)
+	if (len(sh)> 2) or (sh[0] ==0) or (sh[1] == 0):
+	    print 'Warning: Shape of expected 2D array:', sh
         tlist = t.tolist()
         sortt = []
         indx = zip(*sorted([(val, i) for i,val in enumerate(tlist)]))[1]
@@ -219,7 +222,9 @@ class Boundary:
         for i,x in enumerate(sortt):
             if x == sortt[i-1]:
                 indx[i] = -1
-        
+        # all the rows are identical, set the first as the unique row
+        if sortt[0] == sortt[-1]:
+	    indx[0] = 0
+			        
         return indx[indx != -1]
-
 
