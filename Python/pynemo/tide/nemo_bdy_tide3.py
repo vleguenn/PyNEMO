@@ -114,7 +114,12 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T, Grid_U, Grid_V, comp):
     #summing over scale factors as zps doesn't have hbat variable
     #e3X = zgr.variables['e3u']
     #e3X = np.squeeze(e3X)
-    e3X = zgr['e3u'][:,:,:].squeeze()
+    try: # Read in either 3D or 4D data. 
+        e3X = zgr['e3u'][:,:,:].squeeze()
+    except ValueError:
+        e3X = zgr['e3u'][:,:,:,:].squeeze()
+    if len(np.shape(e3X)) != 3:
+        logger.warning('Expected a 3D array for e3u field')
 
     heightrange = np.arange(1, e3X.shape[0]+1)
     regular_heightprofile = np.tile(heightrange,
@@ -137,7 +142,12 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T, Grid_U, Grid_V, comp):
     #summing over scale factors as zps doesn't have hbat variable
     #e3X = zgr.variables['e3v']
     #e3X = np.squeeze(e3X)
-    e3X = zgr['e3v'][:,:,:].squeeze()
+    try: # Read in either 3D or 4D data. 
+        e3X = zgr['e3v'][:,:,:].squeeze()
+    except ValueError:
+        e3X = zgr['e3v'][:,:,:,:].squeeze()
+    if len(np.shape(e3X)) != 3:
+        logger.warning('Expected a 3D array for e3v field')
 
     heightrange = np.arange(1, e3X.shape[0]+1)
     regular_heightprofile = np.tile(heightrange,
