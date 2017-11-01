@@ -49,7 +49,7 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
     if grd in gridNames and grd != 'Z': # i.e grid NOT barotropic (Z) 
         dimztID = ncid.createDimension('z', depth_len)
     else:
-        loggin.error('Grid tpye not known. Expecting one of ',gridNames)
+        logging.error('Grid tpye not known')
     dimxbID = ncid.createDimension('xb', xb_len)
     dimybID = ncid.createDimension('yb', yb_len)
     dimxID = ncid.createDimension('x', x_len)
