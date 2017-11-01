@@ -463,12 +463,14 @@ def _get_mask(Setup, mask_gui):
         _, mask = pynemo_settings_editor.open_settings_dialog(Setup)
         bdy_msk = mask.data
         Setup.refresh()
+	logger.info('Using GUI defined mask')
     else:
         try:
             #mask filename and mask file flag is set
             if Setup.bool_settings['mask_file'] and Setup.settings['mask_file'] is not None:
                 mask = Mask_File(Setup.settings['bathy'], Setup.settings['mask_file'])
                 bdy_msk = mask.data
+		logger.info('Using input mask file, min=',np.amin(bdy_mask))
             elif Setup.bool_settings['mask_file']:
                 logger.error("Mask file is not given")
                 return
@@ -544,6 +546,7 @@ def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
                                        Setup.settings['dst_calendar'], 'Z')
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'sossheig',
                                       extract_t.d_bdy['sossheig'][year]['data'])
+    nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'bdy_msk', DstCoord.bdy_msk)
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'nav_lon', DstCoord.lonlat['t']['lon'])
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'nav_lat', DstCoord.lonlat['t']['lat'])
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'nbidta',
