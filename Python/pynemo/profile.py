@@ -470,7 +470,7 @@ def _get_mask(Setup, mask_gui):
             if Setup.bool_settings['mask_file'] and Setup.settings['mask_file'] is not None:
                 mask = Mask_File(Setup.settings['bathy'], Setup.settings['mask_file'])
                 bdy_msk = mask.data
-		logger.info('Using input mask file, min=',np.amin(bdy_mask))
+		logger.info('Using input mask file')
             elif Setup.bool_settings['mask_file']:
                 logger.error("Mask file is not given")
                 return
