@@ -25,9 +25,15 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
     orig -- unit origin (calendar).
     fv -- Fill Value.
     calendar -- time calendar.
-    grd -- grid types. """
+    grd -- grid types. ['T'=3D Temperature/Salinity,
+                        'I'=3D Temperature/Salinity + 2D ice,
+                        'U'=3D u-vel,
+                        'V'=3D v-vel,
+                        'E'=3D biogeochem (phosphate, nitrate, silocate),
+                        'Z'=2D sea surface height]
+    """
 
-    dimensionNames = ['T', 'I', 'U', 'V', 'E']
+    gridNames = ['T', 'I', 'U', 'V', 'E', 'Z'] # All possible grids
 
     # Dimension Lengths
     xb_len = N
@@ -40,8 +46,10 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
     ncid = Dataset(filename, 'w', clobber=True, format='NETCDF4')
 
     #define dimensions
-    if grd in dimensionNames:
+    if grd in gridNames and grd != 'Z': # i.e grid NOT barotropic (Z) 
         dimztID = ncid.createDimension('z', depth_len)
+    else:
+        logging.error('Grid tpye not known')
     dimxbID = ncid.createDimension('xb', xb_len)
     dimybID = ncid.createDimension('yb', yb_len)
     dimxID = ncid.createDimension('x', x_len)
@@ -91,6 +99,7 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
     elif grd == 'Z':
         varsshID = ncid.createVariable('sossheig', 'f4', ('time_counter', 'yb', 'xb', ),
                                        fill_value=fv)
+        varmskID = ncid.createVariable('bdy_msk', 'f4', ('y', 'x', ), fill_value=fv)
     else:
         logging.error("Unknow Grid input")
 
@@ -148,7 +157,7 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
 
         varmskID.short_name = 'bdy_msk'
         varmskID.units = 'unitless'
-        varmskID.long_name = 'Unstructed boundary mask'
+        varmskID.long_name = 'Structured boundary mask'
 
         varN1pID.units = 'mmol/m^3'
         varN1pID.short_name = 'N1p'
@@ -173,7 +182,7 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
 
         varmskID.short_name = 'bdy_msk'
         varmskID.units = 'unitless'
-        varmskID.long_name = 'Unstructed boundary mask'
+        varmskID.long_name = 'Structured boundary mask'
 
         vartmpID.units = 'C'
         vartmpID.short_name = 'votemper'
@@ -208,7 +217,7 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
 
         varbtuID.units = 'm/s'
         varbtuID.short_name = 'vobtcrtx'
-        varbtuID.long_name = 'Barotropic zonal Current'
+        varbtuID.long_name = 'Thickness-weighted depth-averaged zonal Current'
         varbtuID.grid = 'bdyU'
 
         vartouID.units = 'm/s'
@@ -224,7 +233,7 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
 
         varbtvID.units = 'm/s'
         varbtvID.short_name = 'vobtcrty'
-        varbtvID.long_name = 'Barotropic meridional Current'
+        varbtvID.long_name = 'Thickness-weighted depth-averaged meridional Current'
         varbtvID.grid = 'bdyV'
 
         vartovID.units = 'm/s'
@@ -237,6 +246,10 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
         varsshID.short_name = 'sossheig'
         varsshID.long_name = 'Sea Surface Height'
         varsshID.grid = 'bdyT'
+
+        varmskID.short_name = 'bdy_msk'
+        varmskID.units = 'unitless'
+        varmskID.long_name = 'Structured boundary mask'
 
     else:
         logging.error('Unknown Grid')

@@ -9,7 +9,7 @@ import datetime
 import logging
 
 def CreateBDYTideNetcdfFile(filename, N,I,J,h,fv,grd):
-    dimensionNames = ['T', 'U','V']
+    gridNames = ['T', 'U', 'V']
     
     # Dimension Lengths
     xb_len = N
@@ -84,7 +84,7 @@ def CreateBDYTideNetcdfFile(filename, N,I,J,h,fv,grd):
       
         varmskID.short_name = 'bdy_msk'
         varmskID.units = 'unitless'
-        varmskID.long_name = 'Unstructed boundary mask'
+        varmskID.long_name = 'Structured boundary mask'
         
         varz1ID.units = 'm'
         varz1ID.short_name = 'z1'
