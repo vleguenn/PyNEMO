@@ -17,29 +17,79 @@ class TpxoExtract(object):
     def __init__(self, settings, lat, lon, grid_type):
         """initialises the Extract of tide information from the netcdf
            Tidal files"""
-        #read the grid file
-        self.grid = Dataset(settings['tide_grid'])#../data/tide/grid_tpxo7.2.nc')
-        #read the height_dataset file
-        self.height_dataset = Dataset(settings['tide_h'])#../data/tide/h_tpxo7.2.nc')
-        #read the velocity_dataset file
-        self.velocity_dataset = Dataset(settings['tide_u'])#../data/tide/u_tpxo7.2.nc')
+	# Set tide model
+	tide_model = 'TPXO'
 
-        height_z = self.grid.variables['hz']
-        mask_z = self.grid.variables['mz']
-        lon_z = self.height_dataset.variables['lon_z'][:, 0]
-        lat_z = self.height_dataset.variables['lat_z'][0, :]
-        lon_resolution = lon_z[1] - lon_z[0]
-        data_in_km = 0 # added to maintain the reference to matlab tmd code
-        # Pull out the constituents that are avaibable
-        self.cons = []
-        for ncon in range(self.height_dataset.variables['con'].shape[0]):
-            self.cons.append(self.height_dataset.variables['con'][ncon, :].tostring().strip())
+	if tide_model == 'TPXO':
+	   hRe_name = 'hRe'
+	   hIm_name = 'hIm'
+	   lon_z_name = 'lon_z'
+	   lat_z_name = 'lat_z'	
+           URe_name = 'URe'
+	   UIm_name = 'UIm'
+	   lon_u_name = 'lon_u'
+	   lat_u_name = 'lat_u'
+           VRe_name = 'VRe'
+	   VIm_name = 'VIm'
+	   lon_v_name = 'lon_v'
+	   lat_v_name = 'lat_v'
+           mz_name = 'mz'
+           mu_name = 'mu'
+           mv_name = 'mv'
+           self.grid = Dataset(settings['tide_grid'])#../data/tide/grid_tpxo7.2.nc')
+           #read the height_dataset file
+           self.height_dataset = Dataset(settings['tide_h'])#../data/tide/h_tpxo7.2.nc')
+           #read the velocity_dataset file
+           self.velocity_dataset = Dataset(settings['tide_u'])#../data/tide/u_tpxo7.2.nc')
+
+           height_z = self.grid.variables['hz']
+           mask_z = self.grid.variables['mz']
+           lon_z = self.height_dataset.variables[lon_z_name][:, 0]
+           lat_z = self.height_dataset.variables[lat_z_name][0, :]
+           lon_resolution = lon_z[1] - lon_z[0]
+           data_in_km = 0 # added to maintain the reference to matlab tmd code
+           # Pull out the constituents that are avaibable
+           self.cons = []
+           for ncon in range(self.height_dataset.variables['con'].shape[0]):
+              self.cons.append(self.height_dataset.variables['con'][ncon, :].tostring().strip())
 
 
+
+
+	elif tide_model == 'FES':
+	   constituents = ['2N2','EPS2','J1','K1','K2','L2','LA2','M2','M3','M4','M6','M8','MF','MKS2','MM','MN4','MS4','MSF','MSQM','MTM','MU2','N2','N4','NU2','O1','P1','Q1','R2','S1','S2','S4','SA','SSA','T2']
+
+	   icon = 0
+	   self.cons = []
+	   for con in constituents.lower():
+	     ## load in the data
+	     self.Z_dataset = Dataset('/work/thopri/Global_Tide_Model/FES\ NetCDFs/' +con+ "_Z.nc")
+	     self.U_dataset = Dataset('/work/thopri/Global_Tide_Model/FES\ NetCDFs/' +con+ "_U.nc")
+	     self.V_dataset = Dataset('/work/thopri/Global_Tide_Model/FES\ NetCDFs/' +con+ "_V.nc")
+		
+	     height_z[icon,:,:] = self.Z_dataset['amplitude'][:,:]
+	     self.cons.append(con) # self.height_dataset.variables['con'][ncon, :].tostring().strip())
+
+	   # Construct mask from missing values. Also NaN these out.
+	   mask_z = np.ones(np.size(height_z)[1], np.size(height_z)[2])
+	   mask_z[height_z > 9999] = 0
+	   height_z[height_z > 9999] = np.NaN
+
+	   lon_z = self.Z_dataset['lon'][:]
+	   lat_z = self.Z_dataset['lat'][:]
+           lon_resolution = lon_z[1] - lon_z[0]
+	   data_in_km = 0 # added to maintain the reference to matlab tmd code
+	   print 'Got here. Need to convert amp and pha into Re and Im parts for interpolation'	      
+
+
+   	else:
+	   print 'Don''t know that tide model'
+
+        # Wrap coordinates in longitude if the domain is global
         glob = 0
         if lon_z[-1]-lon_z[0] == 360-lon_resolution:
             glob = 1
-
+	# jelt: I'd be surprise if the following wrapping in longitude works as the first dimension is constituent..
         if glob == 1:
             lon_z = np.concatenate(([lon_z[0]-lon_resolution, ], lon_z,
                                     [lon_z[-1]+lon_resolution, ]))
@@ -90,16 +140,16 @@ class TpxoExtract(object):
 
         if grid_type == 'z' or grid_type == 't':
             self.amp, self.gph = self.interpolate_constituents(self.height_dataset,
-                                                               'hRe', 'hIm', 'lon_z', 'lat_z',
-                                                               lon, lat, maskname='mz')
+                                                               hRe_name, hIm_name, lon_z_name, lat_z_name,
+							       lon, lat, maskname=mz_name)
         elif grid_type == 'u':
             self.amp, self.gph = self.interpolate_constituents(self.velocity_dataset,
-                                                               'URe', 'UIm', 'lon_u', 'lat_u',
-                                                               lon, lat, depth, maskname='mu')
+                                                               URe_name, UIm_name, lon_u_name, lat_u_name,
+                                                               lon, lat, depth, maskname=mu_name)
         elif grid_type == 'v':
             self.amp, self.gph = self.interpolate_constituents(self.velocity_dataset,
-                                                               'VRe', 'VIm', 'lon_v', 'lat_v',
-                                                               lon, lat, depth, maskname='mv')
+                                                               VRe_name, VIm_name, lon_v_name, lat_v_name,
+                                                               lon, lat, depth, maskname=mv_name)
         else:
             print 'Unknown grid_type'
             return
