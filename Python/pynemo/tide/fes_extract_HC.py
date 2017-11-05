@@ -3,7 +3,6 @@ This is to extract the tidal harmonic constants out of a tidal model
 for a given locations
 [amp,gph] = fes_extract_HC(Model,lat,lon,type,Cid)
 
-
 Modified from tpxo_extract_HC.py
 
 3 Nov 2017
