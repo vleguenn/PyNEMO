@@ -20,7 +20,7 @@ class TpxoExtract(object):
 	# Set tide model
 	tide_model = 'TPXO'
 
-	if tide_model == 'TPXO':
+	if tide_model == 'TPXO':  # Define stuff to generalise Tide model
 	   hRe_name = 'hRe'
 	   hIm_name = 'hIm'
 	   lon_z_name = 'lon_z'
@@ -58,28 +58,8 @@ class TpxoExtract(object):
 
 	elif tide_model == 'FES':
 	   constituents = ['2N2','EPS2','J1','K1','K2','L2','LA2','M2','M3','M4','M6','M8','MF','MKS2','MM','MN4','MS4','MSF','MSQM','MTM','MU2','N2','N4','NU2','O1','P1','Q1','R2','S1','S2','S4','SA','SSA','T2']
-
-	   icon = 0
-	   self.cons = []
-	   for con in constituents.lower():
-	     ## load in the data
-	     self.Z_dataset = Dataset('/work/thopri/Global_Tide_Model/FES\ NetCDFs/' +con+ "_Z.nc")
-	     self.U_dataset = Dataset('/work/thopri/Global_Tide_Model/FES\ NetCDFs/' +con+ "_U.nc")
-	     self.V_dataset = Dataset('/work/thopri/Global_Tide_Model/FES\ NetCDFs/' +con+ "_V.nc")
-		
-	     height_z[icon,:,:] = self.Z_dataset['amplitude'][:,:]
-	     self.cons.append(con) # self.height_dataset.variables['con'][ncon, :].tostring().strip())
-
-	   # Construct mask from missing values. Also NaN these out.
-	   mask_z = np.ones(np.size(height_z)[1], np.size(height_z)[2])
-	   mask_z[height_z > 9999] = 0
-	   height_z[height_z > 9999] = np.NaN
-
-	   lon_z = self.Z_dataset['lon'][:]
-	   lat_z = self.Z_dataset['lat'][:]
-           lon_resolution = lon_z[1] - lon_z[0]
-	   data_in_km = 0 # added to maintain the reference to matlab tmd code
-	   print 'Got here. Need to convert amp and pha into Re and Im parts for interpolation'	      
+       print 'did not actually code stuff for FES in this routine. Though that would be ideal. Instead put it in fes_extract_HC.py'
+    
 
 
    	else:
