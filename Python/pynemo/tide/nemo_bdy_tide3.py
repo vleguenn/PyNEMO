@@ -261,15 +261,12 @@ def constituents_index(constituents, inputcons):
     Output:     retindx: The indices (relative to the source data list) of the dictionary items from the namelist
                         e.g. [  0.   3.   1.  10.]
     """
-    print 'jelt: constituents', constituents
-    print 'jelt: inputcons', inputcons
     retindx = np.zeros(len(inputcons))
     count = 0
     for value in inputcons.values():
         const_name = value.replace("'", "").lower() # force inputcons entries to lowercase
         retindx[count] = [x.lower() for x in constituents].index(const_name) # force constituents to lowercase
         count = count+1
-    print 'jelt retindx', retindx       
     return retindx
 #    tpxo_z.Gph
 #    tpxo_z.amp
