@@ -254,12 +254,18 @@ def nemo_bdy_tpx7p2_rot(setup, DstCoord, Grid_T, Grid_U, Grid_V, comp):
 def constituents_index(constituents, inputcons):
     """
     Converts the input contituents to index in the tidal constituents.
+    Inputs:     constituents: The list of constituents available from the source data
+                        e.g. TPXO: ['m2', 's2', 'n2', 'k2', 'k1', 'o1', 'p1', 'q1', 'mf', 'mm', 'm4', 'ms4', 'mn4']
+                inputcons: The dictionary of constituents from the namelist with their numbers 
+                        e.g. {'1': "'M2'", '3': "'K2'", '2': "'S2'", '4': "'M4'"}
+    Output:     retindx: The indices (relative to the source data list) of the dictionary items from the namelist
+                        e.g. [  0.   3.   1.  10.]
     """
     retindx = np.zeros(len(inputcons))
     count = 0
     for value in inputcons.values():
-        const_name = value.replace("'", "").lower()
-        retindx[count] = constituents.index(const_name)
+        const_name = value.replace("'", "").lower() # force inputcons entries to lowercase
+        retindx[count] = [x.lower() for x in constituents].index(const_name) # force constituents to lowercase
         count = count+1
     return retindx
 #    tpxo_z.Gph
