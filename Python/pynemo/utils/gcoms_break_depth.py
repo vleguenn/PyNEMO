@@ -48,7 +48,7 @@ def gcoms_break_depth(bathy):
     kplain = -1
     kfloor = -1
     histfloor = 0.0
-    for depth_bin_index in range(0,num_bin-1):
+    for depth_bin_index in range(0,num_bin-1): 
         if kshelf == -1:
             if hist_smooth[depth_bin_index] > hist_smooth[depth_bin_index+1]:
                 kshelf = depth_bin_index;
@@ -67,7 +67,9 @@ def gcoms_break_depth(bathy):
 #    print 'Approximate depths: shelf=%sm, break=%sm, plain=%sm' % (depth_shelf,depth_break,depth_plain)
     h_max = math.floor(depth_break/100)*100
     return depth_shelf, h_max
-    
+
+
+def gcoms_boundary_masks(bathy,ov,lv):    
 """ 
     :param bathy: This is the input bathymetry data
     :param ov: Latittude array
@@ -80,7 +82,6 @@ def gcoms_break_depth(bathy):
     
     :Example:
 """    
-def gcoms_boundary_masks(bathy,ov,lv):
     tmp = np.pad(bathy, (1, 1), 'constant', constant_values=(np.NaN, np.NaN))
     tmp[tmp==ov] = np.NaN
     

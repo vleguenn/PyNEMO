@@ -16,7 +16,7 @@ from PyQt4.QtGui import QMessageBox
 from PyQt4 import QtCore
 
 class Mask(object):
-    """This is a Mask holder. which reads from a netCDF bathemetry file and
+    """This is a Mask holder. which reads from a netCDF bathymetry file and
     stores it in 'data' member variable"""
 
     min_depth = 200.0
@@ -37,7 +37,10 @@ class Mask(object):
 
 
     def set_mask_file(self, mask_file):
-        """Reads the mask data from the mask file"""
+        """
+	Reads the mask data from the mask file
+	Assumes the mask file is 2D
+	"""
         self.mask_file = mask_file
         #if mask file is not set then reset the data
         if self.mask_file == None:
@@ -79,7 +82,7 @@ class Mask(object):
                 #apply default 1px border
                 self.apply_border_mask(1)            
         except KeyError:
-            self.logger.error('Bathymetry file doesnot have Bathyemetry variable')
+            self.logger.error('Bathymetry file does not have Bathymetry variable')
             raise
         except (IOError, RuntimeError):
             self.logger.error('Cannot open bathymetry file '+self.bathymetry_file)
@@ -152,8 +155,9 @@ class Mask(object):
                 
         
     def _get_bathy_depth_index(self, index, depth):
-        """ returns the indexes in the input index which have bathymetry depth greather than the 
-            input depth"""
+        """ returns the indices from the input field `index` which have bathymetry depth greater
+	    than the input field `depth`
+	"""
         output_index = self.bathy_data < depth
         output_index = np.logical_and(index,output_index)
         return output_index
