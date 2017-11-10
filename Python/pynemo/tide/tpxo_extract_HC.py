@@ -58,7 +58,7 @@ class TpxoExtract(object):
 
 	elif tide_model == 'FES':
 	   constituents = ['2N2','EPS2','J1','K1','K2','L2','LA2','M2','M3','M4','M6','M8','MF','MKS2','MM','MN4','MS4','MSF','MSQM','MTM','MU2','N2','N4','NU2','O1','P1','Q1','R2','S1','S2','S4','SA','SSA','T2']
-       print 'did not actually code stuff for FES in this routine. Though that would be ideal. Instead put it in fes_extract_HC.py'
+           print 'did not actually code stuff for FES in this routine. Though that would be ideal. Instead put it in fes_extract_HC.py'
     
 
 
@@ -69,7 +69,6 @@ class TpxoExtract(object):
         glob = 0
         if lon_z[-1]-lon_z[0] == 360-lon_resolution:
             glob = 1
-	# jelt: I'd be surprise if the following wrapping in longitude works as the first dimension is constituent..
         if glob == 1:
             lon_z = np.concatenate(([lon_z[0]-lon_resolution, ], lon_z,
                                     [lon_z[-1]+lon_resolution, ]))

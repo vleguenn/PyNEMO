@@ -70,7 +70,7 @@ def gcoms_break_depth(bathy):
 
 
 def gcoms_boundary_masks(bathy,ov,lv):    
-""" 
+    """ 
     :param bathy: This is the input bathymetry data
     :param ov: Latittude array
     :param lv: Longitude array  
@@ -81,7 +81,7 @@ def gcoms_boundary_masks(bathy,ov,lv):
     :rtype: numpy arrays
     
     :Example:
-"""    
+    """    
     tmp = np.pad(bathy, (1, 1), 'constant', constant_values=(np.NaN, np.NaN))
     tmp[tmp==ov] = np.NaN
     
