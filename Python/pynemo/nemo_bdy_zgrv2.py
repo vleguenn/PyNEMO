@@ -19,6 +19,7 @@ import numpy as np
 import logging
 
 from utils.nemo_bdy_lib import sub2ind
+from utils.e3_to_depth import e3_to_depth
 #     pylint: disable=E1101
 # Query name
 class Depth:
@@ -81,8 +82,10 @@ class Depth:
                 wrk1 = (hbatt - hc) * gsigt[:,:] + (hc * (k + 0.5) / (nz - 1))
                 wrk2 = (hbatt - hc) * gsigw[:,:] + (hc * (k + 0.5) / (nz - 1))
             else:
-                wrk1 = nc['gdept'][0,k,:,:]#nc.variables['gdept'][0,k,:,:]
-                wrk2 = nc['gdepw'][0,k,:,:]#nc.variables['gdepw'][0,k,:,:]
+		# jelt: replace 'load gdep[wt] with load e3[tw] and compute gdep[tw]
+                #wrk1 = nc['gdept'][0,k,:,:]#nc.variables['gdept'][0,k,:,:]
+                #wrk2 = nc['gdepw'][0,k,:,:]#nc.variables['gdepw'][0,k,:,:]
+		[wrk1, wrk2] = e3_to_depth(nc['e3t'][0,k,:,:], nc['e3w'][0,k,:,:], nz)
 
             # Replace deep levels that are not used with NaN
             wrk2[mbathy + 1 < k + 1] = np.NaN
