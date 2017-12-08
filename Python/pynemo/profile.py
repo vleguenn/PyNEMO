@@ -19,7 +19,7 @@
 
 '''
 ###
-## This is the equivalent to the matlab of same name. 
+## This is the equivalent to the matlab of same name.
 ## The driver thast makes things happen. bit messy atm
 ## Note: Individual matlab vars are grouped into relevant dictionaries
 ## for clarity/ease of use
