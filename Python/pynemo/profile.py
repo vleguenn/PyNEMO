@@ -29,7 +29,7 @@
 ## 2) then interpolate the local grid data time data to input time resolution
 ## Written by John Kazimierz Farey, Sep 2012
 ## Port of Matlab code of the Cardinal James Harle
-## $Date$
+## $Last commit on:$
 ###
 '''
 
