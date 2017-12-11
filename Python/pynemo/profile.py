@@ -23,7 +23,6 @@
 ## The driver thast makes things happen. bit messy atm
 ## Note: Individual matlab vars are grouped into relevant dictionaries
 ## for clarity/ease of use
-##
 ## Algorithm:
 ## 1) Interpolate the data from the global grid to local grid
 ## 2) then interpolate the local grid data time data to input time resolution
