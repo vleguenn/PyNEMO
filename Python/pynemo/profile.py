@@ -30,6 +30,7 @@
 ## Written by John Kazimierz Farey, Sep 2012
 ## Port of Matlab code of the Cardinal James Harle
 ## @author James Harle
+## @author John Kazimierz Farey
 ## $Last commit on:$
 ###
 '''
