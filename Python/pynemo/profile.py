@@ -362,7 +362,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
         for month in months:
 
             if Setup.settings['tra']:
-                extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings, SourceCoord, DstCoord,
+		extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings, SourceCoord, DstCoord,
                                                       grid_t, ['votemper', 'vosaline'],
                                                       years=year, months=month)
                 extract_t.extract_month(year, month)
