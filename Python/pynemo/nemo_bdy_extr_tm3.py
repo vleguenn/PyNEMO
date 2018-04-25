@@ -411,6 +411,10 @@ class Extract:
                 break
 
         self.logger.info('first/last dates: %s %s', first_date, last_date)
+        if last_date == 0:
+		self.logger.info('There appears to be no time series of data. Check the time information in the namelist time variables correspond to the file content timestamps')
+		self.logger.info('You probably want to kill this process.')  # jelt: ideally this would quit here, but I'm not 100% sure you wouldn't want first_date=last_date=0
+                self.logger.info(' ')
 
         if self.first:
             nc_3 = GetFile(self.settings['src_msk'])
@@ -448,7 +452,7 @@ class Extract:
         for f in range(first_date, last_date + 1):
             sc_array = [None, None]
             sc_alt_arr = [None, None]
-            #self.logger.info('opening nc file: %s', sc_time[f].file_name)            
+            #self.logger.info('opening nc file: %s', sc_time[f].fname)            
             # Counters not implemented
 
             sc_bdy = np.zeros((len(self.var_nam), sc_z_len, ind.shape[0], 
@@ -622,10 +626,12 @@ class Extract:
                 # Set land pts to zero
 
                 self.logger.info(' pre dst_bdy[nan_ind] %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
-                dst_bdy[nan_ind] = 0
+		if np.sum(nan_ind) > 0:  # jelt: otherwise it breaks
+			dst_bdy[nan_ind] = 0
                 self.logger.info(' post dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                 # Remove any data on dst grid that is in land
-                dst_bdy[:,np.isnan(self.bdy_z)] = 0
+		if np.sum(self.bdy_z)>0: # jelt: added the if to the statement since it didn't work for empty self.bdy_z
+			dst_bdy[:,np.isnan(self.bdy_z)] = 0
                 self.logger.info(' 3 dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
 
                 # If we have depth dimension
