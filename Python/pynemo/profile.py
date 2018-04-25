@@ -45,7 +45,8 @@ from scipy.interpolate import interp1d
 import logging
 from pynemo.reader.factory import GetFile
 from pynemo.reader.factory import GetReader
-from netcdftime import datetime
+#from netcdftime import datetime
+from datetime import datetime, timedelta # jelt netcdftime can't do deltatime to get the date_end variable
 import copy
 
 #local imports
@@ -278,6 +279,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     # Create a Time handler object
 #    SourceTime = source_time.SourceTime(settings['src_dir'])
     acc = settings['src_time_adj']
+    print 'jelt: setting src_time_adj {}'.format(acc)
 #    acc = -3168000 - 86400 # Straight out Matlab code. Question this.
 #    acc = 0
     # Extract source data on dst grid
@@ -370,10 +372,18 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                     time_counter[i] = extract_t.convert_date_to_destination_num(extract_t.sc_time.date_counter[i])
 
                 date_start = datetime(year, month, 1, 0, 0, 0)
-                date_end = datetime(year, month, monthrange(year, month)[1], 24, 60, 60)
+                #date_end = datetime(year, month, monthrange(year, month)[1], 24, 60, 60)
+		date_end = datetime(year, month, monthrange(year, month)[1], 23, 59, 59) + timedelta(seconds=1) # days, seconds. jelt: hours/mins/sec can not be 24/24/60
                 time_num_start = extract_t.convert_date_to_destination_num(date_start)
                 time_num_end = extract_t.convert_date_to_destination_num(date_end)
-
+                print 'jelt: print time stuff'
+		print 'len(extract_t.sc_time.time_counter): {}'.format(len(extract_t.sc_time.time_counter))
+		print 'time_counter: {} '.format( time_counter )
+		print 'date_start: {} '.format( date_start)
+		print 'date_end: {} '.format(  date_end )
+		print 'time_num_start: {} '.format( time_num_start )
+		print 'time_num_end: {} '.format( time_num_end )
+		print 'extract_t.sc_time.time_counter: {}'.format(extract_t.sc_time.time_counter)
                 if monthrange(year, month)[1] == 29:
                     interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
                     time_counter = interp1fn(np.append(np.arange(0,
@@ -390,6 +400,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 
                 ft = np.where(((time_counter >= time_num_start) & (time_counter <= time_num_end)))
                 time_counter = time_counter[ft]
+		print 'jelt: interpolated between limits: time_counter: {}, ft {}'.format( time_counter, ft)
                 # interpolate the data to daily period in a month
                 interpolate_data(extract_t, year, month, ft)
 
@@ -750,6 +761,9 @@ def interpolate_data(extract, year, month, time_indexes):
     """This method does a 1D interpolation of daily mean data of a month"""
 
     for variable_name in extract.d_bdy:
+	print 'month type {}'.format(type(month))
+	#print 'jelt: variable name {}, year+1 {}, month {},  shape(extract.d_bdy[variable_name][year+1][data]) {}'.format(  variable_name, year+1, month, np.shape(extract.d_bdy[variable_name][str(year+1)]['data'] )) 
+	print 'jelt: variable name {}, year {}, month {},  shape(extract.d_bdy[variable_name][year][data]) {}'.format(  variable_name, year, month, np.shape(extract.d_bdy[variable_name][year]['data'] )) 
         lon_len = len(extract.d_bdy[variable_name][year]['data'][:, 0, 0])
         lon = np.squeeze(np.asarray(np.mat(np.arange(0, lon_len, 1)).transpose()))
         lat = extract.d_bdy[variable_name][year]['data'].transpose(0, 2, 1)
