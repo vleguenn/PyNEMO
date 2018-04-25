@@ -73,7 +73,7 @@ from PyQt4.QtGui import QMessageBox
 #import pickle
 
 class Grid(object):
-    """ A Grid object that stores bdy grid information """    
+    """ A Grid object that stores bdy grid information """
     def __init__(self):
         self.bdy_i = None
         self.bdy_r = None
@@ -85,7 +85,7 @@ class Grid(object):
 
 logger = logging.getLogger(__name__)
 def process_bdy(setup_filepath=0, mask_gui=False):
-    """ Main entry to the processing of the bdy 
+    """ Main entry to the processing of the bdy
     Keyword arguments:
     setup_filepath -- file path to bdy file
     mask_gui -- whether gui to select the mask file needs to be poped up
@@ -231,7 +231,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
         SourceCoord.lat = SourceCoord.lat.filled()
     except:
         pass
-        
+
     nc.close()
 
     logger.info(clock() - start)
@@ -295,7 +295,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     grid_t.source_time = reader['t']
     grid_u.source_time = reader['u']
     grid_v.source_time = reader['v']
-    
+
     if ice:
 #        grid_ice.source_time = SourceTime.get_source_time('i', acc)
 #        grid_ice.source_time = factory.GetRepository(settings['src_dir'], 'i', acc).grid_source_data['i']
@@ -345,7 +345,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     if start_year > end_year:
         logging.error("Please check the nn_year_000 and nn_year_end values in input bdy file")
         return
-    
+
     years = range(start_year, end_year+1)
     months = []
     if end_year - start_year >= 1:
@@ -362,7 +362,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
         for month in months:
 
             if Setup.settings['tra']:
-		extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings, SourceCoord, DstCoord,
+                extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings, SourceCoord, DstCoord,
                                                       grid_t, ['votemper', 'vosaline'],
                                                       years=year, months=month)
                 extract_t.extract_month(year, month)
@@ -521,9 +521,9 @@ def _get_mask(Setup, mask_gui):
             tmp = np.ones(bdy_msk.shape, dtype=bool)
             tmp[1:-1, 1:-1] = False
             bdy_msk[tmp] = -1
-            
+
     return bdy_msk
-    
+
 def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, ft, num_bdy,
                            time_counter, unit_origin):
     """ writes the ice data to file"""
@@ -756,14 +756,14 @@ def write_tidal_data(setup_var, dst_coord_var, grid, num_bdy, tide_cons, cos_g, 
                                               np.ones([1, num_bdy['v']]))
         indx = indx+1
 
-        
+
 def interpolate_data(extract, year, month, time_indexes):
     """This method does a 1D interpolation of daily mean data of a month"""
 
     for variable_name in extract.d_bdy:
 	print 'month type {}'.format(type(month))
-	#print 'jelt: variable name {}, year+1 {}, month {},  shape(extract.d_bdy[variable_name][year+1][data]) {}'.format(  variable_name, year+1, month, np.shape(extract.d_bdy[variable_name][str(year+1)]['data'] )) 
-	print 'jelt: variable name {}, year {}, month {},  shape(extract.d_bdy[variable_name][year][data]) {}'.format(  variable_name, year, month, np.shape(extract.d_bdy[variable_name][year]['data'] )) 
+	#print 'jelt: variable name {}, year+1 {}, month {},  shape(extract.d_bdy[variable_name][year+1][data]) {}'.format(  variable_name, year+1, month, np.shape(extract.d_bdy[variable_name][str(year+1)]['data'] ))
+	print 'jelt: variable name {}, year {}, month {},  shape(extract.d_bdy[variable_name][year][data]) {}'.format(  variable_name, year, month, np.shape(extract.d_bdy[variable_name][year]['data'] ))
         lon_len = len(extract.d_bdy[variable_name][year]['data'][:, 0, 0])
         lon = np.squeeze(np.asarray(np.mat(np.arange(0, lon_len, 1)).transpose()))
         lat = extract.d_bdy[variable_name][year]['data'].transpose(0, 2, 1)
@@ -779,4 +779,3 @@ def interpolate_data(extract, year, month, time_indexes):
         if len(tmp.shape) == 2:
             tmp = tmp.reshape(tmp.shape+(1L, ))
         extract.d_bdy[variable_name][year]['data'] = tmp.transpose(0, 2, 1)
-
