@@ -187,7 +187,7 @@ class Extract:
                                      SC.lat.ravel(order='F')), balanced_tree=False,compact_nodes=False)
         except TypeError: #added this fix to make it compatible with scipy 0.16.0
             source_tree = sp.cKDTree(zip(SC.lon.ravel(order='F'),
-                                     SC.lat.ravel(order='F')))            
+                                     SC.lat.ravel(order='F')))
         dst_pts = zip(dst_lon[:].ravel(order='F'), dst_lat[:].ravel(order='F'))
         nn_dist, nn_id = source_tree.query(dst_pts, k=1)
 
@@ -242,7 +242,7 @@ class Extract:
         #Sri TODO::: key_vec compare to assign gcos and gsin
         # Determine 1-2-1 filter indices
         id_121 = np.zeros((num_bdy, 3), dtype=np.int64)
-        for r in range(int(np.amax(bdy_r))+1):         
+        for r in range(int(np.amax(bdy_r))+1):
             r_id = bdy_r != r
             rr_id = bdy_r == r
             tmp_lon = dst_lon.copy()
@@ -256,7 +256,7 @@ class Extract:
             except TypeError: #fix for scipy 0.16.0
                 source_tree = sp.cKDTree(zip(tmp_lon.ravel(order='F'),
                                          tmp_lat.ravel(order='F')))
-                
+
             dst_pts = zip(dst_lon[rr_id].ravel(order='F'),
                           dst_lat[rr_id].ravel(order='F'))
             junk, an_id = source_tree.query(dst_pts, k=3,
@@ -274,9 +274,9 @@ class Extract:
         rep_dims = (id_121.shape[0], id_121.shape[1], sc_z_len)
         # These tran/tiles work like matlab. Tested with same Data.
         id_121 = id_121.repeat(sc_z_len).reshape(rep_dims).transpose(2, 0, 1)
-        reptile = np.arange(sc_z_len).repeat(num_bdy).reshape(sc_z_len, 
+        reptile = np.arange(sc_z_len).repeat(num_bdy).reshape(sc_z_len,
                                                               num_bdy)
-        reptile = reptile.repeat(3).reshape(num_bdy, 3, sc_z_len, 
+        reptile = reptile.repeat(3).reshape(num_bdy, 3, sc_z_len,
                                             order='F').transpose(2, 0, 1)
 
         id_121 = sub2ind((sc_z_len, num_bdy), id_121, reptile)
@@ -289,7 +289,7 @@ class Extract:
         # Fig not implemented
 
         if self.isslab != 1:
-            # Determine vertical weights for the linear interpolation 
+            # Determine vertical weights for the linear interpolation
             # onto Dst grid
             # Allocate vertical index array
             dst_dep_rv = dst_dep.ravel(order='F')
@@ -306,7 +306,7 @@ class Extract:
             # dst_dep point is NaN, causing ref problems later.
             nn_id[nn_id == sc_z_len] = sc_z_len-1
             sc_z[nn_id]
-            
+
             # Find next adjacent point in the vertical
             z_ind[:, 0] = nn_id
             z_ind[sc_z[nn_id] > dst_dep_rv[:], 1] = nn_id[sc_z[nn_id] >
@@ -333,7 +333,7 @@ class Extract:
             z_ind = np.zeros([1,1])
             z_dist = np.zeros([1,1])
         # End self.isslab
-        
+
         # Set instance attributes
         self.first = True
         self.z_ind = z_ind
@@ -354,10 +354,10 @@ class Extract:
         self.d_bdy = {}
         for v in range(self.nvar):
             self.d_bdy[self.var_nam[v]] = {}
-       
+
     def extract_month(self, year, month):
         """Extracts monthly data and interpolates onto the destination grid
-        
+
         Keyword arguments:
         year -- year of data to be extracted
         month -- month of the year to be extracted
@@ -367,28 +367,28 @@ class Extract:
         for v in range(self.nvar):
             try:
                 self.d_bdy[self.var_nam[v]][year]
-            except KeyError:        
+            except KeyError:
                 self.d_bdy[self.var_nam[v]][year] = {'data': None, 'date': {}}
-        
-        i_run = np.arange(self.sc_ind['imin'], self.sc_ind['imax']) 
+
+        i_run = np.arange(self.sc_ind['imin'], self.sc_ind['imax'])
         j_run = np.arange(self.sc_ind['jmin'], self.sc_ind['jmax'])
         extended_i = np.arange(self.sc_ind['imin'] - 1, self.sc_ind['imax'])
         extended_j = np.arange(self.sc_ind['jmin'] - 1, self.sc_ind['jmax'])
         ind = self.sc_ind['ind']
         sc_time = self.sc_time
         sc_z_len = self.sc_z_len
- 
+
         # define src/dst cals
-        sf, ed = self.cal_trans(sc_time.calendar, #sc_time[0].calendar 
+        sf, ed = self.cal_trans(sc_time.calendar, #sc_time[0].calendar
                                 self.settings['dst_calendar'], year, month)
-        DstCal = utime('seconds since %d-1-1' %year, 
+        DstCal = utime('seconds since %d-1-1' %year,
                        self.settings['dst_calendar'])
         dst_start = DstCal.date2num(datetime(year, month, 1))
         dst_end = DstCal.date2num(datetime(year, month, ed, 23, 59, 59))
 
         self.S_cal = utime(sc_time.units, sc_time.calendar)#sc_time[0].units,sc_time[0].calendar)
 
-        self.D_cal = utime('seconds since %d-1-1' %self.settings['base_year'], 
+        self.D_cal = utime('seconds since %d-1-1' %self.settings['base_year'],
                            self.settings['dst_calendar'])
 
         src_date_seconds = np.zeros(len(sc_time.time_counter))
@@ -398,7 +398,7 @@ class Extract:
 
         # Get first and last date within range, init to cover entire range
         first_date = 0
-        last_date = len(sc_time.time_counter) - 1 
+        last_date = len(sc_time.time_counter) - 1
         rev_seq = range(len(sc_time.time_counter))
         rev_seq.reverse()
         for date in rev_seq:
@@ -431,14 +431,14 @@ class Extract:
         meta_data = []
         meta_range = self.nvar
         if self.key_vec:
-            meta_range += 1 
+            meta_range += 1
         for v in range(meta_range):
             meta_data.append({})
             for x in 'mv', 'sf', 'os', 'fv':
                 meta_data[v][x] = np.ones((self.nvar, 1)) * np.NaN
 
         for v in range(self.nvar):
-#            meta_data[v] = self._get_meta_data(sc_time[first_date].file_name, 
+#            meta_data[v] = self._get_meta_data(sc_time[first_date].file_name,
 #                                               self.var_nam[v], meta_data[v])
             meta_data[v] = sc_time.get_meta_data(self.var_nam[v], meta_data[v])
 
@@ -452,10 +452,10 @@ class Extract:
         for f in range(first_date, last_date + 1):
             sc_array = [None, None]
             sc_alt_arr = [None, None]
-            #self.logger.info('opening nc file: %s', sc_time[f].fname)            
+            #self.logger.info('opening nc file: %s', sc_time[f].fname)
             # Counters not implemented
 
-            sc_bdy = np.zeros((len(self.var_nam), sc_z_len, ind.shape[0], 
+            sc_bdy = np.zeros((len(self.var_nam), sc_z_len, ind.shape[0],
                               ind.shape[1]))
 
             # Loop over time entries from file f
@@ -489,15 +489,15 @@ class Extract:
                     sc_alt_arr[0] *= u_mask
                     sc_alt_arr[1] *= v_mask
                     # Average from to T-grid assuming C-grid stagger
-                    sc_array[0] = 0.5 * (sc_alt_arr[0][:,:,:,:-1] + 
+                    sc_array[0] = 0.5 * (sc_alt_arr[0][:,:,:,:-1] +
                                          sc_alt_arr[0][:,:,:,1:])
                     sc_array[1] = 0.5 * (sc_alt_arr[1][:,:,:-1,:] +
                                          sc_alt_arr[1][:,:,1:,:])
                 logger.info(clock() - start)
-		    
+
                 # Set land points to NaN and adjust with any scaling
                 # Factor offset
-                # Note using isnan/sum is relatively fast, but less than 
+                # Note using isnan/sum is relatively fast, but less than
                 # bottleneck external lib
                 self.logger.info('SC ARRAY MIN MAX : %s %s', np.nanmin(sc_array[0]), np.nanmax(sc_array[0]))
                 sc_array[0][t_mask == 0] = np.NaN
@@ -514,7 +514,7 @@ class Extract:
                     if not np.isnan(np.sum(meta_data[vn + 1]['os'])):
                         sc_array[1] += meta_data[vn + 1]['os']
 
-                # Now collapse the extracted data to an array 
+                # Now collapse the extracted data to an array
                 # containing only nearest neighbours to dest bdy points
                 # Loop over the depth axis
                 for dep in range(sc_z_len):
@@ -564,7 +564,7 @@ class Extract:
 
                 self.logger.info('DIST IND ZEROS %s', np.sum(data_ind == 0))
 
-                # Identify problem pts due to grid discontinuities 
+                # Identify problem pts due to grid discontinuities
                 # using dists >  lat
                 over_dist = np.sum(self.dist_tot[:] > 4)
                 if over_dist > 0:
@@ -580,7 +580,7 @@ class Extract:
                 # identify loc where all sc pts are land
                 nan_ind = np.sum(data_ind, 2) == 0
                 self.logger.info('NAN IND : %s ', np.sum(nan_ind))
-                
+
                 # Calc max zlevel to which data available on sc grid
                 data_ind = np.sum(nan_ind == 0, 0) - 1
                 # set land val to level 1 otherwise indexing problems
@@ -591,7 +591,7 @@ class Extract:
                 # index that can be used to speed up calcs
                 data_ind += np.arange(0, sc_z_len * self.num_bdy, sc_z_len)
 
-                # ? Attribute only used on first run so clear. 
+                # ? Attribute only used on first run so clear.
                 del self.dist_tot
 
             # weighted averaged onto new horizontal grid
@@ -602,7 +602,7 @@ class Extract:
                 self.logger.info(' dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
                 # Quick check to see we have not got bad values
                 if np.sum(dst_bdy == np.inf) > 0:
-                    raise RuntimeError('''Bad values found after 
+                    raise RuntimeError('''Bad values found after
                                           weighted averaging''')
                 # weight vector array and rotate onto dest grid
                 if self.key_vec:
@@ -622,7 +622,7 @@ class Extract:
                     # Finished first run operations
                     self.first = False
 
-                dst_bdy = (np.nansum(dst_bdy.flatten(1)[self.id_121] * 
+                dst_bdy = (np.nansum(dst_bdy.flatten(1)[self.id_121] *
                            self.tmp_filt, 2) / np.sum(self.tmp_filt *
                            tmp_valid, 2))
                 # Set land pts to zero
@@ -667,7 +667,7 @@ class Extract:
                     entry['data'] = np.concatenate((entry['data'],
                                                    np.array([data_out])))
                 entry['date'] = sc_time.time_counter[f] #count skipped
-        
+
         # Need stats on fill pts in z and horiz + missing pts...
     # end month
 #end year
@@ -675,14 +675,14 @@ class Extract:
 
 
     # Allows reference of two equal sized but misshapen arrays
-    # equivalent to Matlab alpha(beta(:)) 
+    # equivalent to Matlab alpha(beta(:))
     def _flat_ref(self, alpha, beta):
         """Extract input index elements from array and order them in Fotran array
         and returns the new array
-        
+
         Keywork arguments:
         alpha -- input array
-        beta -- index array 
+        beta -- index array
         """
         return alpha.flatten(1)[beta.flatten(1)].reshape(
                                                    beta.shape, order='F')
@@ -694,7 +694,7 @@ class Extract:
 
     def convert_date_to_destination_num(self, date):
         """Converts the input date to destination calender and returns the number
-        
+
         Keyword arguments:
         date -- input date
         """
@@ -702,14 +702,14 @@ class Extract:
 
     def cal_trans(self, source, dest, year, month):
         """Translate between calendars and return scale factor and number of days in month
-        
+
         Keyword arguments:
         source -- source calendar
         dest -- destination calendar
         year -- input year
-        month -- input month  
+        month -- input month
         """
-        vals = {'gregorian': 365. + isleap(year), 'noleap': 
+        vals = {'gregorian': 365. + isleap(year), 'noleap':
                 365., '360_day': 360.}
         if source not in vals.keys():
             raise ValueError('Unknown source calendar type: %s' %source)
@@ -720,7 +720,7 @@ class Extract:
             ed = monthrange(year, month)[1]
         # Calculate scale factor
         sf = vals[source] / vals[dest]
-        
+
         return sf, ed
 
     # BEWARE FORTRAN V C ordering
@@ -728,25 +728,3 @@ class Extract:
     #def _trig_reptile(self, trig, size):
     #    trig = np.transpose(trig, (2, 1, 0)) # Matlab 2 0 1
     #    return np.tile(trig, (1, size, 1)) # Matlab size 1 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
