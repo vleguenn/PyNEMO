@@ -468,7 +468,8 @@ class Extract:
                     varid_2 = self.fnames_2[self.var_nam[vn+1]]#nc_2.variables[self.var_nam[vn + 1]]
 
                 # Extract 3D scalar variables
-                if not self.isslab and not self.key_vec:
+		start = clock()
+		if not self.isslab and not self.key_vec:
                     self.logger.info(' 3D source array ')
                     sc_array[0] = varid[f:f+1 , :sc_z_len, j_run, i_run]
                 # Extract 3D vector variables
@@ -492,7 +493,8 @@ class Extract:
                                          sc_alt_arr[0][:,:,:,1:])
                     sc_array[1] = 0.5 * (sc_alt_arr[1][:,:,:-1,:] +
                                          sc_alt_arr[1][:,:,1:,:])
-
+                logger.info(clock() - start)
+		    
                 # Set land points to NaN and adjust with any scaling
                 # Factor offset
                 # Note using isnan/sum is relatively fast, but less than 

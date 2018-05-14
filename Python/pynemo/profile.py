@@ -373,17 +373,17 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 
                 date_start = datetime(year, month, 1, 0, 0, 0)
                 #date_end = datetime(year, month, monthrange(year, month)[1], 24, 60, 60)
-	            date_end = datetime(year, month, monthrange(year, month)[1], 23, 59, 59) + timedelta(seconds=1) # days, seconds. jelt: hours/mins/sec can not be 24/24/60
+	        date_end = datetime(year, month, monthrange(year, month)[1], 23, 59, 59) + timedelta(seconds=1) # days, seconds. jelt: hours/mins/sec can not be 24/24/60
                 time_num_start = extract_t.convert_date_to_destination_num(date_start)
                 time_num_end = extract_t.convert_date_to_destination_num(date_end)
                 logger.debug('print time stuff')
                 logger.debug('len(extract_t.sc_time.time_counter): ',len(extract_t.sc_time.time_counter))
                 logger.debug('time_counter: ', time_counter)
-		        logger.debug('date_start: ', date_start)
-		        logger.debug('date_end: ',  date_end )
-		        logger.debug('time_num_start: ', time_num_start )
-		        logger.debug('time_num_end: ', time_num_end )
-	            logger.debug('extract_t.sc_time.time_counter: %s',extract_t.sc_time.time_counter)
+		logger.debug('date_start: ', date_start)
+		logger.debug('date_end: ',  date_end )
+		logger.debug('time_num_start: ', time_num_start )
+		logger.debug('time_num_end: ', time_num_end )
+	        logger.debug('extract_t.sc_time.time_counter: %s',extract_t.sc_time.time_counter)
                 if monthrange(year, month)[1] == 29:
                     interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
                     time_counter = interp1fn(np.append(np.arange(0,
