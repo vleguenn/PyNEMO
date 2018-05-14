@@ -11,6 +11,8 @@ $Last commit on:$
 # pylint: disable=no-name-in-module
 
 # External Imports
+from time import clock
+import logging
 from calendar import monthrange, isleap
 from datetime import datetime
 import numpy as np
@@ -27,6 +29,8 @@ import logging
 # Local Imports
 import nemo_bdy_grid_angle
 from utils.nemo_bdy_lib import sub2ind
+
+logger = logging.getLogger(__name__)
 
 #TODO: Convert the 'F' ordering to 'C'
 class Extract:
@@ -501,7 +505,7 @@ class Extract:
                 # bottleneck external lib
                 self.logger.info('SC ARRAY MIN MAX : %s %s', np.nanmin(sc_array[0]), np.nanmax(sc_array[0]))
                 sc_array[0][t_mask == 0] = np.NaN
-                self.logger.info( 'SC ARRAY MIN MAX : %s %s', np.nanmin(sc_array[0]), np.nanmax(sc_array[0]))
+                self.logger.info( 'SC ARRAY MIN MAX (masked NaNs) : %s %s', np.nanmin(sc_array[0]), np.nanmax(sc_array[0]))
                 if not np.isnan(np.sum(meta_data[vn]['sf'])):
                     sc_array[0] *= meta_data[vn]['sf']
                 if not np.isnan(np.sum(meta_data[vn]['os'])):
