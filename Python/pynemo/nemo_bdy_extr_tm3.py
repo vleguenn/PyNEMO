@@ -647,8 +647,8 @@ class Extract:
                     dst_bdy += ((dst_bdy == 0) *
                                 dst_bdy[data_ind].repeat(sc_z_len))
                     # Weighted averaged on new vertical grid
-                    dst_bdy = (dst_bdy[self.z_ind[:,0]] * self.z_dist[:,0] +
-                               dst_bdy[self.z_ind[:,1]] * self.z_dist[:,1])
+                    #dst_bdy = (dst_bdy[self.z_ind[:,0]] * self.z_dist[:,0] +
+                    #           dst_bdy[self.z_ind[:,1]] * self.z_dist[:,1])  # jelt: comment out vertical interpolation
                     data_out = dst_bdy.reshape(self.dst_dep.shape, order='F')
 
                     # If z-level replace data below bed !!! make stat
