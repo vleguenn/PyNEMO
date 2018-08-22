@@ -127,10 +127,17 @@ class GridAngle:
             case = self.M_T
         else:
             case = self.CD_T
-        zlam = np.float64(self.nc['glam' + case][d, j:jj, i:ii]) #.variables['glam' + case][d, j:jj, i:ii])
+        if d != None:
+            zlam = np.float64(self.nc['glam' + case][d, j:jj, i:ii]) #.variables['glam' + case][d, j:jj, i:ii])
+        else:
+            zlam = np.float64(self.nc['glam' + case][ j:jj, i:ii]) 
+
         if single:
             return zlam
-        zphi = np.float64(self.nc['gphi' + case][d, j:jj, i:ii])#.variables['gphi' + case][d, j:jj, i:ii])
+        if d != None: # TODO: make this into a generic interface ... look up overloading
+            zphi = np.float64(self.nc['gphi' + case][d, j:jj, i:ii])#.variables['gphi' + case][d, j:jj, i:ii])
+        else:
+            zphi = np.float64(self.nc['gphi' + case][j:jj, i:ii])
        
         return zlam, zphi 
 

@@ -10,6 +10,7 @@ $Last commit on:$
 # pylint: disable=E1103
 # pylint: disable=no-name-in-module
 
+import matplotlib.pyplot as plt
 # External Imports
 from time import clock
 import logging
@@ -99,7 +100,13 @@ class Extract:
         SC.lat = SC.lat.squeeze()
 
         # Make function of grid resolution
-        fr = 0.1
+        lon_diff = np.nanmean(np.diff(SC.lon,axis=1))
+        lat_diff = np.nanmean(np.diff(SC.lat,axis=0))
+        lon_diff2 = np.nanmean(np.diff(DC.lonlat['t']['lon'],axis=1))
+        lat_diff2 = np.nanmean(np.diff(DC.lonlat['t']['lat'],axis=0))
+        s_ratio = np.max(lon_diff,lat_diff)/np.max(lon_diff2,lat_diff2)
+        fr = np.max(lon_diff,lat_diff)*2.0
+
 
         # infer key_vec
         if Grid_2 is not None:
@@ -313,6 +320,7 @@ class Extract:
 
             # Find next adjacent point in the vertical
             z_ind[:, 0] = nn_id
+            # TODO: there are nans in dst_dep_rv !?
             z_ind[sc_z[nn_id] > dst_dep_rv[:], 1] = nn_id[sc_z[nn_id] >
                                                           dst_dep_rv[:]] - 1
             z_ind[sc_z[nn_id] <= dst_dep_rv[:], 1] = nn_id[sc_z[nn_id] <=
@@ -354,6 +362,7 @@ class Extract:
         self.sc_time = sc_time
         self.tmp_filt = tmp_filt
         self.dist_tot = dist_tot
+        self.s_ratio=s_ratio
 
         self.d_bdy = {}
         for v in range(self.nvar):
@@ -423,13 +432,27 @@ class Extract:
         if self.first:
             nc_3 = GetFile(self.settings['src_msk'])
             varid_3 = nc_3['tmask']
-            t_mask = varid_3[:1, :sc_z_len, j_run, i_run]
+            if varid_3.ndim==3: #TODO: need to make this a generic interface i.e. overload the reader function?
+                t_mask = np.expand_dims(varid_3[:sc_z_len, j_run, i_run],axis=0)
+            elif varid_3.ndim==4:
+                t_mask = varid_3[:, :sc_z_len, j_run, i_run]
+            else:
+                self.logger.error('Issue with tmask dimension')
+
             if self.key_vec:
-                varid_3 = nc_3['umask']
-                u_mask = varid_3[:1, :sc_z_len, j_run, extended_i]
-                varid_3 = nc_3['vmask']
-                v_mask = varid_3[:1, :sc_z_len, extended_j, i_run]
-            nc_3.close()
+                if varid_3.ndim==3: #TODO: need to make this a generic interface i.e. overload the reader function?
+                    varid_3 = nc_3['umask']
+                    u_mask = np.squeeze(varid_3[:sc_z_len, j_run, extended_i])
+                    varid_3 = nc_3['vmask']
+                    v_mask = np.squeeze(varid_3[:sc_z_len, extended_j, i_run])
+                elif varid_3.ndim==4:
+                    varid_3 = nc_3['umask']
+                    u_mask = np.squeeze(varid_3[:, :sc_z_len, j_run, extended_i])
+                    varid_3 = nc_3['vmask']
+                    v_mask = np.squeeze(varid_3[:, :sc_z_len, extended_j, i_run])
+                else:
+                    self.logger.error('Issue with u/vmask dimension')
+                nc_3.close()
 
         # Identify missing values and scale factors if defined
         meta_data = []
@@ -536,7 +559,6 @@ class Extract:
                         # Include... meridinal direction, ie ij -> n
                         sc_bdy[vn+1, dep, :] = (tmp_arr[1][ind[:]] * self.gcos +
                                                 tmp_arr[0][ind[:]] * self.gsin)
-
                 # End depths loop
                 self.logger.info(' END DEPTHS LOOP ')
             # End Looping over vars
@@ -599,6 +621,7 @@ class Extract:
                 del self.dist_tot
 
             # weighted averaged onto new horizontal grid
+
             for vn in range(self.nvar):
                 self.logger.info(' sc_bdy %s %s', np.nanmin(sc_bdy), np.nanmax(sc_bdy))
                 dst_bdy = (np.nansum(sc_bdy[vn,:,:,:] * dist_wei, 2) /
@@ -625,10 +648,11 @@ class Extract:
                                             dst_bdy.flatten(1)[self.id_121]))
                     # Finished first run operations
                     self.first = False
-
-                dst_bdy = (np.nansum(dst_bdy.flatten(1)[self.id_121] *
-                           self.tmp_filt, 2) / np.sum(self.tmp_filt *
+                for cnt in range(int(self.s_ratio*3)):
+                    dst_bdy = (np.nansum(dst_bdy.flatten(1)[self.id_121] *
+                           self.tmp_filt, 2) / np.nansum(self.tmp_filt *
                            tmp_valid, 2))
+	            dst_bdy[nan_ind] = np.nan
                 # Set land pts to zero
 
                 self.logger.info(' pre dst_bdy[nan_ind] %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
@@ -638,13 +662,16 @@ class Extract:
                 # Remove any data on dst grid that is in land
 		if np.sum(self.bdy_z)>0: # jelt: added the if to the statement since it didn't work for empty self.bdy_z
 			dst_bdy[:,np.isnan(self.bdy_z)] = 0
+                # jdha: had to put the following in to remove NaNs read in
+                dst_bdy=np.where(np.isnan(dst_bdy),0.,dst_bdy)
+
                 self.logger.info(' 3 dst_bdy %s %s', np.nanmin(dst_bdy), np.nanmax(dst_bdy))
 
                 # If we have depth dimension
                 if not self.isslab:
                     # If all else fails fill down using deepest pt
                     dst_bdy = dst_bdy.flatten(1)
-                    dst_bdy += ((dst_bdy == 0) *
+                    dst_bdy += ((dst_bdy == 0.) *
                                 dst_bdy[data_ind].repeat(sc_z_len))
                     # Weighted averaged on new vertical grid
                     #dst_bdy = (dst_bdy[self.z_ind[:,0]] * self.z_dist[:,0] +
@@ -658,7 +685,6 @@ class Extract:
                                           len(self.bdy_z), order='F')
                     ind_z -= self.dst_dep
                     ind_z = ind_z < 0
-
                     data_out[ind_z] = np.NaN
                 else:
                     data_out = dst_bdy

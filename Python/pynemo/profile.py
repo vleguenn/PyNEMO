@@ -37,6 +37,7 @@
 # pylint: disable=E1103
 # pylint: disable=no-name-in-module
 
+import matplotlib.pyplot as plt
 #External imports
 from time import clock
 from calendar import monthrange
@@ -83,6 +84,7 @@ class Grid(object):
         self.fname_2 = None
         self.source_time = None
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 def process_bdy(setup_filepath=0, mask_gui=False):
     """ Main entry to the processing of the bdy
@@ -92,6 +94,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     """
     #Logger
     logger.info('START')
+   
 
     start = clock()
     SourceCoord = source_coord.SourceCoord()
@@ -170,8 +173,8 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     # dyn 3d over 1st rim
     # dyn 3d frs over rw
 
-    grid_u.bdy_i = grid_u.bdy_i[grid_u.bdy_r == 0, :]
-    grid_v.bdy_i = grid_v.bdy_i[grid_v.bdy_r == 0, :]
+    #grid_u.bdy_i = grid_u.bdy_i[grid_u.bdy_r == 0, :]
+    #grid_v.bdy_i = grid_v.bdy_i[grid_v.bdy_r == 0, :]
     # Ought to look at this
     bdy_r = grid_t.bdy_r
 
@@ -189,7 +192,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     start = clock()
     # how grid broken up, long/lats
     nc = GetFile(settings['src_zgr'])
-    SourceCoord.zt = nc['gdept_0'][:]
+    SourceCoord.zt = np.expand_dims(np.squeeze(nc['gdept_0'][:]),axis=0)
     nc.close()
 
     logger.info(clock() - start)
@@ -210,12 +213,13 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     DstCoord.depths = {'t': {}, 'u': {}, 'v': {}}
     #temp = ['t', 'u', 'v']
     #temp2 = ['bdy_hbat', 'bdy_dz', 'bdy_z']
-
+    
     for g in 't', 'u', 'v':
         DstCoord.depths[g]['bdy_hbat'] = np.nanmax(zp['w' + g], axis=0)
-        DstCoord.depths[g]['bdy_dz'] = np.diff(zp['w' + g], axis=0)
-        DstCoord.depths[g]['bdy_z'] = zp[g]
-
+        #DstCoord.depths[g]['bdy_dz'] = np.diff(zp['w' + g], axis=0)
+        #DstCoord.depths[g]['bdy_z'] = zp[g]
+        DstCoord.depths[g]['bdy_z'] = np.swapaxes(np.tile(SourceCoord.zt[:,:],[num_bdy[g], 1]),0,1)
+        DstCoord.depths[g]['bdy_dz'] = np.diff(np.swapaxes(np.tile(SourceCoord.zt[:,:],[num_bdy[g], 1]),0,1),axis=0)
     # Might want to stake up some heretics now
     logger.info('horizontal grid info')
     start = clock()
@@ -384,26 +388,42 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 		logger.debug('time_num_start: ', time_num_start )
 		logger.debug('time_num_end: ', time_num_end )
 	        logger.debug('extract_t.sc_time.time_counter: %s',extract_t.sc_time.time_counter)
-                if monthrange(year, month)[1] == 29:
-                    interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
-                    time_counter = interp1fn(np.append(np.arange(0,
+                # TODO: need to handle cases where the time_counter may be much larger than
+                if time_counter[1]-time_counter[0] == 86400.*5:
+                    time_interp = True
+                    if monthrange(year, month)[1] == 29:
+                        interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
+                        time_counter = interp1fn(np.append(np.arange(0,
                                                                  len(extract_t.sc_time.time_counter)-2+0.2,
                                                                  0.2),
                                                        np.arange(len(extract_t.sc_time.time_counter)-2+1/6.0,
                                                                  len(extract_t.sc_time.time_counter)-1+1/6.0,
                                                                  1/6.0)))
                                             #added 0.2 to include boundary
+                    else:
+                        interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
+                        #added 0.2 to include boundary
+                        time_counter = interp1fn(np.arange(0, len(extract_t.sc_time.time_counter)-1+0.2, 0.2))
                 else:
+                    time_interp = False
+                    # no interpolation
                     interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
-                    #added 0.2 to include boundary
-                    time_counter = interp1fn(np.arange(0, len(extract_t.sc_time.time_counter)-1+0.2, 0.2))
+                    time_counter = interp1fn(np.arange(0, len(extract_t.sc_time.time_counter), 1))
 
                 ft = np.where(((time_counter >= time_num_start) & (time_counter <= time_num_end)))
+               
                 time_counter = time_counter[ft]
 		print 'jelt: interpolated between limits: time_counter: {}, ft {}'.format( time_counter, ft)
                 # interpolate the data to daily period in a month
-                interpolate_data(extract_t, year, month, ft)
-
+                if time_interp == True:
+                    interpolate_data(extract_t, year, month, ft)
+                else: # trim first and last entry [1:-1]
+                    extract_t.d_bdy['votemper'][year]['data']=extract_t.d_bdy['votemper'][year]['data'][1:-1,:,:]
+                    extract_t.d_bdy['vosaline'][year]['data']=extract_t.d_bdy['vosaline'][year]['data'][1:-1,:,:]
+                    #print here
+                    
+                    
+                    
                 output_filename_t = Setup.settings['dst_dir']+Setup.settings['fn']+ \
                                     '_bdyT_y'+str(year)+'m'+"%02d" % month+'.nc'
                 logger.info('Outputing T file:%s', output_filename_t)
@@ -448,10 +468,10 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 
                 if Setup.settings['ice']:
                     extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month,
-                                           ft, num_bdy, time_counter, unit_origin)
+                                           ft, num_bdy, time_counter, unit_origin, time_interp)
                 #-------------------------bt------------------------------------------------------
                 extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
-                                      ft, num_bdy, time_counter, unit_origin)
+                                      ft, num_bdy, time_counter, unit_origin, time_interp)
             #Eco
 
             #U, V
@@ -464,7 +484,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 grid_u2.max_j = DstCoord.lonlat['t']['lon'].shape[0]
                 grid_u2.fname_2 = grid_v.source_time
                 extract_write_u_data(Setup, SourceCoord, DstCoord, grid_u, grid_u2, year, month,
-                                     ft, num_bdy, time_counter, unit_origin)
+                                     ft, num_bdy, time_counter, unit_origin, time_interp)
                 #----------------------------------------------V----------------------------------
                 grid_v2 = Grid()
                 grid_v2.grid_type = 'v'
@@ -478,7 +498,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 grid_uv.bdy_r = grid_v.bdy_r
                 grid_uv.source_time = grid_u.source_time
                 extract_write_v_data(Setup, SourceCoord, DstCoord, grid_uv, grid_v2, year, month,
-                                     ft, num_bdy, time_counter, unit_origin)
+                                     ft, num_bdy, time_counter, unit_origin, time_interp)
 
 
 def _get_mask(Setup, mask_gui):
@@ -525,7 +545,7 @@ def _get_mask(Setup, mask_gui):
     return bdy_msk
 
 def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, ft, num_bdy,
-                           time_counter, unit_origin):
+                           time_counter, unit_origin, time_interp):
     """ writes the ice data to file"""
     source_coord_var_copy = copy.deepcopy(SourceCoord)
     source_coord_var_copy.zt = np.zeros([1, 1])
@@ -538,6 +558,13 @@ def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, 
     extract_ice.extract_month(year, month)
     interpolate_data(extract_ice, year, month, ft) #interpolate the data to daily period in a month
 
+    if time_interp == True: 
+        interpolate_data(extract_ice, year, month, ft)
+    else: # trim first and last entry [1:-1]
+        extract_ice.d_bdy['iicethic'][year]['data']=extract_ice.d_bdy['iicethic'][year]['data'][1:-1,:,:]
+        extract_ice.d_bdy['ileadfra'][year]['data']=extract_ice.d_bdy['ileadfra'][year]['data'][1:-1,:,:]
+        extract_ice.d_bdy['isnowthi'][year]['data']=extract_ice.d_bdy['isnowthi'][year]['data'][1:-1,:,:]
+
     output_filename_t = Setup.settings['dst_dir']+Setup.settings['fn']+'_bdyT_y'+str(year)+ \
                         'm'+"%02d" % month+'.nc'
     logger.info('Outputing ICE values to T file:%s', output_filename_t)
@@ -549,7 +576,7 @@ def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, 
                                       extract_ice.d_bdy['isnowthi'][year]['data'])
 
 def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
-                          ft, num_bdy, time_counter, unit_origin):
+                          ft, num_bdy, time_counter, unit_origin, time_interp):
     """Writes BT data file"""
     SourceCoordLatLon = copy.deepcopy(SourceCoord)
     SourceCoordLatLon.zt = np.zeros([1, 1])
@@ -564,7 +591,12 @@ def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
                                           years=year,
                                           months=month)
     extract_t.extract_month(year, month)
-    interpolate_data(extract_t, year, month, ft) #interpolate the data to daily period in a month
+    #interpolate_data(extract_t, year, month, ft) #interpolate the data to daily period in a month
+    if time_interp == True: 
+        interpolate_data(extract_t, year, month, ft)
+    else: # trim first and last entry [1:-1]
+        extract_t.d_bdy['sossheig'][year]['data']=extract_t.d_bdy['sossheig'][year]['data'][1:-1,:,:]
+
     output_filename_bt = Setup.settings['dst_dir']+ \
                          Setup.settings['fn']+ \
                          '_bt_bdyT_y'+str(year)+'m'+"%02d" % month+'.nc'
@@ -590,14 +622,19 @@ def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'time_counter', time_counter)
 
 def extract_write_u_data(setup_var, source_coord_var, dst_coord_var, grid_u, grid_u2, year,
-                         month, ft, num_bdy, time_counter, unit_origin):
+                         month, ft, num_bdy, time_counter, unit_origin, time_interp):
     """ Extracts the U component of velocity data, interpolates the data for a month and writes
       data to netCDF file"""
     extract_u = nemo_bdy_extr_tm3.Extract(setup_var.settings, source_coord_var, dst_coord_var,
                                           grid_u, ['vozocrtx', 'vomecrty'], Grid_2=grid_u2,
                                           years=year, months=month)
     extract_u.extract_month(year, month)
-    interpolate_data(extract_u, year, month, ft)
+    #interpolate_data(extract_u, year, month, ft) # TODO: sort out interpolation routine
+    if time_interp == True: 
+        interpolate_data(extract_u, year, month, ft)
+    else: # trim first and last entry [1:-1]
+        extract_u.d_bdy['vozocrtx'][year]['data']=extract_u.d_bdy['vozocrtx'][year]['data'][1:-1,:,:]
+
     nanindex = np.isnan(extract_u.d_bdy['vozocrtx'][year]['data'])
     tmp_vozocrtx = extract_u.d_bdy['vozocrtx'][year]['data']
     tmp_vozocrtx[nanindex] = setup_var.settings['fv']
@@ -636,14 +673,19 @@ def extract_write_u_data(setup_var, source_coord_var, dst_coord_var, grid_u, gri
     #-------------------------------------------End U-------------------------------
 
 def extract_write_v_data(setup_var, source_coord_var, dst_coord_var, grid_v, grid_v2, year, month,
-                         ft, num_bdy, time_counter, unit_origin):
+                         ft, num_bdy, time_counter, unit_origin, time_interp):
     """ Extracts the V component of velocity data, interpolates the data for a month and writes
       data to netCDF file"""
     extract_v = nemo_bdy_extr_tm3.Extract(setup_var.settings, source_coord_var, dst_coord_var,
                                           grid_v, ['vozocrtx', 'vomecrty'], Grid_2=grid_v2,
                                           years=year, months=month)
     extract_v.extract_month(year, month) #return values in vozocrtx instead of vomecrty
-    interpolate_data(extract_v, year, month, ft)
+    #interpolate_data(extract_v, year, month, ft)
+    if time_interp == True: 
+        interpolate_data(extract_v, year, month, ft)
+    else: # trim first and last entry [1:-1]
+        extract_v.d_bdy['vozocrtx'][year]['data']=extract_v.d_bdy['vozocrtx'][year]['data'][1:-1,:,:]
+
     nanindex = np.isnan(extract_v.d_bdy['vozocrtx'][year]['data'])
     tmp_vozocrty = extract_v.d_bdy['vozocrtx'][year]['data']
     tmp_vozocrty[nanindex] = setup_var.settings['fv']
@@ -761,7 +803,6 @@ def interpolate_data(extract, year, month, time_indexes):
     """This method does a 1D interpolation of daily mean data of a month"""
 
     for variable_name in extract.d_bdy:
-	print 'month type {}'.format(type(month))
 	#print 'jelt: variable name {}, year+1 {}, month {},  shape(extract.d_bdy[variable_name][year+1][data]) {}'.format(  variable_name, year+1, month, np.shape(extract.d_bdy[variable_name][str(year+1)]['data'] ))
 	print 'jelt: variable name {}, year {}, month {},  shape(extract.d_bdy[variable_name][year][data]) {}'.format(  variable_name, year, month, np.shape(extract.d_bdy[variable_name][year]['data'] ))
         lon_len = len(extract.d_bdy[variable_name][year]['data'][:, 0, 0])
@@ -775,6 +816,7 @@ def interpolate_data(extract, year, month, time_indexes):
         else:
             interp1fn = interp1d(lon, lat, axis=0)
             extract.d_bdy[variable_name][year]['data'] = interp1fn(np.squeeze(np.asarray(np.mat(np.arange(0, lon_len-1+0.2, 0.2)).transpose())))      #added 0.2 to include boundary
+            #extract.d_bdy[variable_name][year]['data'] = interp1fn(np.squeeze(np.asarray(np.mat(np.arange(0, lon_len-1, 1)).transpose())))      #added 0.2 to include boundary
         tmp = np.squeeze(extract.d_bdy[variable_name][year]['data'][time_indexes, :, :])
         if len(tmp.shape) == 2:
             tmp = tmp.reshape(tmp.shape+(1L, ))
