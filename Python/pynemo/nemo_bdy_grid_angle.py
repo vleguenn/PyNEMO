@@ -24,6 +24,7 @@ class GridAngle:
                   'v': [0, 0, -1, 0], 'f': [0, 1, 0, 0]}
     MAP = {'t': 'v', 'u': 'f', 'v': 'f', 'f': 'u'}
 
+    logger = logging.getLogger(__name__)
     def __init__(self, coord_fname, imin, imax, jmin, jmax, cd_type):
         # set case and check validity
         self.CD_T = cd_type.lower()
@@ -32,7 +33,7 @@ class GridAngle:
             raise ValueError('Unknown grid grid_type %s' %cd_type)
         self.M_T = self.MAP[self.CD_T]
         
-        self.logger.debug( 'Grid Angle: ', self.CD_T)
+        self.logger.debug( 'Grid Angle: %s', self.CD_T)
 
         # open coord file 
         self.nc = GetFile(coord_fname)

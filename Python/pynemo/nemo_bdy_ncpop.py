@@ -18,6 +18,7 @@ def write_data_to_file(filename, variable_name, data):
     ncid = Dataset(filename, 'a', clobber=False, format='NETCDF4')
     count = data.shape
 
+    print data.shape
     three_dim_variables = ['votemper', 'vosaline', 'N1p', 'N3n', 'N5s']
     two_dim_variables = ['sossheig', 'vobtcrtx', 'vobtcrty', 'iicethic', 'ileadfra', 'isnowthi']
 

@@ -62,7 +62,8 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
     varlatID = ncid.createVariable('nav_lat', 'f4', ('y', 'x', ))
 
     if grd in ['E']:
-        varztID = ncid.createVariable('deptht', 'f4', ('z', 'yb', 'xb', ))
+        varztID = ncid.createVariable('gdept', 'f4', ('z', 'yb', 'xb', ))
+        vardzID = ncid.createVariable('e3t', 'f4', ('z', 'yb', 'xb', ))
         varmskID = ncid.createVariable('bdy_msk', 'f4', ('y', 'x', ), fill_value=fv)
         varN1pID = ncid.createVariable('N1p', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
                                        fill_value=fv)
@@ -71,7 +72,8 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
         varN5sID = ncid.createVariable('N5s', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
                                        fill_value=fv)
     elif grd in ['T', 'I']:
-        varztID = ncid.createVariable('deptht', 'f4', ('z', 'yb', 'xb', ))
+        varztID = ncid.createVariable('gdept', 'f4', ('z', 'yb', 'xb', ))
+        vardzID = ncid.createVariable('e3t', 'f4', ('z', 'yb', 'xb', ))
         varmskID = ncid.createVariable('bdy_msk', 'f4', ('y', 'x', ), fill_value=fv)
         vartmpID = ncid.createVariable('votemper', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
                                        fill_value=fv)
@@ -85,13 +87,15 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
             varisnID = ncid.createVariable('isnowthi', 'f4', ('time_counter', 'yb', 'xb',),
                                            fill_value=fv)
     elif grd == 'U':
-        varztID = ncid.createVariable('depthu', 'f4', ('z', 'yb', 'xb', ), fill_value=fv)
+        varztID = ncid.createVariable('gdepu', 'f4', ('z', 'yb', 'xb', ), fill_value=fv)
+        vardzID = ncid.createVariable('e3u', 'f4', ('z', 'yb', 'xb', ), fill_value=fv)
         varbtuID = ncid.createVariable('vobtcrtx', 'f4', ('time_counter', 'yb', 'xb', ),
                                        fill_value=fv)
         vartouID = ncid.createVariable('vozocrtx', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
                                        fill_value=fv)
     elif grd == 'V':
-        varztID = ncid.createVariable('depthv', 'f4', ('z', 'yb', 'xb', ))
+        varztID = ncid.createVariable('gdepv', 'f4', ('z', 'yb', 'xb', ))
+        vardzID = ncid.createVariable('e3v', 'f4', ('z', 'yb', 'xb', ))
         varbtvID = ncid.createVariable('vobtcrty', 'f4', ('time_counter', 'yb', 'xb', ),
                                        fill_value=fv)
         vartovID = ncid.createVariable('vomecrty', 'f4', ('time_counter', 'z', 'yb', 'xb',),
@@ -151,9 +155,14 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
     varnbrID.long_name = 'Bdy discrete distance'
     if grd == 'E':
         varztID.axis = 'Depth'
-        varztID.short_name = 'deptht'
+        varztID.short_name = 'gdept'
         varztID.units = 'm'
         varztID.long_name = 'Depth'
+
+        vardzID.axis = 'Depth'
+        vardzID.short_name = 'e3t'
+        vardzID.units = 'm'
+        vardzID.long_name = 'Depth'
 
         varmskID.short_name = 'bdy_msk'
         varmskID.units = 'unitless'
@@ -176,9 +185,14 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
 
     if grd in ['T', 'I']:
         varztID.axis = 'Depth'
-        varztID.short_name = 'deptht'
+        varztID.short_name = 'gdept'
         varztID.units = 'm'
         varztID.long_name = 'Depth'
+
+        vardzID.axis = 'Depth'
+        vardzID.short_name = 'e3t'
+        vardzID.units = 'm'
+        vardzID.long_name = 'Depth'
 
         varmskID.short_name = 'bdy_msk'
         varmskID.units = 'unitless'
@@ -215,6 +229,11 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
         varztID.units = 'm'
         varztID.long_name = 'Depth'
 
+        vardzID.axis = 'Depth'
+        vardzID.short_name = 'e3u'
+        vardzID.units = 'm'
+        vardzID.long_name = 'Depth'
+
         varbtuID.units = 'm/s'
         varbtuID.short_name = 'vobtcrtx'
         varbtuID.long_name = 'Thickness-weighted depth-averaged zonal Current'
@@ -230,6 +249,11 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
         varztID.short_name = 'depthv'
         varztID.units = 'm'
         varztID.long_name = 'Depth'
+
+        vardzID.axis = 'Depth'
+        vardzID.short_name = 'e3v'
+        vardzID.units = 'm'
+        vardzID.long_name = 'Depth'
 
         varbtvID.units = 'm/s'
         varbtvID.short_name = 'vobtcrty'

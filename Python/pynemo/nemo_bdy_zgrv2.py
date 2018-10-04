@@ -88,7 +88,6 @@ class Depth:
                 #wrk2 = nc['gdepw'][0,k,:,:]#nc.variables['gdepw'][0,k,:,:]
                 #print 'e3t shape: ', nc['e3t_0'][:].shape
                 [wrk1, wrk2] = tmp_zt[k,:,:], tmp_zw[k,:,:] 
-            print k, nz, wrk2[0]
 
             # Replace deep levels that are not used with NaN
             wrk2[mbathy + 1 < k + 1] = np.NaN

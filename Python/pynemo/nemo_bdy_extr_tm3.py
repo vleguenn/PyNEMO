@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 class Extract:
 
     def __init__(self, setup, SourceCoord, DstCoord, Grid, var_nam,
-                 Grid_2=None, fnames_2=None, years=[1979], months=[11]):
+                 Grid_2=None, fnames_2=None):
         """Initialises the Extract object.
 
         Keyword arguments:
@@ -57,10 +57,11 @@ class Extract:
         self.settings = setup
         SC = copy.deepcopy(SourceCoord)
         DC = copy.deepcopy(DstCoord)
-        if self.g_type == 't':  # this should be removed as bdy_r needs to be defined for all grids
-            bdy_r = copy.deepcopy(Grid.bdy_r)
-        else:
+        if self.g_type == 'z':  # this should be removed as bdy_r needs to be defined for all grids
             bdy_r = copy.deepcopy(Grid.bdy_r[Grid.bdy_r == 0])
+        else:
+            bdy_r = copy.deepcopy(Grid.bdy_r)
+
 
         self.fnames_2 = fnames_2 # second source times dict
         sc_time = Grid.source_time
@@ -104,8 +105,8 @@ class Extract:
         lat_diff = np.nanmean(np.diff(SC.lat,axis=0))
         lon_diff2 = np.nanmean(np.diff(DC.lonlat['t']['lon'],axis=1))
         lat_diff2 = np.nanmean(np.diff(DC.lonlat['t']['lat'],axis=0))
-        s_ratio = np.max(lon_diff,lat_diff)/np.max(lon_diff2,lat_diff2)
-        fr = np.max(lon_diff,lat_diff)*2.0
+        s_ratio = np.maximum(lon_diff,lat_diff)/np.maximum(lon_diff2,lat_diff2)
+        fr = np.maximum(lon_diff,lat_diff)*2.0
 
 
         # infer key_vec
@@ -257,6 +258,7 @@ class Extract:
             r_id = bdy_r != r
             rr_id = bdy_r == r
             tmp_lon = dst_lon.copy()
+            print tmp_lon.shape, r_id.shape, rr_id.shape
             tmp_lon[r_id] = -9999
             tmp_lat = dst_lat.copy()
             tmp_lat[r_id] = -9999
@@ -740,7 +742,8 @@ class Extract:
         month -- input month
         """
         vals = {'gregorian': 365. + isleap(year), 'noleap':
-                365., '360_day': 360.}
+                365., '360_day': 360., 'proleptic_gregorian': 365. + isleap(year),
+                '365_day': 365. , 'standard': 365. + isleap(year)}
         if source not in vals.keys():
             raise ValueError('Unknown source calendar type: %s' %source)
         # Get month length

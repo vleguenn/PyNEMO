@@ -194,7 +194,10 @@ def process_bdy(setup_filepath=0, mask_gui=False):
     nc = GetFile(settings['src_zgr'])
     SourceCoord.zt = np.expand_dims(np.squeeze(nc['gdept_0'][:]),axis=0)
     nc.close()
-
+    SourceCoord.dz = np.zeros_like(SourceCoord.zt)
+    SourceCoord.dz[0,0] = SourceCoord.zt[0,0]*2.
+    for k in np.arange(1,len(SourceCoord.dz[0,:])):
+        SourceCoord.dz[0,k] = (SourceCoord.zt[0,k] - np.sum(SourceCoord.dz[0,:k]))*2.
     logger.info(clock() - start)
     logger.info('generating depth info')
     start = clock()
@@ -219,7 +222,8 @@ def process_bdy(setup_filepath=0, mask_gui=False):
         #DstCoord.depths[g]['bdy_dz'] = np.diff(zp['w' + g], axis=0)
         #DstCoord.depths[g]['bdy_z'] = zp[g]
         DstCoord.depths[g]['bdy_z'] = np.swapaxes(np.tile(SourceCoord.zt[:,:],[num_bdy[g], 1]),0,1)
-        DstCoord.depths[g]['bdy_dz'] = np.diff(np.swapaxes(np.tile(SourceCoord.zt[:,:],[num_bdy[g], 1]),0,1),axis=0)
+        #DstCoord.depths[g]['bdy_dz'] = np.diff(np.swapaxes(np.tile(SourceCoord.zt[:,:],[num_bdy[g], 1]),0,1),axis=0)
+        DstCoord.depths[g]['bdy_dz'] = np.swapaxes(np.tile(SourceCoord.dz[:,:],[num_bdy[g], 1]),0,1)
     # Might want to stake up some heretics now
     logger.info('horizontal grid info')
     start = clock()
@@ -366,9 +370,9 @@ def process_bdy(setup_filepath=0, mask_gui=False):
         for month in months:
 
             if Setup.settings['tra']:
+                print grid_t.grid_type
                 extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings, SourceCoord, DstCoord,
-                                                      grid_t, ['votemper', 'vosaline'],
-                                                      years=year, months=month)
+                                                      grid_t, ['votemper', 'vosaline'])
                 extract_t.extract_month(year, month)
                 #Get Date as a Number used in interpolation
                 time_counter = np.zeros([len(extract_t.sc_time.time_counter)])
@@ -381,12 +385,12 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 time_num_start = extract_t.convert_date_to_destination_num(date_start)
                 time_num_end = extract_t.convert_date_to_destination_num(date_end)
                 logger.debug('print time stuff')
-                logger.debug('len(extract_t.sc_time.time_counter): ',len(extract_t.sc_time.time_counter))
-                logger.debug('time_counter: ', time_counter)
-		logger.debug('date_start: ', date_start)
-		logger.debug('date_end: ',  date_end )
-		logger.debug('time_num_start: ', time_num_start )
-		logger.debug('time_num_end: ', time_num_end )
+                logger.debug('len(extract_t.sc_time.time_counter): %s',len(extract_t.sc_time.time_counter))
+                logger.debug('time_counter: %s', time_counter)
+		logger.debug('date_start: %s', date_start)
+		logger.debug('date_end: %s',  date_end )
+		logger.debug('time_num_start: %s', time_num_start )
+		logger.debug('time_num_end: %s', time_num_end )
 	        logger.debug('extract_t.sc_time.time_counter: %s',extract_t.sc_time.time_counter)
                 # TODO: need to handle cases where the time_counter may be much larger than
                 if time_counter[1]-time_counter[0] == 86400.*5:
@@ -451,8 +455,10 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                                                   extract_t.d_bdy['vosaline'][year]['data'])
 
                 nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'bdy_msk', DstCoord.bdy_msk)
-                nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'deptht',
+                nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'gdept',
                                                   DstCoord.depths['t']['bdy_z'])
+                nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'e3t',
+                                                  DstCoord.depths['t']['bdy_dz'])
                 nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'nav_lon',
                                                   DstCoord.lonlat['t']['lon'])
                 nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'nav_lat',
@@ -527,12 +533,15 @@ def _get_mask(Setup, mask_gui):
                 logger.error("Mask file is not given")
                 return
             else: #no mask file specified then use default 1px halo mask
+                print 'intern1'
                 logger.warning("Using default mask with bathymetry!!!!")
                 mask = Mask_File(Setup.settings['bathy'])
                 mask.apply_border_mask(Constants.DEFAULT_MASK_PIXELS)
                 bdy_msk = mask.data
+                print bdy_msk.shape, 'intern1'
         except:
             return
+    print bdy_msk.shape, 'intern'
     if np.amin(bdy_msk) == 0:
         # Mask is not set throw a warning message and set border to 1px.
         logger.warning("Setting the mask to 1px border")
@@ -553,8 +562,7 @@ def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, 
     dst_coord_var_copy.depths['t']['bdy_z'] = np.zeros([1, 1])
     extract_ice = nemo_bdy_extr_tm3.Extract(Setup.settings, source_coord_var_copy,
                                             dst_coord_var_copy, grid_ice,
-                                            ['iicethic', 'ileadfra', 'isnowthi'],
-                                            years=year, months=month)
+                                            ['iicethic', 'ileadfra', 'isnowthi'])
     extract_ice.extract_month(year, month)
     interpolate_data(extract_ice, year, month, ft) #interpolate the data to daily period in a month
 
@@ -575,27 +583,27 @@ def extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month, 
     nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'isnowthi',
                                       extract_ice.d_bdy['isnowthi'][year]['data'])
 
-def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
+def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t_in, year, month,
                           ft, num_bdy, time_counter, unit_origin, time_interp):
     """Writes BT data file"""
     SourceCoordLatLon = copy.deepcopy(SourceCoord)
     SourceCoordLatLon.zt = np.zeros([1, 1])
     DstCoordLatLon = copy.deepcopy(DstCoord)
     DstCoordLatLon.depths['t']['bdy_z'] = np.zeros([1, 1])
-    grid_t.grid_type = 'z'
-    extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings,
+    grid_t_in.grid_type = 'z'
+    extract_z = nemo_bdy_extr_tm3.Extract(Setup.settings,
                                           SourceCoordLatLon,
                                           DstCoord,
-                                          grid_t,
-                                          ['sossheig'],
-                                          years=year,
-                                          months=month)
-    extract_t.extract_month(year, month)
+                                          grid_t_in,
+                                          ['sossheig'])
+
+    grid_t_in.grid_type = 't'
+    extract_z.extract_month(year, month)
     #interpolate_data(extract_t, year, month, ft) #interpolate the data to daily period in a month
     if time_interp == True: 
-        interpolate_data(extract_t, year, month, ft)
+        interpolate_data(extract_z, year, month, ft)
     else: # trim first and last entry [1:-1]
-        extract_t.d_bdy['sossheig'][year]['data']=extract_t.d_bdy['sossheig'][year]['data'][1:-1,:,:]
+        extract_z.d_bdy['sossheig'][year]['data']=extract_z.d_bdy['sossheig'][year]['data'][1:-1,:,:]
 
     output_filename_bt = Setup.settings['dst_dir']+ \
                          Setup.settings['fn']+ \
@@ -609,16 +617,16 @@ def extract_write_bt_data(Setup, SourceCoord, DstCoord, grid_t, year, month,
                                        unit_origin, Setup.settings['fv'],
                                        Setup.settings['dst_calendar'], 'Z')
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'sossheig',
-                                      extract_t.d_bdy['sossheig'][year]['data'])
+                                      extract_z.d_bdy['sossheig'][year]['data'])
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'bdy_msk', DstCoord.bdy_msk)
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'nav_lon', DstCoord.lonlat['t']['lon'])
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'nav_lat', DstCoord.lonlat['t']['lat'])
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'nbidta',
-                                      grid_t.bdy_i[np.where(grid_t.bdy_r == 0), 0]+1)
+                                      grid_t_in.bdy_i[np.where(grid_t_in.bdy_r == 0), 0]+1)
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'nbjdta',
-                                      grid_t.bdy_i[np.where(grid_t.bdy_r == 0), 1]+1)
+                                      grid_t_in.bdy_i[np.where(grid_t_in.bdy_r == 0), 1]+1)
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'nbrdta',
-                                      grid_t.bdy_r[np.where(grid_t.bdy_r == 0)]+1)
+                                      grid_t_in.bdy_r[np.where(grid_t_in.bdy_r == 0)]+1)
     nemo_bdy_ncpop.write_data_to_file(output_filename_bt, 'time_counter', time_counter)
 
 def extract_write_u_data(setup_var, source_coord_var, dst_coord_var, grid_u, grid_u2, year,
@@ -626,8 +634,8 @@ def extract_write_u_data(setup_var, source_coord_var, dst_coord_var, grid_u, gri
     """ Extracts the U component of velocity data, interpolates the data for a month and writes
       data to netCDF file"""
     extract_u = nemo_bdy_extr_tm3.Extract(setup_var.settings, source_coord_var, dst_coord_var,
-                                          grid_u, ['vozocrtx', 'vomecrty'], Grid_2=grid_u2,
-                                          years=year, months=month)
+                                          grid_u, ['vozocrtx', 'vomecrty'], Grid_2=grid_u2)
+                                          
     extract_u.extract_month(year, month)
     #interpolate_data(extract_u, year, month, ft) # TODO: sort out interpolation routine
     if time_interp == True: 
@@ -652,13 +660,15 @@ def extract_write_u_data(setup_var, source_coord_var, dst_coord_var, grid_u, gri
                                        setup_var.settings['dst_calendar'],
                                        'U')
     nemo_bdy_ncpop.write_data_to_file(output_filename_u, 'vozocrtx', tmp_vozocrtx)
-    nemo_bdy_ncpop.write_data_to_file(output_filename_u, 'depthu',
+    nemo_bdy_ncpop.write_data_to_file(output_filename_u, 'gdepu',
                                       dst_coord_var.depths['u']['bdy_z'])
+    nemo_bdy_ncpop.write_data_to_file(output_filename_u, 'e3u',
+                                      dst_coord_var.depths['u']['bdy_dz'])
     # TODO: write vobtcrtx
     tmp_vozocrtx[nanindex] = float('NaN')
     # ft size has some problem
     tmp_tile = np.tile(dst_coord_var.depths['u']['bdy_dz'], [ft[0].size, 1, 1, 1])
-    tmp_vobtcrtx = np.nansum(np.reshape(tmp_vozocrtx[:, :-1, :],
+    tmp_vobtcrtx = np.nansum(np.reshape(tmp_vozocrtx[:, :, :],
                                         tmp_tile.shape) * tmp_tile, 2) / np.nansum(tmp_tile, 2)
     tmp_vobtcrtx[np.isnan(tmp_vobtcrtx)] = setup_var.settings['fv']
     nemo_bdy_ncpop.write_data_to_file(output_filename_u, 'vobtcrtx', tmp_vobtcrtx)
@@ -677,8 +687,8 @@ def extract_write_v_data(setup_var, source_coord_var, dst_coord_var, grid_v, gri
     """ Extracts the V component of velocity data, interpolates the data for a month and writes
       data to netCDF file"""
     extract_v = nemo_bdy_extr_tm3.Extract(setup_var.settings, source_coord_var, dst_coord_var,
-                                          grid_v, ['vozocrtx', 'vomecrty'], Grid_2=grid_v2,
-                                          years=year, months=month)
+                                          grid_v, ['vozocrtx', 'vomecrty'], Grid_2=grid_v2)
+                                  
     extract_v.extract_month(year, month) #return values in vozocrtx instead of vomecrty
     #interpolate_data(extract_v, year, month, ft)
     if time_interp == True: 
@@ -705,12 +715,14 @@ def extract_write_v_data(setup_var, source_coord_var, dst_coord_var, grid_v, gri
                                        'V')
     nemo_bdy_ncpop.write_data_to_file(output_filename_v, 'vomecrty',
                                       extract_v.d_bdy['vozocrtx'][year]['data'])
-    nemo_bdy_ncpop.write_data_to_file(output_filename_v, 'depthv',
+    nemo_bdy_ncpop.write_data_to_file(output_filename_v, 'gdepv',
                                       dst_coord_var.depths['v']['bdy_z'])
+    nemo_bdy_ncpop.write_data_to_file(output_filename_v, 'e3v',
+                                      dst_coord_var.depths['v']['bdy_dz'])
     tmp_vozocrty[nanindex] = float('NaN')
     #ft size has some problem
     tmp_tile = np.tile(dst_coord_var.depths['v']['bdy_dz'], [ft[0].size, 1, 1, 1])
-    tmp_vobtcrty = np.nansum(np.reshape(tmp_vozocrty[:, :-1, :], tmp_tile.shape)*tmp_tile, 2) \
+    tmp_vobtcrty = np.nansum(np.reshape(tmp_vozocrty[:, :, :], tmp_tile.shape)*tmp_tile, 2) \
                    /np.nansum(tmp_tile, 2)
     tmp_vobtcrty[np.isnan(tmp_vobtcrty)] = setup_var.settings['fv']
     nemo_bdy_ncpop.write_data_to_file(output_filename_v, 'vobtcrty', tmp_vobtcrty)

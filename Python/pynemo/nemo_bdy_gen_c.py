@@ -74,6 +74,7 @@ class Boundary:
                     bdy_msk[grid_ind] = fval
 
         # Create padded array for overlays
+        print bdy_msk.shape
         msk = np.pad(bdy_msk,((1,1),(1,1)), 'constant', constant_values=(-1))
         # create index arrays of I and J coords
         igrid, jgrid = np.meshgrid(np.arange(bdy_msk.shape[1]), np.arange(bdy_msk.shape[0]))
