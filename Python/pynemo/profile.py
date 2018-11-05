@@ -301,6 +301,8 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 #    grid_v.source_time = factory.GetRepository(settings['src_dir'], 'v', acc).grid_source_data['v']
     reader = factory.GetReader(settings['src_dir'],acc)
     grid_t.source_time = reader['t']
+    print grid_t.source_time.time_counter
+    print grid_t.source_time.units
     grid_u.source_time = reader['u']
     grid_v.source_time = reader['v']
 
