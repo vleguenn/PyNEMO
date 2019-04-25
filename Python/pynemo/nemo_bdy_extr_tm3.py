@@ -517,10 +517,16 @@ class Extract:
                 elif self.key_vec:
                     # For u vels take i-1
                     #sc_alt_arr[0] = varid[f:f+1, :sc_z_len, j_run, extended_i]
-                    sc_alt_arr[0] = varid[f:f+1, :sc_z_len, 1354:1480,3928:3964]
+                    print np.min(j_run),np.max(j_run)
+                    print np.min(i_run),np.max(i_run)
+                    sc_alt_arr[0] = varid[f:f+1, :sc_z_len, np.min(j_run):np.max(j_run)+1, np.min(i_run)-1:np.max(i_run)+1]
+                    #sc_alt_arr[0] = varid[f:f+1, :sc_z_len, 1354:1480,3928:3964]
                     # For v vels take j-1
                     #sc_alt_arr[1] = varid_2[f:f+1, :sc_z_len, extended_j, i_run]
-                    sc_alt_arr[1] = varid_2[f:f+1, :sc_z_len, 1353:1480,3929:3964]
+                    #sc_alt_arr[1] = varid_2[f:f+1, :sc_z_len, 1353:1480,3929:3964]
+                    sc_alt_arr[1] = varid_2[f:f+1, :sc_z_len,np.min(j_run)-1:np.max(j_run)+1, np.min(i_run):np.max(i_run)+1]
+
+
                 # Extract 2D scalar vars
                 else:
                     self.logger.info(' 2D source array ')
