@@ -400,6 +400,7 @@ class Extract:
                        self.settings['dst_calendar'])
         dst_start = DstCal.date2num(datetime(year, month, 1))
         dst_end = DstCal.date2num(datetime(year, month, ed, 23, 59, 59))
+        print sc_time.units
 
         self.S_cal = utime(sc_time.units, sc_time.calendar)#sc_time[0].units,sc_time[0].calendar)
 
@@ -484,6 +485,10 @@ class Extract:
             meta_data[n] = self.fnames_2.get_meta_data(self.var_nam[n], meta_data[n])
 
         # Loop over identified files
+        for vn in range(self.nvar):
+            self.d_bdy[self.var_nam[vn]]['date'] = sc_time.date_counter[first_date:last_date + 1] #count skipped
+        print '****************', sc_time.date_counter[first_date:last_date + 1]
+
         for f in range(first_date, last_date + 1):
             sc_array = [None, None]
             sc_alt_arr = [None, None]
@@ -697,8 +702,8 @@ class Extract:
                     dst_bdy += ((dst_bdy == 0.) *
                                 dst_bdy[data_ind].repeat(sc_z_len))
                     # Weighted averaged on new vertical grid
-                    #dst_bdy = (dst_bdy[self.z_ind[:,0]] * self.z_dist[:,0] +
-                    #           dst_bdy[self.z_ind[:,1]] * self.z_dist[:,1])  # jelt: comment out vertical interpolation
+                    # dst_bdy = (dst_bdy[self.z_ind[:,0]] * self.z_dist[:,0] +
+                    #            dst_bdy[self.z_ind[:,1]] * self.z_dist[:,1])  # jelt: comment out vertical interpolation
                     data_out = dst_bdy.reshape(self.dst_dep.shape, order='F')
 
                     # If z-level replace data below bed !!! make stat
@@ -719,7 +724,6 @@ class Extract:
                 else:
                     entry['data'] = np.concatenate((entry['data'],
                                                    np.array([data_out])))
-                entry['date'] = sc_time.time_counter[f] #count skipped
 
         # Need stats on fill pts in z and horiz + missing pts...
     # end month

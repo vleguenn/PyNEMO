@@ -301,8 +301,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 #    grid_v.source_time = factory.GetRepository(settings['src_dir'], 'v', acc).grid_source_data['v']
     reader = factory.GetReader(settings['src_dir'],acc)
     grid_t.source_time = reader['t']
-    print grid_t.source_time.time_counter
-    print grid_t.source_time.units
+    
     grid_u.source_time = reader['u']
     grid_v.source_time = reader['v']
 
@@ -380,14 +379,22 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 time_counter = np.zeros([len(extract_t.sc_time.time_counter)])
                 for i in range(0, len(extract_t.sc_time.time_counter)):
                     time_counter[i] = extract_t.convert_date_to_destination_num(extract_t.sc_time.date_counter[i])
+              
+                print time_counter
 
+                nt_src = len(extract_t.d_bdy['votemper']['date'])
+                time_counter = np.zeros([len(extract_t.d_bdy['votemper']['date'])])
+                for i in range(0, len(extract_t.d_bdy['votemper']['date'])):
+                    time_counter[i] = extract_t.convert_date_to_destination_num(extract_t.d_bdy['votemper']['date'][i])
+
+                print time_counter
                 date_start = datetime(year, month, 1, 0, 0, 0)
                 #date_end = datetime(year, month, monthrange(year, month)[1], 24, 60, 60)
 	        date_end = datetime(year, month, monthrange(year, month)[1], 23, 59, 59) + timedelta(seconds=1) # days, seconds. jelt: hours/mins/sec can not be 24/24/60
                 time_num_start = extract_t.convert_date_to_destination_num(date_start)
                 time_num_end = extract_t.convert_date_to_destination_num(date_end)
                 logger.debug('print time stuff')
-                logger.debug('len(extract_t.sc_time.time_counter): %s',len(extract_t.sc_time.time_counter))
+                logger.debug('len(extract_t.sc_time.time_counter): %s',nt_src)
                 logger.debug('time_counter: %s', time_counter)
 		logger.debug('date_start: %s', date_start)
 		logger.debug('date_end: %s',  date_end )
@@ -395,32 +402,41 @@ def process_bdy(setup_filepath=0, mask_gui=False):
 		logger.debug('time_num_end: %s', time_num_end )
 	        logger.debug('extract_t.sc_time.time_counter: %s',extract_t.sc_time.time_counter)
                 # TODO: need to handle cases where the time_counter may be much larger than
+                print time_counter[1]-time_counter[0], 86400.*5
+             
                 if time_counter[1]-time_counter[0] == 86400.*5:
+                    print time_counter[1]-time_counter[0], 86400.*5
                     time_interp = True
                     if monthrange(year, month)[1] == 29:
-                        interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
+                        interp1fn = interp1d(np.arange(0.0, nt_src, 1.0), time_counter)
+#JTH accuracy fix
+                        tim_ex=np.arange(nt_src-2+1/6.0,nt_src-1+1/6.0,1/6.0)
+                        it = np.where(tim_ex>nt_src-1.)
+                        tim_ex[it]=nt_src-1.
                         time_counter = interp1fn(np.append(np.arange(0,
-                                                                 len(extract_t.sc_time.time_counter)-2+0.2,
+                                                                 nt_src-2+0.2,
                                                                  0.2),
-                                                       np.arange(len(extract_t.sc_time.time_counter)-2+1/6.0,
-                                                                 len(extract_t.sc_time.time_counter)-1+1/6.0,
-                                                                 1/6.0)))
+                                                                 tim_ex))
                                             #added 0.2 to include boundary
                     else:
-                        interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
+                        interp1fn = interp1d(np.arange(0, nt_src, 1), time_counter)
                         #added 0.2 to include boundary
-                        time_counter = interp1fn(np.arange(0, len(extract_t.sc_time.time_counter)-1+0.2, 0.2))
+                        time_counter = interp1fn(np.arange(0, nt_src-1+0.2, 0.2))
+                    print time_counter
                 else:
                     time_interp = False
                     # no interpolation
-                    interp1fn = interp1d(np.arange(0, len(extract_t.sc_time.time_counter), 1), time_counter)
-                    time_counter = interp1fn(np.arange(0, len(extract_t.sc_time.time_counter), 1))
+                    interp1fn = interp1d(np.arange(0, nt_src, 1), time_counter)
+                    time_counter = interp1fn(np.arange(0, nt_src, 1))
 
+                
                 ft = np.where(((time_counter >= time_num_start) & (time_counter <= time_num_end)))
-               
+                print time_counter, time_num_start, time_num_end
                 time_counter = time_counter[ft]
+                
 		print 'jelt: interpolated between limits: time_counter: {}, ft {}'.format( time_counter, ft)
                 # interpolate the data to daily period in a month
+                print time_interp, extract_t.d_bdy['votemper'][year]['data'][1:-1,:,:].shape
                 if time_interp == True:
                     interpolate_data(extract_t, year, month, ft)
                 else: # trim first and last entry [1:-1]
@@ -428,7 +444,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                     extract_t.d_bdy['vosaline'][year]['data']=extract_t.d_bdy['vosaline'][year]['data'][1:-1,:,:]
                     #print here
                     
-                    
+                print time_interp, extract_t.d_bdy['votemper'][year]['data'][:,:,:].shape
                     
                 output_filename_t = Setup.settings['dst_dir']+Setup.settings['fn']+ \
                                     '_bdyT_y'+str(year)+'m'+"%02d" % month+'.nc'
@@ -473,7 +489,6 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'nbrdta',
                                                   grid_t.bdy_r[:]+1)
                 nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'time_counter', time_counter)
-
                 if Setup.settings['ice']:
                     extract_write_ice_data(Setup, SourceCoord, DstCoord, grid_ice, year, month,
                                            ft, num_bdy, time_counter, unit_origin, time_interp)
@@ -824,8 +839,14 @@ def interpolate_data(extract, year, month, time_indexes):
         lat = extract.d_bdy[variable_name][year]['data'].transpose(0, 2, 1)
         if monthrange(year, month)[1] == 29: #leap year
             interp1fn = interp1d(lon, lat, axis=0)
+#jth accuracy fix
+            tim_ex=np.arange(lon_len-2+1/6.0,lon_len-1+1/6.0,1/6.0)
+            it = np.where(tim_ex>lon_len-1.)
+            tim_ex[it]=lon_len-1.
+#jth
             extra_axis = np.append(np.arange(0, lon_len-2+0.2, 0.2),
-                                   np.arange(lon_len-2+1/6.0, lon_len-1+1/6.0, 1/6.0))
+                                             tim_ex)
+#                                   np.arange(lon_len-2+1/6.0, lon_len-1+1/6.0, 1/6.0))
             extract.d_bdy[variable_name][year]['data'] = interp1fn(extra_axis)
         else:
             interp1fn = interp1d(lon, lat, axis=0)
