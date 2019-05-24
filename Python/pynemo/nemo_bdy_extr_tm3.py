@@ -555,7 +555,8 @@ class Extract:
                 # Note using isnan/sum is relatively fast, but less than
                 # bottleneck external lib
                 self.logger.info('SC ARRAY MIN MAX : %s %s', np.nanmin(sc_array[0]), np.nanmax(sc_array[0]))
-                sc_array[0][t_mask == 0] = np.NaN
+		sc_array[0] = sc_array[0].astype(float) # Fix: only needed as sc_array was not defined as float. Otherwise cant take NaN
+		sc_array[0][t_mask == 0] = np.NaN
                 self.logger.info( 'SC ARRAY MIN MAX (masked NaNs) : %s %s', np.nanmin(sc_array[0]), np.nanmax(sc_array[0]))
                 if not np.isnan(np.sum(meta_data[vn]['sf'])):
                     sc_array[0] *= meta_data[vn]['sf']
