@@ -404,7 +404,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 # TODO: need to handle cases where the time_counter may be much larger than
                 print time_counter[1]-time_counter[0], 86400.*5
              
-                if time_counter[1]-time_counter[0] == 86400.*5:
+                if time_counter[2]-time_counter[1] == 86400.*5:
                     print time_counter[1]-time_counter[0], 86400.*5
                     time_interp = True
                     if monthrange(year, month)[1] == 29:
@@ -430,7 +430,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                     time_counter = interp1fn(np.arange(0, nt_src, 1))
 
                 
-                ft = np.where(((time_counter >= time_num_start) & (time_counter <= time_num_end)))
+                ft = np.where(((time_counter >= time_num_start) & (time_counter <= time_num_end + 17280. ))) #jth fix for dec in leap lears
                 print time_counter, time_num_start, time_num_end
                 time_counter = time_counter[ft]
                 
