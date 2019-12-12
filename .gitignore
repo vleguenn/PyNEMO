@@ -5,7 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
-
+*.nc
+*.xml
 # Distribution / packaging
 .Python
 build/
@@ -14,6 +15,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+.idea/
 lib/
 lib64/
 parts/
@@ -24,6 +26,8 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+outputs
+.DS_Store
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
