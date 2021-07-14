@@ -32,6 +32,7 @@ $Last commit on:$
 # pylint: disable=no-name-in-module
 
 # External Imports
+import os
 import copy
 import logging
 import numpy as np
@@ -921,7 +922,7 @@ class Extract:
         f_out = self.settings['dst_dir']+self.settings['fn']+ \
                 '_bdy'+self.g_type.upper()+ '_y'+str(year)+'m'+'%02d' % month+'.nc'
 
-        ncml_out = glob(self.settings['ncml_out']+'/*'+'output_'+str(self.g_type.upper())+'.ncml')
+        ncml_out = glob(self.settings['dst_dir']+'/*output_'+str(self.g_type.upper())+'.ncml')
         if len(ncml_out) == 0:
             raise RuntimeError('NCML out file for grid '+str(self.g_type.upper())+' missing, please add into NCML directory')
         ncml_out = ncml_out[0]
