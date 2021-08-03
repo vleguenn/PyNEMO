@@ -373,7 +373,7 @@ def process_bdy(setup_filepath=0, mask_gui=False):
             if Setup.settings['tra']:
                 print grid_t.grid_type
                 extract_t = nemo_bdy_extr_tm3.Extract(Setup.settings, SourceCoord, DstCoord,
-                                                      grid_t, ['votemper', 'vosaline'])
+                                                      grid_t, ['votemper', 'vosaline', 'CHN', 'CHD', 'PHN', 'PHD', 'ZMI', 'ZME', 'DIN', 'SIL', 'FER', 'DET', 'PDS', 'DTC', 'DIC', 'ALK', 'OXY'])
                 extract_t.extract_month(year, month)
                 #Get Date as a Number used in interpolation
                 time_counter = np.zeros([len(extract_t.sc_time.time_counter)])
@@ -440,8 +440,8 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                 if time_interp == True:
                     interpolate_data(extract_t, year, month, ft)
                 else: # trim first and last entry [1:-1]
-                    extract_t.d_bdy['votemper'][year]['data']=extract_t.d_bdy['votemper'][year]['data'][1:-1,:,:]
-                    extract_t.d_bdy['vosaline'][year]['data']=extract_t.d_bdy['vosaline'][year]['data'][1:-1,:,:]
+                    for variable in ['votemper', 'vosaline', 'CHN', 'CHD', 'PHN', 'PHD', 'ZMI', 'ZME', 'DIN', 'SIL', 'FER', 'DET', 'PDS', 'DTC', 'DIC', 'ALK', 'OXY']:   
+                    	extract_t.d_bdy[variable][year]['data']=extract_t.d_bdy[variable][year]['data'][1:-1,:,:]
                     #print here
                     
                 print time_interp, extract_t.d_bdy['votemper'][year]['data'][:,:,:].shape
@@ -462,15 +462,12 @@ def process_bdy(setup_filepath=0, mask_gui=False):
                                                    Setup.settings['dst_calendar'],
                                                    grid_id)
                 #Replace nan values with fillvalues
-                nanindex = np.isnan(extract_t.d_bdy['votemper'][year]['data'])
-                extract_t.d_bdy['votemper'][year]['data'][nanindex] = Setup.settings['fv']
-                nanindex = np.isnan(extract_t.d_bdy['vosaline'][year]['data'])
-                extract_t.d_bdy['vosaline'][year]['data'][nanindex] = Setup.settings['fv']
+		for variable in ['votemper', 'vosaline', 'CHN', 'CHD', 'PHN', 'PHD', 'ZMI', 'ZME', 'DIN', 'SIL', 'FER', 'DET', 'PDS', 'DTC', 'DIC', 'ALK', 'OXY']:	
+                	nanindex = np.isnan(extract_t.d_bdy[variable][year]['data'])
+                	extract_t.d_bdy[variable][year]['data'][nanindex] = Setup.settings['fv']
 
-                nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'votemper',
-                                                  extract_t.d_bdy['votemper'][year]['data'])
-                nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'vosaline',
-                                                  extract_t.d_bdy['vosaline'][year]['data'])
+                	nemo_bdy_ncpop.write_data_to_file(output_filename_t, variable,
+                                                  extract_t.d_bdy[variable][year]['data'])
 
                 nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'bdy_msk', DstCoord.bdy_msk)
                 nemo_bdy_ncpop.write_data_to_file(output_filename_t, 'gdept',

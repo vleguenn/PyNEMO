@@ -79,6 +79,36 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
                                        fill_value=fv)
         varsalID = ncid.createVariable('vosaline', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
                                        fill_value=fv)
+        varchnID = ncid.createVariable('CHN', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varchdID = ncid.createVariable('CHD', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varphnID = ncid.createVariable('PHN', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varphdID = ncid.createVariable('PHD', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varzmiID = ncid.createVariable('ZMI', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varzmeID = ncid.createVariable('ZME', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        vardinID = ncid.createVariable('DIN', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varsilID = ncid.createVariable('SIL', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varferID = ncid.createVariable('FER', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        vardetID = ncid.createVariable('DET', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varpdsID = ncid.createVariable('PDS', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        vardtcID = ncid.createVariable('DTC', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        vardicID = ncid.createVariable('DIC', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varalkID = ncid.createVariable('ALK', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
+        varoxyID = ncid.createVariable('OXY', 'f4', ('time_counter', 'z', 'yb', 'xb', ),
+                                       fill_value=fv)
         if grd == 'I':
             varildID = ncid.createVariable('ileadfra', 'f4', ('time_counter', 'yb', 'xb',),
                                            fill_value=fv)
@@ -207,6 +237,76 @@ def CreateBDYNetcdfFile(filename, N, I, J, K, rw, h, orig, fv, calendar, grd):
         varsalID.short_name = 'vosaline'
         varsalID.long_name = 'Salinity'
         varsalID.grid = 'bdyT'
+
+        varchnID.units = 'mg Chl/m3'
+        varchnID.short_name = 'CHN'
+        varchnID.long_name = 'CHN'
+        varchnID.grid = 'bdyT'
+
+        varchdID.units = 'mg Chl/m3'
+        varchdID.short_name = 'CHD'
+        varchdID.long_name = 'CHD'
+        varchdID.grid = 'bdyT'
+
+        varphnID.units = 'mmolN/m3'
+        varphnID.short_name = 'PHN'
+        varphnID.long_name = 'PHN'
+        varphnID.grid = 'bdyT'
+
+        varphdID.units = 'mmolN/m3'
+        varphdID.short_name = 'PHD'
+        varphdID.long_name = 'PHD'
+        varphdID.grid = 'bdyT'
+
+        varzmiID.units = 'mmolN/m3'
+        varzmiID.short_name = 'ZMI'
+        varzmiID.long_name = 'ZMI'
+        varzmiID.grid = 'bdyT'
+
+        varzmeID.units = 'mmolN/m3'
+        varzmeID.short_name = 'ZME'
+        varzmeID.long_name = 'ZME'
+        varzmeID.grid = 'bdyT'
+
+        vardinID.units = 'mmolN/m3'
+        vardinID.short_name = 'DIN'
+        vardinID.long_name = 'DIN'
+        vardinID.grid = 'bdyT'
+
+        varsilID.units = 'mmolSi/m3'
+        varsilID.short_name = 'SIL'
+        varsilID.long_name = 'SIL'
+        varsilID.grid = 'bdyT'
+
+        varferID.units = 'mmolFe/m3'
+        varferID.short_name = 'FER'
+        varferID.long_name = 'FER'
+        varferID.grid = 'bdyT'
+
+        vardetID.units = 'mmolN/m3'
+        vardetID.short_name = 'DET'
+        vardetID.long_name = 'DET'
+        vardetID.grid = 'bdyT'
+
+        varpdsID.units = 'mmolSi/m3'
+        varpdsID.short_name = 'PDS'
+        varpdsID.long_name = 'PDS'
+        varpdsID.grid = 'bdyT'
+
+        vardtcID.units = 'mmolC/m3'
+        vardtcID.short_name = 'DTC'
+        vardtcID.long_name = 'DTC'
+        vardtcID.grid = 'bdyT'
+
+        varalkID.units = 'meq/m3'
+        varalkID.short_name = 'ALK'
+        varalkID.long_name = 'ALK'
+        varalkID.grid = 'bdyT'
+
+        varoxyID.units = 'mmolO2/m3'
+        varoxyID.short_name = 'OXY'
+        varoxyID.long_name = 'OXY'
+        varoxyID.grid = 'bdyT'
 
         if grd == 'I':
             varildID.units = '%'
